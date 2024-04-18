@@ -51,6 +51,7 @@ import { useDevice } from "./DeviceContext";
 import DeviceManager from "./views/DeviceManager";
 import Device from "../api/comms/Device";
 import { HIDNotifdevice } from "./types/hid";
+import { store as storage } from "../renderer/utils/AppSettings";
 
 const store = Store.getStore();
 
@@ -79,9 +80,8 @@ function App() {
     // Update stored settings schema
     console.log("Retrieving settings: ", store.get("settings"));
     const locale = await ipcRenderer.invoke("get-Locale");
-    if (store.get("settings.language") !== undefined) {
-      i18n.setLanguage(store.get("settings.language").toString());
-    }
+    console.log("Settings for locale: ", locale);
+    i18n.setLanguage(storage.language);
 
     // when moving from other version, config may for superkeys may contain wrong data (wrong legnth, nulls)
     // so we have to fix it. This fix should not be here. It should be in separate file.

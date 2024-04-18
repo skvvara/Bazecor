@@ -1,5 +1,5 @@
 import { nativeTheme, NativeTheme } from "electron";
-import Store from "../managers/Store";
+import Store from "../../renderer/utils/Store";
 import sendToRenderer from "../utils/sendToRenderer";
 
 const onThemeChange = () => () => {
