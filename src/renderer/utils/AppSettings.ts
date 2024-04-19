@@ -1,17 +1,20 @@
 import Store from "electron-store";
+import { LanguageType } from "../../api/keymap/types";
 
 type Version = number;
 
+type AppPreferencesType = {
+  language: LanguageType;
+};
+
 export interface StorageType {
   version: Version;
-  settings: {
-    language: string;
-  };
+  settings: AppPreferencesType;
 }
 
 const LATEST = 1;
 
-class AppSettings {
+class AppSettings implements AppPreferencesType {
   private static instance: AppSettings;
 
   private store: Store<StorageType>;
@@ -35,11 +38,11 @@ class AppSettings {
     return AppSettings.instance;
   }
 
-  get language(): string {
-    return this.store.get("settings.language");
+  get language(): LanguageType {
+    return this.store.get("settings.language", "en-US");
   }
 
-  set language(val: string) {
+  set language(val: LanguageType | string) {
     this.store.set("settings.language", val);
   }
 }

@@ -36,3 +36,6 @@ export type LanguageType =
   | "en-XX-eurkey"
   | "fr-XX-bepo"
   | "fr-XX-optimot";
+
+
+

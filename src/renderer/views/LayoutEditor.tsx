@@ -54,6 +54,8 @@ import LoaderLayout from "@Renderer/components/loader/loaderLayout";
 import { i18n } from "@Renderer/i18n";
 
 import Store from "@Renderer/utils/Store";
+import { store as Storage } from "@Renderer/utils/AppSettings";
+
 import getLanguage from "@Renderer/utils/language";
 import { ClearLayerDialog } from "@Renderer/modules/LayoutEditor/ClearLayerDialog";
 import Keymap, { KeymapDB } from "../../api/keymap";
@@ -1623,7 +1625,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     const scanner = async () => {
       await scanKeyboard(currentLanguageLayout);
       const standardView = configStandardView();
-      const newLanguage = getLanguage(store.get("settings.language") as string);
+      const newLanguage = getLanguage(Storage.language);
       console.log("Language automatically set to: ", newLanguage);
       setCurrentLanguageLayout(newLanguage || "english");
       setIsStandardView(standardView);

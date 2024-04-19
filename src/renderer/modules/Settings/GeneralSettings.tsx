@@ -34,16 +34,14 @@ import getLanguage from "@Renderer/utils/language";
 import ToastMessage from "@Renderer/component/ToastMessage";
 
 import { i18n } from "@Renderer/i18n";
+import { store as Storage } from "@Renderer/utils/AppSettings";
 import Keymap from "../../../api/keymap";
-import Store from "../../utils/Store";
 
 const GeneralSettingsWrapper = Styled.div`
 .dropdown-menu {
   min-width: 13rem;
 }
 `;
-
-const store = Store.getStore();
 
 interface GeneralSettingsProps {
   selectDarkMode: (item: string) => void;
@@ -74,13 +72,13 @@ const GeneralSettings = ({
   const { state } = useDevice();
 
   useEffect(() => {
-    setSelectedLanguage(getLanguage(store.get("settings.language") as string));
+    setSelectedLanguage(getLanguage(Storage.language));
   }, []);
 
   const changeLanguage = (language: string) => {
     try {
       setSelectedLanguage(language);
-      store.set("settings.language", `${language}`);
+      Storage.language = language;
       if (state.currentDevice && !state.currentDevice.isClosed) {
         const deviceLang = { ...state.currentDevice.device, language: true };
         state.currentDevice.commands.keymap = new Keymap(deviceLang);

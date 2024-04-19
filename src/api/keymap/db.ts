@@ -50,6 +50,8 @@ import { languagesDB, supportModifiedTables } from "./languages/languageLayouts"
 // newLanguageLayout - is a function that modify language layout
 import newLanguageLayout from "./languages/newLanguageLayout";
 
+import { store as Storage } from "../../renderer/utils/AppSettings"
+
 // eslint-disable-next-line import/no-cycle
 import Store from "../../renderer/utils/Store";
 import getLanguage from "../../renderer/utils/language";
@@ -123,7 +125,7 @@ class KeymapDB {
   constructor() {
     this.keymapCodeTable = new Array<KeymapCodeTableType>();
     // create variable that get language from the local storage
-    this.language = getLanguage(store.get("settings.language"));
+    this.language = getLanguage(Storage.language);
     if (languagesDB[this.language] === undefined) {
       this.language = "en-US";
     }
@@ -310,7 +312,7 @@ class KeymapDB {
   }
 
   updateBaseKeyCode() {
-    this.language = getLanguage(store.get("settings.language"));
+    this.language = getLanguage(Storage.language);
     if (languagesDB[this.language] === undefined) {
       this.language = "en-US";
     }

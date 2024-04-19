@@ -57,6 +57,8 @@ import getLanguage from "@Renderer/utils/language";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import Backup from "../../api/backup";
 
+import { store as Storage } from "@Renderer/utils/AppSettings";
+
 const store = Store.getStore();
 
 const Styles = Styled.div`
@@ -140,7 +142,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
     listToDelete: [],
     futureSK: [],
     futureSSK: 0,
-    currentLanguageLayout: getLanguage(store.get("settings.language") as string),
+    currentLanguageLayout: getLanguage(Storage.language),
     isStandardView: store.get("settings.isStandardView") as boolean,
     showStandardView: false,
     loading: true,

@@ -64,6 +64,8 @@ import Keymap, { KeymapDB } from "../../api/keymap";
 import Store from "../utils/Store";
 import getLanguage from "../utils/language";
 
+import { store as Storage } from "@Renderer/utils/AppSettings";
+
 const store = Store.getStore();
 
 const Styles = Styled.div`
@@ -133,7 +135,7 @@ function MacroEditor(props: MacroEditorProps) {
     totalMemory: 0,
     macrosEraser: "",
     loading: true,
-    currentLanguageLayout: getLanguage(store.get("settings.language") as string),
+    currentLanguageLayout: getLanguage(Storage.language),
     kbtype: "ansi",
     scrollPos: 0,
   };
