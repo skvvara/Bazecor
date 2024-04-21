@@ -6,6 +6,7 @@ import GlobalStyles from "@Renderer/theme/GlobalStyles";
 import Light from "@Renderer/theme/LightTheme";
 import Dark from "@Renderer/theme/DarkTheme";
 import Store from "@Renderer/utils/Store";
+import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 
 const store = Store.getStore();
 
@@ -56,7 +57,7 @@ class ErrorBoundary extends React.Component<Myprops, Mystate> {
     super(props);
 
     let isDark;
-    const mode = store.get("settings.darkMode");
+    const mode = storage.darkMode;
     isDark = mode === "dark";
     if (mode === "system") {
       isDark = ipcRenderer.invoke("get-NativeTheme");

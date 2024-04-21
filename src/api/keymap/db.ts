@@ -50,7 +50,7 @@ import { languagesDB, supportModifiedTables } from "./languages/languageLayouts"
 // newLanguageLayout - is a function that modify language layout
 import newLanguageLayout from "./languages/newLanguageLayout";
 
-import { store as Storage } from "../../renderer/utils/AppSettings"
+import { ApplicationPreferencesProvider as Storage } from "../../renderer/utils/AppSettings";
 
 // eslint-disable-next-line import/no-cycle
 import Store from "../../renderer/utils/Store";

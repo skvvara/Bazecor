@@ -54,7 +54,7 @@ import LoaderLayout from "@Renderer/components/loader/loaderLayout";
 import { i18n } from "@Renderer/i18n";
 
 import Store from "@Renderer/utils/Store";
-import { store as Storage } from "@Renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as Storage } from "@Renderer/utils/AppSettings";
 
 import getLanguage from "@Renderer/utils/language";
 import { ClearLayerDialog } from "@Renderer/modules/LayoutEditor/ClearLayerDialog";

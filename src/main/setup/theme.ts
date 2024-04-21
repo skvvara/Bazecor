@@ -1,4 +1,5 @@
 import { nativeTheme, NativeTheme } from "electron";
+import { ApplicationPreferencesProvider } from "@Renderer/utils/AppSettings";
 import Store from "../../renderer/utils/Store";
 import sendToRenderer from "../utils/sendToRenderer";
 
@@ -11,14 +12,7 @@ const configureNativeTheme = () => {
 };
 
 const setTheme = () => {
-  const store = Store.getStore();
-  let darkMode = store.get("settings.darkMode");
-  if (typeof darkMode === "boolean" || darkMode === undefined) {
-    darkMode = "system";
-    store.set("settings.darkMode", "system");
-  }
-  // Setting nativeTheme currently only seems to work at this point in the code
-  nativeTheme.themeSource = darkMode as NativeTheme["themeSource"];
+  nativeTheme.themeSource = ApplicationPreferencesProvider.darkMode as NativeTheme["themeSource"];
 };
 
 export { configureNativeTheme, setTheme, onThemeChange };

@@ -34,7 +34,7 @@ import getLanguage from "@Renderer/utils/language";
 import ToastMessage from "@Renderer/component/ToastMessage";
 
 import { i18n } from "@Renderer/i18n";
-import { store as Storage } from "@Renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as Storage } from "@Renderer/utils/AppSettings";
 import Keymap from "../../../api/keymap";
 
 const GeneralSettingsWrapper = Styled.div`

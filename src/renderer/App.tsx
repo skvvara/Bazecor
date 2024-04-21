@@ -51,7 +51,7 @@ import { useDevice } from "./DeviceContext";
 import DeviceManager from "./views/DeviceManager";
 import Device from "../api/comms/Device";
 import { HIDNotifdevice } from "./types/hid";
-import { store as storage } from "../renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as storage } from "./utils/AppSettings";
 
 const store = Store.getStore();
 
@@ -116,14 +116,14 @@ function App() {
     i18n.setLanguage(data.language);
     store.set("settings", data);
     store.set("neurons", []);
-    console.log("Testing results: ", data, store.get("settings"), store.get("settings.darkMode"));
+    console.log("Testing results: ", data, store.get("settings"), storage.darkMode);
   };
 
   useEffect(() => {
     const init = async () => {
       await updateStorageSchema();
       let isDark: boolean;
-      const mode = store.get("settings.darkMode") as string;
+      const mode = storage.darkMode;
       isDark = mode === "dark";
       if (mode === "system") {
         isDark = await ipcRenderer.invoke("get-NativeTheme");
@@ -215,12 +215,12 @@ function App() {
       document.documentElement.classList.add(mode);
     }
     setDarkMode(isDark);
-    store.set("settings.darkMode", mode);
+    storage.darkMode = mode;
   };
 
   const darkThemeListener = (event: any, message: boolean) => {
     console.log("O.S. DarkTheme Settings changed to ", message, event);
-    const dm = store.get("settings.darkMode");
+    const dm = storage.darkMode;
     if (dm === "system") {
       toggleDarkMode(dm);
     }

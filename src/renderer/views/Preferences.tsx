@@ -55,6 +55,7 @@ import {
 import Version from "@Renderer/component/Version/Version";
 
 import Store from "@Renderer/utils/Store";
+import { ApplicationPreferencesProvider, ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 import { useDevice } from "@Renderer/DeviceContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@Renderer/components/ui/tabs";
 import { KBDataPref, PrefState, PreferencesProps } from "@Renderer/types/preferences";
@@ -131,7 +132,7 @@ const initialPreferences = {
   devTools: false,
   advanced: false,
   verboseFocus: false,
-  darkMode: store.get("settings.darkMode") as string,
+  darkMode: storage.darkMode,
   neurons: store.get("neurons") as Array<Neuron>,
   selectedNeuron: 0,
   neuronID: "",
@@ -253,7 +254,7 @@ const Preferences = (props: PreferencesProps) => {
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         neuronID: localNeuronID,
-        darkMode: store.get("settings.darkMode") as string,
+        darkMode: ApplicationPreferencesProvider.darkMode,
         neurons: store.get("neurons") as Array<Neuron>,
       }));
     }
@@ -588,14 +589,10 @@ const Preferences = (props: PreferencesProps) => {
       const NID = await getNeuronData();
       if (connected && state.currentDevice.device.info.keyboardType === "wireless") await getWirelessPreferences();
       const devTools = await ipcRenderer.invoke("is-devtools-opened");
-      let darkMode = store.get("settings.darkMode") as string;
-      if (!darkMode) {
-        darkMode = "system";
-      }
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         devTools,
-        darkMode,
+        darkMode: storage.darkMode,
         selectedNeuron: prevPreferencesState.neurons.indexOf(prevPreferencesState.neurons.find((x: Neuron) => x.id === NID)),
         verboseFocus: true,
       }));
