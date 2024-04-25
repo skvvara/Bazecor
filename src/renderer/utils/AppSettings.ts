@@ -1,56 +1,35 @@
 import Store from "electron-store";
-import { toast } from "react-toastify";
-import { LanguageType } from "../../api/keymap/types";
-import dark = toast.dark;
 
-type Version = number;
-
-type DarkModeType = string | "dark" | "light" | "system";
+type DarkModeType = string; // convert it to unine/value object | "dark" | "light" | "system";
+type LanguageType = string; // convert it to unine/value object | "en-US" | "fr-FR" | "de-DE";
 
 type AppPreferencesType = {
   language: LanguageType;
   darkMode: DarkModeType;
+  allowBeta: boolean;
+  backupFolder: string;
+  backupFrequency: number;
+  isStandardView: boolean;
+  showDefaultLayers: boolean;
 };
 
-export interface StorageType {
-  version: Version;
-  settings: AppPreferencesType;
-}
-
-const getFallbackSettings = (): AppPreferencesType => ({
-  language: "en-US",
-  darkMode: "system",
-});
-
-function normalizeDarkMode(darkMode: unknown): DarkModeType {
-  if (darkMode === null || darkMode === undefined) {
-    return "system";
-  }
-
-  if (["dark", "light", "system"].indexOf(darkMode as string) >= 0) {
-    return darkMode as string;
-  }
-
-  if (darkMode === "true") {
-    return "dark";
-  }
-
-  return "system";
+interface ElectronStorageType {
+  language: string;
+  darkMode: string;
+  allowBeta: boolean;
+  backupFolder: string;
+  backupFrequency: number;
+  isStandardView: boolean;
+  showDefaults: boolean;
 }
 
 class ApplicationPreferences implements AppPreferencesType {
   private static instance: ApplicationPreferences;
 
-  private store: Store<StorageType>;
+  private store: Store<ElectronStorageType>;
 
   constructor() {
-    this.store = new Store<StorageType>({
-      defaults: {
-        version: 1,
-        settings: getFallbackSettings(),
-      },
-    });
-    this.migrateData();
+    this.store = new Store<ElectronStorageType>();
   }
 
   static getInstance(): ApplicationPreferences {
@@ -62,24 +41,59 @@ class ApplicationPreferences implements AppPreferencesType {
   }
 
   get language(): LanguageType {
-    return this.store.get("settings.language");
+    return this.store.get("settings.language", "en-US");
   }
 
-  set language(val: LanguageType | string) {
+  set language(val: LanguageType) {
     this.store.set("settings.language", val);
   }
 
   get darkMode(): DarkModeType {
-    return this.store.get("settings.darkMode");
+    return this.store.get("settings.darkMode", "system");
   }
 
   set darkMode(val: DarkModeType) {
     this.store.set("settings.darkMode", val);
   }
 
-  private migrateData() {
-    const data = this.store.get("settings");
-    normalizeDarkMode(data.darkMode);
+  get allowBeta(): boolean {
+    return this.store.get("settings.allowBeta", false);
+  }
+
+  set allowBeta(val: boolean) {
+    this.store.set("settings.allowBeta", val);
+  }
+
+  get backupFolder(): string {
+    return this.store.get("settings.backupFolder", "");
+  }
+
+  set backupFolder(val: string) {
+    this.store.set("settings.backupFolder", val);
+  }
+
+  get backupFrequency(): number {
+    return this.store.get("settings.backupFrequency", 0);
+  }
+
+  set backupFrequency(val: number) {
+    this.store.set("settings.backupFrequency", val);
+  }
+
+  get isStandardView(): boolean {
+    return this.store.get("settings.isStandardView", true);
+  }
+
+  set isStandardView(val: boolean) {
+    this.store.set("settings.isStandardView", val);
+  }
+
+  get showDefaultLayers(): boolean {
+    return this.store.get("settings.showDefaults", false);
+  }
+
+  set showDefaultLayers(val: boolean) {
+    this.store.set("settings.showDefaults", val);
   }
 }
 

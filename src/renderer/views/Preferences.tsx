@@ -186,8 +186,7 @@ const Preferences = (props: PreferencesProps) => {
         newKbData.ledIdleTimeLimit = limit ? parseInt(limit, 10) : -1;
       });
 
-      newKbData.showDefaults =
-        store.get("settings.showDefaults") === undefined ? false : (store.get("settings.showDefaults") as boolean);
+      newKbData.showDefaults = storage.showDefaultLayers;
 
       // QUKEYS variables commands
       await state.currentDevice.command("qukeys.holdTimeout").then((holdTimeout: string) => {
@@ -346,7 +345,7 @@ const Preferences = (props: PreferencesProps) => {
       await state.currentDevice.command("led.brightnessUG", kbData.ledBrightnessUG.toString());
       if (kbData.ledIdleTimeLimit >= 0)
         await state.currentDevice.command("idleleds.time_limit", kbData.ledIdleTimeLimit.toString());
-      store.set("settings.showDefaults", kbData.showDefaults);
+      storage.showDefaultLayers = kbData.showDefaults;
       // QUKEYS
       await state.currentDevice.command("qukeys.holdTimeout", kbData.qukeysHoldTimeout.toString());
       await state.currentDevice.command("qukeys.overlapThreshold", kbData.qukeysOverlapThreshold.toString());

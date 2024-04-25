@@ -14,13 +14,11 @@ import { i18n } from "@Renderer/i18n";
 import { VirtualType } from "@Renderer/types/devices";
 import { BackupType } from "@Renderer/types/backups";
 
+import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 import Hardware from "../../../api/hardware";
 import { RaiseISO, RaiseANSI, DefyWired, DefyWireless, Raise2ANSI, Raise2ISO, enumerator } from "../../../api/hardware-virtual";
-import Store from "../../utils/Store";
 import { isVirtualType } from "../../../api/comms/virtual";
 import Backup from "../../../api/backup";
-
-const store = Store.getStore();
 
 interface VirtualSelectorProps {
   handleVirtualConnect: (file: any) => void;
@@ -94,7 +92,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
     const options = {
       title: i18n.keyboardSelect.virtualKeyboard.newTitle,
       buttonLabel: i18n.keyboardSelect.virtualKeyboard.buttonLabelSave,
-      defaultPath: path.join(store.get("settings.backupFolder") as string, `${fileName}.json`),
+      defaultPath: path.join(storage.backupFolder, `${fileName}.json`),
       filters: [{ name: "Json", extensions: ["json"] }],
     };
     const newPath = await ipcRenderer.invoke("save-dialog", options);
@@ -197,7 +195,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
     const options = {
       title: i18n.keyboardSelect.virtualKeyboard.newTitle,
       buttonLabel: i18n.keyboardSelect.virtualKeyboard.buttonLabelSave,
-      defaultPath: path.join(store.get("settings.backupFolder") as string, `${fileName}.json`),
+      defaultPath: path.join(storage.backupFolder, `${fileName}.json`),
       filters: [{ name: "Json", extensions: ["json"] }],
     };
     const newPath = await ipcRenderer.invoke("save-dialog", options);

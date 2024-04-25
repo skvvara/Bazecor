@@ -31,19 +31,17 @@ import { i18n } from "@Renderer/i18n";
 import { IconFolder } from "@Renderer/component/Icon";
 
 // Utils
-import Store from "@Renderer/utils/Store";
-
-const store = Store.getStore();
+import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 
 const FileBackUpHandling = () => {
   const [backupFolder, setBackupFolder] = useState("");
   const [storeBackups, setStoreBackups] = useState(13);
   useEffect(() => {
-    const freq = store.get("settings.backupFrequency") as number;
-    setBackupFolder(store.get("settings.backupFolder") as string);
+    const freq = storage.backupFrequency;
+    setBackupFolder(storage.backupFolder);
     if (freq === 0) {
       setStoreBackups(13);
-      store.set("settings.backupFrequency", 13);
+      storage.backupFrequency = 13;
     } else {
       setStoreBackups(freq);
     }
@@ -61,7 +59,7 @@ const FileBackUpHandling = () => {
     if (!resp.canceled) {
       // console.log(resp.filePaths);
       setBackupFolder(resp.filePaths[0]);
-      store.set("settings.backupFolder", `${resp.filePaths[0]}`);
+      storage.backupFolder = `${resp.filePaths[0]}`;
     } else {
       // console.log("user closed backup folder dialog");
     }
@@ -69,8 +67,13 @@ const FileBackUpHandling = () => {
 
   const onSetStoreBackups = (value: any) => {
     // console.log("changed backup period to: ", value);
-    setStoreBackups(value);
-    store.set("settings.backupFrequency", value);
+    const val = Number.parseInt(String(value), 10);
+    if (Number.isNaN(val)) {
+      console.warn(`Invalid value for backup frequency: ${value}... ignoring`);
+      return;
+    }
+    setStoreBackups(val);
+    storage.backupFrequency = val;
   };
 
   return (

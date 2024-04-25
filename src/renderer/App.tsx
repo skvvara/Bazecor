@@ -135,21 +135,12 @@ function App() {
         document.documentElement.classList.add(mode);
       }
 
-      // Settings entry creation for the beta toggle, it will have a control in preferences to change the policy
-      let getAllowBeta: boolean;
-      if (store.has("settings.allowBeta")) {
-        getAllowBeta = store.get("settings.allowBeta") as boolean;
-      } else {
-        getAllowBeta = true;
-        store.set("settings.allowBeta", true);
-      }
-
       setDarkMode(isDark);
       setConnected(false);
       device.current = null;
       setPages({});
       setContextBar(false);
-      setAllowBeta(getAllowBeta);
+      setAllowBeta(storage.allowBeta);
       setLoading(true);
       setFwUpdate(false);
       localStorage.clear();
@@ -318,10 +309,8 @@ function App() {
   };
 
   const updateAllowBetas = (checked: boolean) => {
-    const newValue = checked;
-    // console.log("new allowBeta value: ", newValue);
-    store.set("settings.allowBeta", newValue);
-    setAllowBeta(newValue);
+    storage.allowBeta = checked;
+    setAllowBeta(checked);
   };
 
   const handleSetRestoredOk = (status: boolean) => {

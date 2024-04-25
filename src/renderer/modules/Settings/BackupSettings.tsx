@@ -33,14 +33,12 @@ import { RegularButton } from "@Renderer/component/Button";
 import { IconArrowDownWithLine, IconFloppyDisk } from "@Renderer/component/Icon";
 
 // Utils
-import Store from "@Renderer/utils/Store";
 import { BackupSettingsProps } from "@Renderer/types/preferences";
 import WaitForRestoreDialog from "@Renderer/component/WaitForRestoreDialog";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/devices";
+import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 import Backup from "../../../api/backup";
-
-const store = Store.getStore();
 
 const BackupSettings = (props: BackupSettingsProps) => {
   const [backupFolder, setBackupFolder] = useState("");
@@ -49,7 +47,7 @@ const BackupSettings = (props: BackupSettingsProps) => {
 
   const { connected, neurons, neuronID, toggleBackup, destroyContext } = props;
   useEffect(() => {
-    setBackupFolder(store.get("settings.backupFolder") as string);
+    setBackupFolder(storage.backupFolder);
   }, []);
 
   const openPerformingBackup = () => {

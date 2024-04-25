@@ -469,9 +469,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   const [currentLanguageLayout, setCurrentLanguageLayout] = useState("english");
   const [showMacroModal, setShowMacroModal] = useState(false);
   const [showNeuronModal, setShowNeuronModal] = useState(false);
-  const [isStandardView, setIsStandardView] = useState(
-    store.get("settings.isStandardView") !== undefined ? (store.get("settings.isStandardView") as boolean) : false,
-  );
+  const [isStandardView, setIsStandardView] = useState(Storage.isStandardView);
   const [showStandardView, setShowStandardView] = useState(false);
   const [layoutSelectorPosition, setLayoutSelectorPosition] = useState({
     x: 0,
@@ -876,7 +874,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
         if (!restoredOk) {
           console.log("Error when restoring data after flash detected, repairing...");
           try {
-            const backupFolder = store.get("settings.backupFolder") as string;
+            const { backupFolder } = Storage;
             const neurons = store.get("neurons") as Neuron[];
             const latestBackup = await Backup.getLatestBackup(backupFolder, chipID, currentDevice);
             await Backup.restoreBackup(neurons, chipID, latestBackup, currentDevice);
@@ -1608,7 +1606,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
 
   const configStandardView = () => {
     try {
-      const preferencesStandardView = store.get("settings.isStandardView", true) as boolean;
+      const preferencesStandardView = Storage.isStandardView;
       console.log("preferencesStandardView: ", preferencesStandardView);
       if (preferencesStandardView !== null) {
         return preferencesStandardView;
@@ -1665,12 +1663,12 @@ const LayoutEditor = (props: LayoutEditorProps) => {
 
   useEffect(() => {
     // console.log("Running StandardView useEffect", isStandardView);
-    store.set("settings.isStandardView", isStandardView);
+    Storage.isStandardView = isStandardView;
   }, [isStandardView]);
 
   useEffect(() => {
     // console.log("Running LayerData useEffect");
-    const localShowDefaults = store.get("settings.showDefaults") as boolean;
+    const localShowDefaults = Storage.showDefaultLayers;
     let cLayer = currentLayer;
 
     if (!localShowDefaults) {

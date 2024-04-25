@@ -4,6 +4,7 @@ import Store from "electron-store";
 import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { DeviceClass, VirtualType } from "@Renderer/types/devices";
+import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
@@ -132,7 +133,7 @@ export default class Backup {
     }
     const { product } = device.device.info;
     const d = new Date();
-    const folder = store.get("settings.backupFolder") as string;
+    const folder = storage.backupFolder;
     try {
       if (localBackup.neuron.name === undefined || localBackup.neuron.name === "") localBackup.neuron.name = "NoName";
       const folderPath = path.join(folder, product, localBackup.neuronID);

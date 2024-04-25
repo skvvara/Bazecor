@@ -142,7 +142,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
     futureSK: [],
     futureSSK: 0,
     currentLanguageLayout: getLanguage(Storage.language),
-    isStandardView: store.get("settings.isStandardView") as boolean,
+    isStandardView: Storage.isStandardView,
     showStandardView: false,
     loading: true,
   };
@@ -296,7 +296,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
 
   useEffect(() => {
     try {
-      store.set("settings.isStandardViewSuperkeys", state.isStandardView);
+      Storage.isStandardView = state.isStandardView;
     } catch (error) {
       console.log("error when setting standard view mode", error);
     }
@@ -641,7 +641,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
   // Manage Standard/Single view
   const configStandarView = async () => {
     try {
-      const preferencesStandardView = store.get("settings.isStandardView") as boolean;
+      const preferencesStandardView = Storage.isStandardView;
       // console.log("Preferences StandardView", preferencesStandardViewJSON);
       if (preferencesStandardView !== null) {
         state.isStandardView = preferencesStandardView;
