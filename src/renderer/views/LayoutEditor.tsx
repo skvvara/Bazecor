@@ -54,16 +54,17 @@ import LoaderLayout from "@Renderer/components/loader/loaderLayout";
 import { i18n } from "@Renderer/i18n";
 
 import Store from "@Renderer/utils/Store";
-import { ApplicationPreferencesProvider as Storage } from "@Renderer/utils/AppSettings";
 
 import getLanguage from "@Renderer/utils/language";
 import { ClearLayerDialog } from "@Renderer/modules/LayoutEditor/ClearLayerDialog";
+import { getAppContext } from "@Common/app-context/appContext";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import { rgb2w, rgbw2b } from "../../api/color";
 import Backup from "../../api/backup";
 import { TRANS_KEY_CODE } from "../../api/keymap/types";
 
 const store = Store.getStore();
+const Storage = getAppContext().settings;
 
 const Styles = Styled.div`
 &.layoutEditor {

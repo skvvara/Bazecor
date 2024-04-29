@@ -40,6 +40,7 @@ module.exports = {
           ["@Assets", "./src/static"],
           ["@Renderer", "./src/renderer"],
           ["@Types", "./src/renderer/types"],
+          ["@Common", "./src/common"]
         ],
         extensions: [".ts", ".js", ".jsx", ".tsx", ".json"],
       },

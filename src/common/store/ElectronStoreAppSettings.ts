@@ -1,19 +1,7 @@
 import Store from "electron-store";
+import { AppPreferencesType, DarkModeType, LanguageType } from "@Common/store/types";
 
-type DarkModeType = string; // convert it to unine/value object | "dark" | "light" | "system";
-type LanguageType = string; // convert it to unine/value object | "en-US" | "fr-FR" | "de-DE";
-
-type AppPreferencesType = {
-  language: LanguageType;
-  darkMode: DarkModeType;
-  allowBeta: boolean;
-  backupFolder: string;
-  backupFrequency: number;
-  isStandardView: boolean;
-  showDefaultLayers: boolean;
-};
-
-interface ElectronStorageType {
+interface JsonSettingsType {
   language: string;
   darkMode: string;
   allowBeta: boolean;
@@ -23,21 +11,11 @@ interface ElectronStorageType {
   showDefaults: boolean;
 }
 
-class ApplicationPreferences implements AppPreferencesType {
-  private static instance: ApplicationPreferences;
-
-  private store: Store<ElectronStorageType>;
+export class ApplicationPreferences implements AppPreferencesType {
+  private store: Store<JsonSettingsType>;
 
   constructor() {
-    this.store = new Store<ElectronStorageType>();
-  }
-
-  static getInstance(): ApplicationPreferences {
-    if (!ApplicationPreferences.instance) {
-      ApplicationPreferences.instance = new ApplicationPreferences();
-    }
-
-    return ApplicationPreferences.instance;
+    this.store = new Store<JsonSettingsType>();
   }
 
   get language(): LanguageType {
@@ -97,4 +75,4 @@ class ApplicationPreferences implements AppPreferencesType {
   }
 }
 
-export const ApplicationPreferencesProvider = ApplicationPreferences.getInstance();
+export const ApplicationPreferencesProvider = new ApplicationPreferences();

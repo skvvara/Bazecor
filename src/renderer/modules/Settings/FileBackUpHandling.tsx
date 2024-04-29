@@ -31,7 +31,7 @@ import { i18n } from "@Renderer/i18n";
 import { IconFolder } from "@Renderer/component/Icon";
 
 // Utils
-import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
 
 const FileBackUpHandling = () => {
   const [backupFolder, setBackupFolder] = useState("");

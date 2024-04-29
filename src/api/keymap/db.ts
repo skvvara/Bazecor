@@ -18,6 +18,7 @@
  */
 
 import { KeyType } from "@Renderer/types/layout";
+import { ApplicationPreferencesProvider as Storage } from "../../common/store/AppSettings";
 import BlankTable from "./db/blanks";
 import { LetterTable, ModifiedLetterTables } from "./db/letters";
 import DigitTable, { ModifiedDigitTables } from "./db/digits";
@@ -50,14 +51,8 @@ import { languagesDB, supportModifiedTables } from "./languages/languageLayouts"
 // newLanguageLayout - is a function that modify language layout
 import newLanguageLayout from "./languages/newLanguageLayout";
 
-import { ApplicationPreferencesProvider as Storage } from "../../renderer/utils/AppSettings";
-
-// eslint-disable-next-line import/no-cycle
-import Store from "../../renderer/utils/Store";
 import getLanguage from "../../renderer/utils/language";
 import { BaseKeycodeTableType, KeymapCodeTableType, LanguageType } from "./types";
-
-const store = Store.getStore();
 
 const defaultBaseKeyCodeTable: BaseKeycodeTableType[] = [
   LetterTable,

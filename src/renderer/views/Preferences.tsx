@@ -55,13 +55,13 @@ import {
 import Version from "@Renderer/component/Version/Version";
 
 import Store from "@Renderer/utils/Store";
-import { ApplicationPreferencesProvider, ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
 import { useDevice } from "@Renderer/DeviceContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@Renderer/components/ui/tabs";
 import { KBDataPref, PrefState, PreferencesProps } from "@Renderer/types/preferences";
 import { WirelessInterface } from "@Renderer/types/wireless";
 import { LogoLoader } from "@Renderer/component/Loader";
 import { Neuron } from "@Renderer/types/neurons";
+import { ApplicationPreferencesProvider, ApplicationPreferencesProvider as storage } from "../../common/store/AppSettings";
 import Backup from "../../api/backup";
 
 const store = Store.getStore();

@@ -31,6 +31,7 @@ const rendererConfig: Configuration = {
       "@Assets": path.resolve(__dirname, "src", "static"),
       "@Renderer": path.resolve(__dirname, "src", "renderer"),
       "@Types": path.resolve(__dirname, "src", "renderer", "types"),
+      "@Common": path.resolve(__dirname, "src", "common")
     },
   },
   externals: {

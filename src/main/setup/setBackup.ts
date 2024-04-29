@@ -2,7 +2,7 @@ import { app } from "electron";
 import fs from "fs";
 import path from "path";
 import moment from "moment";
-import { ApplicationPreferencesProvider } from "../../renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider } from "../../common/store/AppSettings";
 
 function deleteOldFiles(backupPath: string, period: number) {
   // Get the current date

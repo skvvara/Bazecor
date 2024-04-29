@@ -44,6 +44,7 @@ import { showDevtools } from "@Renderer/devMode";
 import Store from "@Renderer/utils/Store";
 import getTranslator from "@Renderer/utils/translator";
 import { Neuron } from "@Types/neurons";
+import { getAppContext } from "../common/app-context/appContext";
 import Focus from "../api/focus";
 import "../api/keymap";
 import "../api/colormap";
@@ -51,9 +52,9 @@ import { useDevice } from "./DeviceContext";
 import DeviceManager from "./views/DeviceManager";
 import Device from "../api/comms/Device";
 import { HIDNotifdevice } from "./types/hid";
-import { ApplicationPreferencesProvider as storage } from "./utils/AppSettings";
 
 const store = Store.getStore();
+const storage = getAppContext().settings;
 
 const focus = Focus.getInstance();
 focus.debug = true;

@@ -54,7 +54,7 @@ import { useDevice } from "@Renderer/DeviceContext";
 import { i18n } from "@Renderer/i18n";
 import Store from "@Renderer/utils/Store";
 import getLanguage from "@Renderer/utils/language";
-import { ApplicationPreferencesProvider as Storage } from "@Renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as Storage } from "../../common/store/AppSettings";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import Backup from "../../api/backup";
 

@@ -14,7 +14,7 @@ import { i18n } from "@Renderer/i18n";
 import { VirtualType } from "@Renderer/types/devices";
 import { BackupType } from "@Renderer/types/backups";
 
-import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
 import Hardware from "../../../api/hardware";
 import { RaiseISO, RaiseANSI, DefyWired, DefyWireless, Raise2ANSI, Raise2ISO, enumerator } from "../../../api/hardware-virtual";
 import { isVirtualType } from "../../../api/comms/virtual";

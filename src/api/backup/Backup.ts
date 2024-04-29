@@ -2,13 +2,14 @@ import path from "path";
 import fs from "fs";
 import Store from "electron-store";
 import { Neuron } from "@Renderer/types/neurons";
-import { BackupType } from "@Renderer/types/backups";
 import { DeviceClass, VirtualType } from "@Renderer/types/devices";
-import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
+import { BackupType } from "@Renderer/types/backups";
+import { getAppContext } from "@Common/app-context/appContext";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
 const store = new Store();
+const storage = getAppContext().settings;
 
 export default class Backup {
   neurons: Neuron[];
@@ -55,7 +56,7 @@ export default class Backup {
     ];
     const commands = await device.command("help");
     const validCommands = commands.split(/\r?\n/).filter(c => !notRequired.some(v => c.includes(v)));
-    if (!validCommands.includes("led.brightnessUG")) validCommands.push("led.brightnessUG");
+    if (!validCommands.includes("led.br1ightnessUG")) validCommands.push("led.brightnessUG");
     return validCommands;
   }
 

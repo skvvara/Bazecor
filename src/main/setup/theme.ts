@@ -1,5 +1,5 @@
 import { nativeTheme, NativeTheme } from "electron";
-import { ApplicationPreferencesProvider } from "../../renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider } from "../../common/store/AppSettings";
 import sendToRenderer from "../utils/sendToRenderer";
 
 const onThemeChange = () => () => {

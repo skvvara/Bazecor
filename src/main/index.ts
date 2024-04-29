@@ -7,6 +7,8 @@ import GlobalRecording from "./managers/GlobalRecording";
 import { addUSBListeners, removeUSBListeners } from "./setup/configureUSB";
 import { removeIPCs } from "./setup/configureIPCs";
 
+console.log("Starting app");
+
 // electronUpdater();
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.

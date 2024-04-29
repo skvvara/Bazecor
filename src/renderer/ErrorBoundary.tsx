@@ -5,10 +5,7 @@ import Styled, { ThemeProvider } from "styled-components";
 import GlobalStyles from "@Renderer/theme/GlobalStyles";
 import Light from "@Renderer/theme/LightTheme";
 import Dark from "@Renderer/theme/DarkTheme";
-import Store from "@Renderer/utils/Store";
-import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
-
-const store = Store.getStore();
+import { ApplicationPreferencesProvider as storage } from "../common/store/AppSettings";
 
 const Styles = Styled.div`
 .alert {

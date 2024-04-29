@@ -37,7 +37,7 @@ import { BackupSettingsProps } from "@Renderer/types/preferences";
 import WaitForRestoreDialog from "@Renderer/component/WaitForRestoreDialog";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/devices";
-import { ApplicationPreferencesProvider as storage } from "@Renderer/utils/AppSettings";
+import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
 import Backup from "../../../api/backup";
 
 const BackupSettings = (props: BackupSettingsProps) => {
