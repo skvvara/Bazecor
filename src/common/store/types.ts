@@ -11,4 +11,5 @@ export type AppPreferencesType = {
   backupFrequency: number;
   isStandardView: boolean;
   showDefaultLayers: boolean;
+  showDeveloperConsole: boolean;
 };

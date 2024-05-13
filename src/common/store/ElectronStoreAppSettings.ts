@@ -9,6 +9,7 @@ interface JsonSettingsType {
   backupFrequency: number;
   isStandardView: boolean;
   showDefaults: boolean;
+  showDeveloperConsole: boolean;
 }
 
 export class ApplicationPreferences implements AppPreferencesType {
@@ -72,6 +73,14 @@ export class ApplicationPreferences implements AppPreferencesType {
 
   set showDefaultLayers(val: boolean) {
     this.store.set("settings.showDefaults", val);
+  }
+
+  get showDeveloperConsole(): boolean {
+    return this.store.get("settings.showDeveloperConsole", false);
+  }
+
+  set showDeveloperConsole(val: boolean) {
+    this.store.set("settings.showDeveloperConsole", val);
   }
 }
 
