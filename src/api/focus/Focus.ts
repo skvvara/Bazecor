@@ -22,6 +22,10 @@ import type { AutoDetectTypes, PortInfo } from "@serialport/bindings-cpp";
 import { spawn } from "child_process";
 import fs from "fs";
 import type { SerialPort, SerialPortOpenOptions } from "serialport";
+import log from "electron-log/renderer";
+// eslint-disable-next-line import/no-cycle
+import { DygmaDeviceType } from "@Renderer/types/dygmaDefs";
+import { VirtualType } from "@Renderer/types/virtual";
 import { delay } from "../flash/delay";
 import { ctx } from "./Focus.ctx";
 
@@ -44,12 +48,11 @@ export class Focus {
   closed = true;
   file = false;
   commands: CommandOverrides = { help: this._help };
-  protected logger = console;
 
   protected debugLog(...args: unknown[]) {
     if (!this.debug) return;
     // TODO: should be able to use `this.logger.debug` instead
-    this.logger.log(...args);
+    log.info(...args);
   }
 
   protected async listSerialPorts(): Promise<PortInfo[]> {
@@ -62,14 +65,12 @@ export class Focus {
     return new sp.SerialPort(options, openCallback);
   }
 
-  async find(...devices: Array<{ usb: { productId: number; vendorId: number } }>) {
+  async find(...devices: DygmaDeviceType[]) {
     const portList = await this.listSerialPorts();
 
     const foundDevices = [];
 
-    this.debugLog("focus.find: portList:", portList, "devices:", devices);
-    this.logger.log("Passed devices", devices);
-    this.logger.log("Port list from where");
+    log.info("focus.find: portList:", portList, "devices:", devices);
     for (const port of portList) {
       for (const device of devices) {
         if (
@@ -81,26 +82,26 @@ export class Focus {
       }
     }
 
-    this.debugLog("focus.find: foundDevices:", foundDevices);
+    log.info("focus.find: foundDevices:", foundDevices);
 
     return foundDevices;
   }
-  device: any;
+  device: DygmaDeviceType;
   result: string;
-  callbacks: any[];
-  fileData: any;
-  supportedCommands: any;
-  _port: any;
-  parser: any;
+  callbacks: Array<(value: unknown) => void>;
+  fileData: VirtualType;
+  supportedCommands: Array<string>;
+  _port: SerialPort;
+  parser: typeof DelimiterParser;
   private async fileOpen(_info: unknown, file: any) {
-    // console.log("DATA!!", info, file);
+    // log.info("DATA!!", info, file);
     this.device = file.device;
     this.result = "";
     this.callbacks = [];
     this.closed = false;
     this.file = true;
     this.fileData = file;
-    this.supportedCommands = await this.command("help");
+    this.supportedCommands = await this._help(this);
   }
 
   async open(device: any, info: any, file: any) {
@@ -110,24 +111,24 @@ export class Focus {
     }
 
     if (this._port !== undefined && this._port.isOpen === false) {
-      this.close();
+      await this.close();
     }
 
-    // console.log("Warning! device being opened");
-    // console.log("port status opened?", this._port ? this._port.isOpen : "unknown");
-    // console.log("received device", device);
-    // console.log("received info: ", info);
+    // log.info("Warning! device being opened");
+    // log.info("port status opened?", this._port ? this._port.isOpen : "unknown");
+    // log.info("received device", device);
+    // log.info("received info: ", info);
     try {
       let path;
       if (typeof device === "string") path = device;
       if (typeof device === "object") path = device.settings.path;
       if (path !== undefined) {
         const testingDevices = await this.listSerialPorts();
-        console.log(testingDevices);
+        log.info(testingDevices);
         this._port = this.createSerialPort({ path, baudRate: 115200, autoOpen: false, endOnClose: true });
-        await this._port.open((err: any) => {
-          if (err) console.error("error when opening port: ", err);
-          else console.log("connected");
+        await this._port.open((err: Error) => {
+          if (err) log.error("error when opening port: ", err);
+          else log.info("connected");
         });
       } else {
         throw Error("device not a string or object!");
@@ -138,12 +139,12 @@ export class Focus {
       this.result = "";
       this.callbacks = [];
       this.supportedCommands = [];
-      this.parser.on("data", (data: any) => {
+      this.parser.on("data", (data: Buffer) => {
         // eslint-disable-next-line no-param-reassign
-        data = data.toString("utf-8");
-        this.debugLog("focus: incoming data:", data);
+        const localData = data.toString("utf-8");
+        log.info("focus: incoming data:", localData);
 
-        if (data === "." || data.endsWith(".")) {
+        if (localData === "." || localData.endsWith(".")) {
           const { result } = this;
           const resolve = this.callbacks.shift();
 
@@ -152,9 +153,9 @@ export class Focus {
             resolve(result.trim());
           }
         } else if (this.result.length === 0) {
-          this.result = data;
+          this.result = localData;
         } else {
-          this.result += `\r\n${data}`;
+          this.result += `\r\n${localData}`;
         }
       });
 
@@ -165,20 +166,20 @@ export class Focus {
       // It's not necessary to retreive the supported commands in bootloader mode
       if (!this.device.bootloader) {
         try {
-          this.supportedCommands = await this.command("help");
+          this.supportedCommands = await this._help(this);
         } catch (e) {
-          console.warn(e);
+          log.warn(e);
           // Ignore
         }
       }
     } catch (error) {
-      console.error("found this error while opening!", error);
+      log.error("found this error while opening!", error);
       // throw new Error("Unable to connect");
     }
 
     // Setup error port alert
-    this._port.on("error", async function (err: any) {
-      console.error(`Error on SerialPort: ${err}`);
+    this._port.on("error", async (err: Error) => {
+      log.error(`Error on SerialPort: ${err}`);
       await this._port.close();
     });
     this.closed = false;
@@ -204,19 +205,17 @@ export class Focus {
     try {
       if (this._port) {
         while (this._port.isOpen === true) {
-          console.log("Closing device port!!", this._port);
+          log.info("Closing device port!!");
           result = await this._port.close();
-          // console.log("is it still open? ", this._port.isOpen, result);
           await this._port.removeAllListeners();
           await this._port.destroy();
-          // console.log("is it destroyed?", this._port.destroyed);
         }
         delete this._port;
         this.closed = true;
         await delay(200);
       }
     } catch (error) {
-      console.error("error when closing", error);
+      log.error("error when closing", error);
     }
 
     this.clearContext();
@@ -240,7 +239,7 @@ export class Focus {
       return true;
     }
     const supported = await device.device.isDeviceSupported(device);
-    this.debugLog("focus.isDeviceSupported: port=", device, "supported=", supported);
+    log.info("focus.isDeviceSupported: port=", device, "supported=", supported);
     return supported;
   }
 
@@ -248,7 +247,7 @@ export class Focus {
     return this.supportedCommands.indexOf(cmd) !== -1;
   }
 
-  async _write_parts(parts: any[], cb: any) {
+  async _write_parts(parts: string[], cb: (value?: unknown) => void) {
     if (!parts || parts.length === 0) {
       cb();
       return;
@@ -263,7 +262,7 @@ export class Focus {
   }
 
   request<T>(cmd: string, ...args: unknown[]) {
-    this.debugLog("focus.request:", cmd, ...args);
+    log.info("focus.request:", cmd, ...args);
     return new Promise<T>((resolve, reject) => {
       const timer = setTimeout(() => {
         reject(new Error("Communication timeout"));
@@ -274,7 +273,7 @@ export class Focus {
           resolve(data);
         })
         .catch(err => {
-          console.log("Error sending request from focus", err);
+          log.info("Error sending request from focus", err);
           reject(new Error("Error sending request from focus"));
         });
     });
@@ -282,21 +281,21 @@ export class Focus {
 
   private async _request(cmd: string, ...args: unknown[]) {
     if (this.file === true) {
-      console.log("performing virtual request");
+      log.info("performing virtual request");
       if (args.length > 0 && this.fileData.virtual[cmd].eraseable) {
         this.fileData.virtual[cmd].data = args.join(" ");
       }
-      console.log(`reading virtual data from ${cmd}: `, this.fileData.virtual[cmd]);
+      log.info(`reading virtual data from ${cmd}: `, this.fileData.virtual[cmd]);
       let result = "";
       if (this.fileData.virtual[cmd] !== undefined) {
         result = this.fileData.virtual[cmd].data;
       }
-      console.log(result);
+      log.info(result);
       return new Promise(resolve => {
         resolve(result);
       });
     }
-    console.log("performing request");
+    log.info("performing request");
     if (!this._port) throw new Error("Device not connected!");
 
     let request = cmd;

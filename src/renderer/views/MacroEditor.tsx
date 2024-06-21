@@ -21,13 +21,10 @@
 import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import Styled from "styled-components";
+import log from "electron-log/renderer";
 
-import Col from "react-bootstrap/Col";
-import Container from "react-bootstrap/Container";
-import Dropdown from "react-bootstrap/Dropdown";
-import DropdownButton from "react-bootstrap/DropdownButton";
-import Modal from "react-bootstrap/Modal";
-import Row from "react-bootstrap/Row";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@Renderer/components/atoms/Select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@Renderer/components/atoms/Dialog";
 
 // Types
 import {
@@ -43,12 +40,13 @@ import { SuperkeysType } from "@Renderer/types/superkeys";
 import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
 
 // Components
-import { LogoLoaderCentered } from "@Renderer/component/Loader";
-import { RegularButton } from "@Renderer/component/Button";
-import Callout from "@Renderer/component/Callout";
-import { IconFloppyDisk, IconLoader } from "@Renderer/component/Icon";
-import { MacroSelector } from "@Renderer/component/Select";
-import ToastMessage from "@Renderer/component/ToastMessage";
+import LogoLoader from "@Renderer/components/atoms/loader/LogoLoader";
+import { Button } from "@Renderer/components/atoms/Button";
+import { IconFloppyDisk, IconLoader } from "@Renderer/components/atoms/icons";
+import MacroSelector from "@Renderer/components/organisms/Select/MacroSelector";
+import ToastMessage from "@Renderer/components/atoms/ToastMessage";
+import Callout from "@Renderer/components/molecules/Callout/Callout";
+import Heading from "@Renderer/components/atoms/Heading";
 
 // Modules
 import { PageHeader } from "@Renderer/modules/PageHeader";
@@ -151,11 +149,11 @@ function MacroEditor(props: MacroEditorProps) {
     let superindex = 0;
 
     if (superArray.length < 1) {
-      console.log("Discarded Superkeys due to short length of string", raw, raw.length);
+      log.info("Discarded Superkeys due to short length of string", raw, raw.length);
       return [{ actions: [53, 2101, 1077, 41, 0], name: "Welcome to superkeys", id: superindex }];
     }
     while (superArray.length > iter) {
-      // console.log(iter, raw[iter], superkey);
+      // log.info(iter, raw[iter], superkey);
       if (superArray[iter] === 0) {
         superkeys[superindex] = { actions: skAction, name: "", id: superindex };
         superindex += 1;
@@ -168,10 +166,10 @@ function MacroEditor(props: MacroEditorProps) {
     superkeys[superindex] = { actions: skAction, name: "", id: superindex };
 
     if (superkeys[0].actions.length === 0 || superkeys[0].actions.length > 5) {
-      console.log(`Superkeys were empty`);
+      log.info(`Superkeys were empty`);
       return [];
     }
-    console.log(`Got Superkeys:${JSON.stringify(superkeys)} from ${raw}`);
+    log.info(`Got Superkeys:${JSON.stringify(superkeys)} from ${raw}`);
     // TODO: Check if stored superKeys match the received ones, if they match, retrieve name and apply it to current superKeys
     let finalSuper: SuperkeysType[] = [];
     const stored = neurons[neuronIdx].superkeys;
@@ -185,7 +183,7 @@ function MacroEditor(props: MacroEditorProps) {
       }
       return superk;
     });
-    console.log("final superkeys", finalSuper);
+    log.info("final superkeys", finalSuper);
     return finalSuper;
   };
 
@@ -198,7 +196,7 @@ function MacroEditor(props: MacroEditorProps) {
       return Array(512).fill("65535").join(" ");
     }
     let keyMap = JSON.parse(JSON.stringify(superkeys));
-    // console.log("First", JSON.stringify(keyMap));
+    // log.info("First", JSON.stringify(keyMap));
     keyMap = keyMap.map((sky: SuperkeysType) => {
       const sk = sky;
       sk.actions = sk.actions.map(act => {
@@ -215,13 +213,13 @@ function MacroEditor(props: MacroEditorProps) {
       .join(" ")
       .split(",")
       .join(" ");
-    console.log("Mapped superkeys: ", mapped, keyMap);
+    log.info("Mapped superkeys: ", mapped, keyMap);
     return mapped;
   };
 
   function macrosMap(macros: MacrosType[]) {
     const { macrosEraser } = state;
-    console.log(
+    log.info(
       "Macros map function",
       macros,
       macrosEraser,
@@ -257,7 +255,7 @@ function MacroEditor(props: MacroEditorProps) {
       .join(" ")
       .split(",")
       .join(" ");
-    console.log("MACROS GOING TO BE SAVED", result);
+    log.info("MACROS GOING TO BE SAVED", result);
     return result;
   }
 
@@ -341,7 +339,7 @@ function MacroEditor(props: MacroEditorProps) {
     const { currentDevice } = deviceState;
     setIsSaving(true);
     setLoading(true);
-    console.log("saving Macros:", macros, keymap, superkeys);
+    log.info("saving Macros:", macros, keymap, superkeys);
     const newMacros = macros;
     const localNeurons = [...neurons];
     localNeurons[neuronIdx].macros = newMacros;
@@ -366,8 +364,8 @@ function MacroEditor(props: MacroEditorProps) {
       setLoading(false);
       setIsSaving(false);
     } catch (error) {
-      console.log("error when writing macros");
-      console.error(error);
+      log.info("error when writing macros");
+      log.error(error);
       toast.error(<ToastMessage title="Error when sending macros to the device" icon={<IconFloppyDisk />} />, { icon: "" });
       cancelContext();
       setLoading(false);
@@ -383,7 +381,7 @@ function MacroEditor(props: MacroEditorProps) {
   function ActUponDelete() {
     const { selectedList, listToDelete, listToDeleteS, listToDeleteM, keymap, superkeys } = state;
     let { macros } = state;
-    console.log("Checking list to delete macros", listToDeleteM, macros);
+    log.info("Checking list to delete macros", listToDeleteM, macros);
     for (let i = 0; i < listToDelete.length; i += 1) {
       if (listToDelete[i].newKey === -1) {
         keymap.custom[listToDelete[i].layer][listToDelete[i].pos] = keymapDB.parse(
@@ -416,7 +414,7 @@ function MacroEditor(props: MacroEditorProps) {
       newMacro.actions = macro.actions.filter(x => x !== undefined);
       return newMacro;
     });
-    console.log("result!", macros);
+    log.info("result!", macros);
     state.keymap = keymap;
     state.superkeys = superkeys;
     state.macros = macros;
@@ -595,7 +593,7 @@ function MacroEditor(props: MacroEditorProps) {
   const loadMacros = async () => {
     const { onDisconnect, cancelContext, setLoading } = props;
     const { currentDevice } = deviceState;
-    console.log("Loading macros!");
+    log.info("Loading macros!");
     try {
       /**
        * Create property language to the object 'options', to call KeymapDB in Keymap and modify languagu layout
@@ -609,13 +607,13 @@ function MacroEditor(props: MacroEditorProps) {
       setState({ ...state });
       const deviceLang = { ...currentDevice.device, language: true };
       currentDevice.commands.keymap = new Keymap(deviceLang);
-      keymapDB = currentDevice.commands.keymap.db;
+      keymapDB = (currentDevice.commands.keymap as Keymap).db;
       let kbtype = "iso";
       try {
         kbtype = currentDevice.device && currentDevice.device.info.keyboardType === "ISO" ? "iso" : "ansi";
       } catch (error) {
-        console.log("error when reading focus.device and kbType for Macros");
-        console.error(error);
+        log.info("error when reading focus.device and kbType for Macros");
+        log.error(error);
         setLoading(false);
         throw Error(error);
       }
@@ -680,8 +678,8 @@ function MacroEditor(props: MacroEditorProps) {
       setLoading(false);
       return true;
     } catch (error) {
-      console.log("error when loading macros");
-      console.error(error);
+      log.info("error when loading macros");
+      log.error(error);
       toast.error(<ToastMessage title="Error when loading macros from the device" icon={<IconLoader />} />, { icon: "" });
       cancelContext();
       setLoading(false);
@@ -733,11 +731,10 @@ function MacroEditor(props: MacroEditorProps) {
   let ListOfDeletes = listToDelete.map(({ layer, pos, key, newKey }) => {
     if (newKey === -1) {
       return (
-        <Row key={`${key.keyCode}-${layer}-${pos}-${newKey}`}>
-          <Col xs={12} className="px-0 text-center gridded">
-            <p className="titles alignvert">{`Key in layer ${layer + 1} and pos ${pos + 1}`}</p>
-          </Col>
-        </Row>
+        <li
+          key={`${key.keyCode}-${layer}-${pos}-${newKey}`}
+          className="text-left"
+        >{`Key in Layer ${layer + 1} and pos ${pos + 1}`}</li>
       );
     }
     return "";
@@ -747,11 +744,10 @@ function MacroEditor(props: MacroEditorProps) {
       const actions = ["Tap", "Hold", "Tap & hold", "2Tap", "2Tap & hold"];
       if (newKey === -1) {
         return (
-          <Row key={`${superIdx}-${pos}-${newKey}`}>
-            <Col xs={12} className="px-0 text-center gridded">
-              <p className="titles alignvert">{`Key in Superkey ${superIdx + 1} and action ${actions[pos]}`}</p>
-            </Col>
-          </Row>
+          <li
+            key={`${superIdx}-${pos}-${newKey}`}
+            className="text-left"
+          >{`Key in Superkey ${superIdx + 1} and action ${actions[pos]}`}</li>
         );
       }
       return "";
@@ -761,11 +757,7 @@ function MacroEditor(props: MacroEditorProps) {
     listToDeleteM.map(({ macroIdx, pos, newKey }) => {
       if (newKey === -1) {
         return (
-          <Row key={`${macroIdx}-${pos}-${newKey}`}>
-            <Col xs={12} className="px-0 text-center gridded">
-              <p className="titles alignvert">{`Key in Macro ${macroIdx + 1} and action ${pos}`}</p>
-            </Col>
-          </Row>
+          <li key={`${macroIdx}-${pos}-${newKey}`} className="text-left">{`Key in Macro ${macroIdx + 1} and action ${pos}`}</li>
         );
       }
       return "";
@@ -773,30 +765,31 @@ function MacroEditor(props: MacroEditorProps) {
   );
 
   const ListCombo = (
-    <DropdownButton
-      id="Selectlayers"
-      className="selectButton"
-      // drop={"up"}
-      title={macros.length > 0 && selectedList > -1 ? macros[selectedList]?.name : "No Key"}
-      onSelect={UpdateList}
-    >
-      <Dropdown.Item eventKey={(-1).toString()} key={`macro-${-1}`} disabled={false}>
-        No Key
-      </Dropdown.Item>
-      {macros.map(macro => (
-        <Dropdown.Item eventKey={macro.id.toString()} key={`macro-${macro.id}`} disabled={macro.id === -1}>
-          {macro?.name}
-        </Dropdown.Item>
-      ))}
-    </DropdownButton>
+    <>
+      <Select onValueChange={UpdateList}>
+        <SelectTrigger className="w-full">
+          <SelectValue placeholder={macros.length > 0 && selectedList > -1 ? macros[selectedList]?.name : "No Key"} />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value={(-1).toString()} key={`macro-${-1}`} disabled={false}>
+            No Key
+          </SelectItem>
+          {macros.map(macro => (
+            <SelectItem value={macro.id.toString()} key={`macro-${macro.id}`} disabled={macro.id === -1}>
+              {macro?.name ? `#${macro.id + 1}. ${macro?.name}` : `#${macro.id + 1}. No name`}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </>
   );
 
-  if (loading) return <LogoLoaderCentered />;
+  if (loading) return <LogoLoader centered />;
   return (
     <Styles className="macroEditor">
-      <Container fluid>
+      <div className="px-3">
         <PageHeader
-          text={i18n.app.menu.macros}
+          text="Macro Editor"
           contentSelector={
             <MacroSelector
               itemList={macros}
@@ -818,15 +811,19 @@ function MacroEditor(props: MacroEditorProps) {
           destroyContext={destroyThisContext}
           inContext={modified}
         />
+
         <Callout
-          content={i18n.editor.macros.callout}
-          className="mt-md"
           size="sm"
+          className="mt-4"
           hasVideo
           media="MfTUvFrHLsE"
           videoTitle="13 Time-saving MACROS For Your Keyboard"
           videoDuration="5:24"
-        />
+        >
+          <p>{i18n.editor.macros.callout1}</p>
+          <p>{i18n.editor.macros.callout2}</p>
+        </Callout>
+
         {macros[selectedMacro] === undefined || macros[selectedMacro].actions === undefined ? (
           <div />
         ) : (
@@ -852,31 +849,37 @@ function MacroEditor(props: MacroEditorProps) {
             />
           </>
         )}
-      </Container>
-      <Modal show={showDeleteModal} onHide={toggleDeleteModal} size="lg" aria-labelledby="contained-modal-title-vcenter" centered>
-        <Modal.Header closeButton>
-          <Modal.Title>{i18n.editor.macros.deleteModal.title}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          {ListOfDeletes}
-          <p>{i18n.editor.macros.deleteModal.body}</p>
-          {ListCombo}
-        </Modal.Body>
-        <Modal.Footer>
-          <RegularButton
-            buttonText={i18n.editor.macros.deleteModal.cancelButton}
-            styles="outline transp-bg"
-            size="sm"
-            onClick={toggleDeleteModal}
-          />
-          <RegularButton
-            buttonText={i18n.editor.macros.deleteModal.applyButton}
-            styles="outline gradient"
-            size="sm"
-            onClick={ActUponDelete}
-          />
-        </Modal.Footer>
-      </Modal>
+      </div>
+
+      <Dialog open={showDeleteModal} onOpenChange={toggleDeleteModal}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{i18n.editor.macros.deleteModal.title}</DialogTitle>
+          </DialogHeader>
+          <div className="px-6 pb-2 mt-2">
+            {ListOfDeletes && (
+              <>
+                <Heading headingLevel={4} renderAs="h4">
+                  The macro you want to delete is currently in use on:
+                </Heading>
+                <div className="mt-1 mb-4">
+                  <ul className="mb-[4px] text-ssm list-disc pl-[24px] text-gray-500 dark:text-gray-100">{ListOfDeletes}</ul>
+                </div>
+              </>
+            )}
+            <p className="mb-2">{i18n.editor.macros.deleteModal.body}</p>
+            {ListCombo}
+          </div>
+          <DialogFooter>
+            <Button size="sm" variant="outline" onClick={toggleDeleteModal}>
+              {i18n.editor.macros.deleteModal.cancelButton}
+            </Button>
+            <Button size="sm" variant="secondary" onClick={ActUponDelete}>
+              {i18n.editor.macros.deleteModal.applyButton}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Styles>
   );
 }

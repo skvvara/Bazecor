@@ -15,12 +15,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Routes, Navigate, Route, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ThemeProvider } from "styled-components";
 import { ipcRenderer } from "electron";
 import path from "path";
+import log from "electron-log/renderer";
 import { i18n } from "@Renderer/i18n";
 
 import GlobalStyles from "@Renderer/theme/GlobalStyles";
@@ -28,7 +29,7 @@ import Light from "@Renderer/theme/LightTheme";
 import Dark from "@Renderer/theme/DarkTheme";
 
 import Header from "@Renderer/modules/NavigationMenu";
-import SelectKeyboard from "@Renderer/views/SelectKeyboard";
+// import SelectKeyboard from "@Renderer/views/SelectKeyboard";
 import FirmwareUpdate from "@Renderer/views/FirmwareUpdate";
 import LayoutEditor from "@Renderer/views/LayoutEditor";
 import MacroEditor from "@Renderer/views/MacroEditor";
@@ -36,8 +37,8 @@ import SuperkeysEditor from "@Renderer/views/SuperkeysEditor";
 import Preferences from "@Renderer/views/Preferences";
 import Welcome from "@Renderer/views/Welcome";
 
-import ToastMessage from "@Renderer/component/ToastMessage";
-import { IconBluetooth, IconNoSignal } from "@Renderer/component/Icon";
+import ToastMessage from "@Renderer/components/atoms/ToastMessage";
+import { IconBluetooth, IconConnected, IconPlug } from "@Renderer/components/atoms/icons";
 import BazecorDevtools from "@Renderer/views/BazecorDevtools";
 import { showDevtools } from "@Renderer/devMode";
 
@@ -48,17 +49,14 @@ import { getAppContext } from "../common/app-context/appContext";
 import Focus from "../api/focus";
 import "../api/keymap";
 import "../api/colormap";
-import { useDevice } from "./DeviceContext";
+import { DeviceTools, useDevice } from "./DeviceContext";
 import DeviceManager from "./views/DeviceManager";
 import Device from "../api/comms/Device";
 import { HIDNotifdevice } from "./types/hid";
+import HID from "../api/hid/hid";
 
 const store = Store.getStore();
 const storage = getAppContext().settings;
-
-const focus = Focus.getInstance();
-focus.debug = true;
-focus.timeout = 5000;
 
 function App() {
   const [pages, setPages] = useState({});
@@ -72,16 +70,16 @@ function App() {
   const [fwUpdate, setFwUpdate] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { state } = useDevice();
+  const { state, dispatch } = useDevice();
   const navigate = useNavigate();
   const varFlashing = React.useRef(false);
   const device: any = React.useRef();
 
   const updateStorageSchema = async () => {
     // Update stored settings schema
-    console.log("Retrieving settings: ", store.get("settings"));
+    log.verbose("Retrieving settings: ", store.get("settings"));
     const locale = await ipcRenderer.invoke("get-Locale");
-    console.log("Settings for locale: ", locale);
+    log.verbose("Settings for locale: ", locale);
     i18n.setLanguage(storage.language);
 
     // when moving from other version, config may for superkeys may contain wrong data (wrong legnth, nulls)
@@ -117,7 +115,7 @@ function App() {
     i18n.setLanguage(data.language);
     store.set("settings", data);
     store.set("neurons", []);
-    console.log("Testing results: ", data, store.get("settings"), storage.darkMode);
+    log.verbose("Testing results: ", data, store.get("settings"), storage.darkMode);
   };
 
   useEffect(() => {
@@ -134,6 +132,15 @@ function App() {
         }
       } else {
         document.documentElement.classList.add(mode);
+      }
+
+      // Settings entry creation for the beta toggle, it will have a control in preferences to change the policy
+      let getAllowBeta: boolean;
+      if (store.has("settings.allowBeta")) {
+        getAllowBeta = store.get("settings.allowBeta") as boolean;
+      } else {
+        getAllowBeta = true;
+        store.set("settings.allowBeta", true);
       }
 
       setDarkMode(isDark);
@@ -157,18 +164,20 @@ function App() {
     setContextBar(false);
   };
 
-  const onKeyboardDisconnect = () => {
-    console.log("disconnecting Keyboard!");
-    console.log(state);
-    setConnected(false);
-    setPages({});
-    device.current = null;
+  const onKeyboardDisconnect = useCallback(() => {
+    log.verbose("disconnecting Keyboard!");
+    log.verbose(state.currentDevice?.type, state.currentDevice?.path);
     localStorage.clear();
-    navigate("/keyboard-select");
-  };
+    setConnected(false);
+    setFlashing(false);
+    setFwUpdate(false);
+    device.current = null;
+    setPages({});
+    navigate("/device-manager");
+  }, [navigate, state.currentDevice]);
 
-  const onKeyboardConnect = async (currentDevice: Device) => {
-    console.log("Connecting to", currentDevice);
+  const onKeyboardConnect = async (currentDevice: Device): Promise<void> => {
+    log.verbose("Connecting to", currentDevice.type, currentDevice.device);
 
     if (currentDevice.device.bootloader) {
       setConnected(true);
@@ -178,7 +187,7 @@ function App() {
       return;
     }
 
-    console.log("VERSION: ", await currentDevice.command("version"));
+    log.verbose("VERSION: ", await currentDevice.command("version"));
 
     setConnected(true);
     device.current = currentDevice;
@@ -192,7 +201,7 @@ function App() {
     document.documentElement.classList.remove("light");
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.remove("system");
-    console.log("Dark mode changed to: ", mode, "NativeTheme says: ", ipcRenderer.invoke("get-NativeTheme"));
+    log.verbose("Dark mode changed to: ", mode, "NativeTheme says: ", ipcRenderer.invoke("get-NativeTheme"));
     let isDark = mode === "dark";
     if (mode === "system") {
       isDark = await ipcRenderer.invoke("get-NativeTheme");
@@ -210,98 +219,133 @@ function App() {
     storage.darkMode = mode;
   };
 
-  const darkThemeListener = (event: any, message: boolean) => {
-    console.log("O.S. DarkTheme Settings changed to ", message, event);
-    const dm = storage.darkMode;
-    if (dm === "system") {
-      toggleDarkMode(dm);
-    }
-    if (dm || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
-      toggleDarkMode("dark");
-    } else {
-      toggleDarkMode("light");
-    }
-  };
-
   const toggleFlashing = async () => {
     setFlashing(!flashing);
     varFlashing.current = !flashing;
-    console.log("toggled flashing to", !flashing);
+    log.verbose("toggled flashing to", !flashing);
 
     // if Flashing is going to be set to false from true
-    if (flashing) {
-      setConnected(false);
-      device.current = null;
-      setPages({});
-      navigate("/keyboard-select");
+    if (!flashing === false) {
+      const currentID = state.currentDevice.serialNumber.toLowerCase();
+      dispatch({ type: "disconnect", payload: [currentID] });
+      onKeyboardDisconnect();
     }
-  };
-
-  const handleDeviceDisconnection = async (dev: any) => {
-    const isFlashing = varFlashing.current;
-    console.log("Handling device disconnect", isFlashing, dev, device);
-    if (isFlashing) {
-      console.log("no action due to flashing active");
-      return;
-    }
-
-    // if (state.currentDevice?.device?.usb?.productId !== state.currentDevice?.device?.deviceDescriptor?.idProduct) {
-    //   return;
-    // }
-
-    // Must await this to stop re-render of components reliant on `focus.device`
-    // However, it only renders a blank screen. New route is rendered below.
-    if (connected) {
-      toast.warning(
-        <ToastMessage
-          icon={<IconNoSignal />}
-          title={i18n.errors.deviceDisconnected}
-          content={i18n.errors.deviceDisconnectedContent}
-        />,
-        { icon: "" },
-      );
-    }
-    onKeyboardDisconnect();
   };
 
   useEffect(() => {
     const fontFace = new FontFace("Libre Franklin", "@Renderer/theme/fonts/LibreFranklin/LibreFranklin-VariableFont_wght.ttf");
-    console.log("Font face: ", fontFace);
+    log.verbose("Font face: ", fontFace);
     document.fonts.add(fontFace);
+  }, []);
+
+  useEffect(() => {
+    const handleDeviceConnection = async (dev: USBDevice) => {
+      log.verbose("new Device connected to USB", dev);
+      const isFlashing = varFlashing.current;
+      if (isFlashing) {
+        log.verbose("no action due to flashing active");
+        return;
+      }
+      try {
+        const existingIDs = state.deviceList.map(d => d.serialNumber);
+        const newDev = await DeviceTools.enumerateDevice(false, dev, existingIDs);
+        dispatch({ type: "addDevices", payload: newDev });
+      } catch (error) {
+        log.error("error when trying to insert newly connected device to DeviceContext", error);
+      }
+      toast.success(
+        <ToastMessage
+          icon={<IconConnected />}
+          title={i18n.success.USBdeviceConnected}
+          content={i18n.success.USBdeviceConnectedText}
+        />,
+        { autoClose: 2000, icon: "" },
+      );
+    };
+
+    const handleDeviceDisconnection = async (dev: USBDevice) => {
+      const isFlashing = varFlashing.current;
+      log.verbose("Handling device disconnect", isFlashing, dev);
+      if (isFlashing) {
+        log.verbose("no action due to flashing active");
+        return;
+      }
+      let missing: string[];
+      try {
+        const existingIDs = state.deviceList.filter(d => d.type === "serial").map(d => d.serialNumber.toLowerCase());
+        const existingPNs = state.deviceList
+          .filter(d => d.type === "hid")
+          .map(d => ({ PN: (d.port as unknown as HID).connectedDevice.productName, SN: d.serialNumber }));
+        const missingSerialN = await DeviceTools.currentSerialN(existingIDs);
+        const missingPNs = await DeviceTools.currentHIDN(existingPNs.map(x => x.PN));
+        missing = missingSerialN.concat(existingPNs.map(x => (missingPNs.includes(x.PN) ? x.SN : undefined)));
+        dispatch({
+          type: "disconnect",
+          payload: missing,
+        });
+      } catch (error) {
+        log.error("error when trying to remove disconnected device from DeviceContext", error);
+      }
+      toast.warn(
+        <ToastMessage
+          icon={<IconPlug />}
+          title={i18n.errors.deviceDisconnected}
+          content={i18n.errors.deviceDisconnectedContent}
+        />,
+        { autoClose: 3000, icon: "" },
+      );
+      if (connected && missing.length > 0 && missing.includes(state.currentDevice?.serialNumber.toLowerCase())) {
+        onKeyboardDisconnect();
+      }
+    };
 
     const usbListener = (event: unknown, response: unknown) => handleDeviceDisconnection(JSON.parse(response as string));
-    const hidListener = (event: unknown, response: unknown) =>
-      handleDeviceDisconnection(JSON.parse(response as string) as HIDNotifdevice);
+    const newUsbConnection = (event: unknown, response: unknown) => handleDeviceConnection(JSON.parse(response as string));
+    const hidListener = (event: unknown, response: unknown) => handleDeviceDisconnection(JSON.parse(response as string));
 
     const notifyBtDevice = (event: any, hidDev: string) => {
       const localDev: HIDNotifdevice = JSON.parse(hidDev);
-      console.log("received connection event: ", localDev);
+      log.verbose("received connection event: ", localDev);
       toast.success(
         <ToastMessage
           icon={<IconBluetooth />}
-          title="Detected Dgyma Bluetooth Device"
-          content={`Found ${localDev.name} device! to connect, first press scan keyboards button in keyboard selection view`}
+          title="Detected Dygma Bluetooth Device"
+          content={`Found ${localDev.name} device! to connect, first press scan keyboards button in keyboard manager`}
         />,
         { autoClose: 3000, icon: "" },
       );
     };
 
+    const darkThemeListener = (event: any, message: boolean) => {
+      log.verbose("O.S. DarkTheme Settings changed to ", message, event);
+      const dm = storage.darkMode;
+      if (dm === "system") {
+        toggleDarkMode(dm);
+      }
+      if (dm || (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches)) {
+        toggleDarkMode("dark");
+      } else {
+        toggleDarkMode("light");
+      }
+    };
+
     // Setting up function to receive O.S. dark theme changes
     ipcRenderer.on("darkTheme-update", darkThemeListener);
     ipcRenderer.on("usb-disconnected", usbListener);
+    ipcRenderer.on("usb-connected", newUsbConnection);
     ipcRenderer.on("hid-disconnected", hidListener);
     ipcRenderer.on("hid-connected", notifyBtDevice);
     return () => {
       ipcRenderer.off("darkTheme-update", darkThemeListener);
       ipcRenderer.off("usb-disconnected", usbListener);
+      ipcRenderer.off("usb-connected", newUsbConnection);
       ipcRenderer.off("hid-disconnected", hidListener);
       ipcRenderer.off("hid-connected", notifyBtDevice);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [connected, dispatch, navigate, onKeyboardDisconnect, state.currentDevice, state.deviceList]);
 
   const toggleFwUpdate = async (value: boolean) => {
-    console.log("toggling fwUpdate to: ", value);
+    log.verbose("toggling fwUpdate to: ", value);
     setFwUpdate(value);
   };
 
@@ -315,7 +359,7 @@ function App() {
   };
 
   const handleSetRestoredOk = (status: boolean) => {
-    console.log("CHECK RESTORE", status);
+    log.verbose("CHECK RESTORE", status);
     setRestoredOk(status);
   };
 
@@ -333,10 +377,23 @@ function App() {
       />
       <div className="main-container">
         <Routes>
-          <Route path="/" element={<Navigate to="/keyboard-select" />} />
+          <Route path="/" element={<Navigate to="/device-manager" />} />
           <Route path="/welcome" element={<Welcome device={device} onConnect={onKeyboardConnect} />} />
-          <Route path="/device-manager" element={<DeviceManager />} />
           <Route
+            path="/device-manager"
+            element={
+              <DeviceManager
+                connected={connected}
+                onConnect={onKeyboardConnect}
+                onDisconnect={onKeyboardDisconnect}
+                device={device}
+                darkMode={darkMode}
+                setLoading={setLoadingData}
+                restoredOk={restoredOk}
+              />
+            }
+          />
+          {/* <Route
             path="/keyboard-select"
             element={
               <SelectKeyboard
@@ -349,7 +406,7 @@ function App() {
                 restoredOk={restoredOk}
               />
             }
-          />
+          /> */}
           <Route
             path="/editor"
             element={
@@ -391,13 +448,9 @@ function App() {
             path="/firmware-update"
             element={
               <FirmwareUpdate
-                path="/firmware-update"
-                device={device}
                 toggleFlashing={toggleFlashing}
                 toggleFwUpdate={toggleFwUpdate}
                 onDisconnect={onKeyboardDisconnect}
-                titleElement={() => document.querySelector("#page-title")}
-                darkMode={darkMode}
                 allowBeta={allowBeta}
                 setRestoredOk={handleSetRestoredOk}
               />

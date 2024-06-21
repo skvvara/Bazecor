@@ -1,9 +1,11 @@
 import path from "path";
 import fs from "fs";
 import Store from "electron-store";
+import log from "electron-log/renderer";
 import { Neuron } from "@Renderer/types/neurons";
-import { DeviceClass, VirtualType } from "@Renderer/types/devices";
 import { BackupType } from "@Renderer/types/backups";
+import { VirtualType } from "@Renderer/types/virtual";
+import Device from "../comms/Device";
 import { getAppContext } from "@Common/app-context/appContext";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -23,7 +25,7 @@ export default class Backup {
    * Function that returns the list of available commands excluding the ones that do not return usefull information for the backup
    * @returns An array with strings that contain the serial commands that are capable of returing the keyboard configuration
    */
-  static async Commands(device: DeviceClass) {
+  static async Commands(device: Device) {
     const notRequired = [
       "eeprom",
       "hardware",
@@ -56,7 +58,7 @@ export default class Backup {
     ];
     const commands = await device.command("help");
     const validCommands = commands.split(/\r?\n/).filter(c => !notRequired.some(v => c.includes(v)));
-    if (!validCommands.includes("led.br1ightnessUG")) validCommands.push("led.brightnessUG");
+    if (!validCommands.includes("led.brightnessUG")) validCommands.push("led.brightnessUG");
     return validCommands;
   }
 
@@ -71,7 +73,7 @@ export default class Backup {
    * @param {string} neuronID This parameter contains the neuronID obtained from the Raise, so the corresponding local settings can be retrieved.
    * @returns {Backup} Backup The function returns the full made backup, so it can be stored wherever is needed, and changed if the module requires it.
    */
-  async DoBackup(commands: string[], neuronID: string, device: DeviceClass) {
+  async DoBackup(commands: string[], neuronID: string, device: Device) {
     if (device.file !== false) return undefined;
     const backup: BackupType = {
       neuronID: undefined,
@@ -82,7 +84,7 @@ export default class Backup {
     const commandList = [];
     for (let i = 0; i < commands.length; i += 1) {
       const command = commands[i];
-      console.log(command);
+      log.info(command);
       // eslint-disable-next-line no-await-in-loop
       const data = await device.command(command);
       commandList.push({ command, data });
@@ -118,7 +120,7 @@ export default class Backup {
    * @param {*} localBackup The backup data object to be stored locally
    * @returns True when the function has successfully stored the backup locally, and false if something fails, an error log will be also pushed to the console
    */
-  static SaveBackup(backup: BackupType, device: DeviceClass) {
+  static SaveBackup(backup: BackupType, device: Device) {
     const localBackup = { ...backup };
     if (device.file !== false) {
       const file = JSON.parse(fs.readFileSync(device.fileData.device.filePath).toString("utf-8"));
@@ -127,7 +129,7 @@ export default class Backup {
       try {
         fs.writeFileSync(device.fileData.device.filePath, json);
       } catch (error) {
-        console.error(error);
+        log.error(error);
         throw error;
       }
       return true;
@@ -152,32 +154,32 @@ export default class Backup {
         }-${localBackup.neuron.name.replace(/[^\w\s]/gi, "")}.json`,
       );
       const json = JSON.stringify(localBackup, null, 2);
-      console.log(fullPath, folderPath, localBackup);
-      console.log("Creating folders");
+      log.info(fullPath, folderPath, localBackup);
+      log.info("Creating folders");
       fs.mkdir(folderPath, { recursive: true }, err => {
         if (err) {
-          console.error(err);
+          log.error(err);
           throw err;
         }
       });
-      console.log(`Saving Backup to -> ${fullPath}`);
+      log.info(`Saving Backup to -> ${fullPath}`);
       try {
         if (!fs.existsSync(path.parse(fullPath).dir)) {
           fs.mkdirSync(path.parse(fullPath).dir, { recursive: true });
         }
         fs.writeFileSync(fullPath, json);
       } catch (error) {
-        console.error(error);
+        log.error(error);
         throw error;
       }
       return true;
     } catch (error) {
-      console.warn("Error ocurred when saving backup to folder");
+      log.warn("Error ocurred when saving backup to folder");
       throw new Error(error);
     }
   }
 
-  static restoreBackup = async (neurons: Neuron[], neuronID: string, backup: BackupType, device: DeviceClass) => {
+  static restoreBackup = async (neurons: Neuron[], neuronID: string, backup: BackupType, device: Device) => {
     let data = [];
     if (Array.isArray(backup)) {
       data = backup;
@@ -201,71 +203,75 @@ export default class Backup {
           if (device.device.info.product === "Defy") {
             // if (data[i].command.includes("macros") || data[i].command.includes("superkeys")) continue;
           }
-          console.log(`Going to send ${data[i].command} to keyboard`);
+          log.info(`Going to send ${data[i].command} to keyboard`);
           // eslint-disable-next-line no-await-in-loop
           await device.command(data[i].command, val.trim());
         }
         await device.noCacheCommand("led.mode 0");
-        console.log("Restoring all settings");
-        console.log("Firmware update OK");
+        log.info("Restoring all settings");
+        log.info("Firmware update OK");
         return true;
       } catch (e) {
-        console.log(`Restore settings: Error: ${e.message}`);
+        log.info(`Restore settings: Error: ${e.message}`);
         return false;
       }
     }
     return false;
   };
 
-  static restoreVirtual = async (virtual: VirtualType, device: DeviceClass) => {
+  static restoreVirtual = async (virtual: VirtualType, device: Device) => {
     if (device) {
       try {
-        console.log("Restoring all settings");
+        log.info("Restoring all settings");
         const data = virtual.virtual;
         for (const command in data) {
           if (data[command].eraseable === true) {
-            console.log(`Going to send ${command} to keyboard`);
+            log.info(`Going to send ${command} to keyboard`);
             // eslint-disable-next-line no-await-in-loop
             await device.noCacheCommand(`${command} ${data[command].data}`.trim());
           }
         }
         await device.noCacheCommand("led.mode 0");
-        console.log("Settings restored OK");
+        log.info("Settings restored OK");
         return true;
       } catch (e) {
-        console.log(`Restore settings: Error: ${e.message}`);
+        log.info(`Restore settings: Error: ${e.message}`);
         return false;
       }
     }
     return false;
   };
 
-  static getLatestBackup = async (backupFolder: string, neuronID: string, device: DeviceClass) => {
+  static getLatestBackup = async (backupFolder: string, neuronID: string, device: Device) => {
     try {
       // creating folder path with current device
       const folderPath = path
         .join(backupFolder, device.device.info.product, neuronID)
         .split(path.sep)
         .join(path[process.platform === "win32" ? "win32" : "posix"].sep);
-      console.log("going to search for newest file in: ", folderPath);
+      log.info("going to search for newest file in: ", folderPath);
 
       // sorting folder files to find newest
       let folderSync;
       if (process.platform === "win32") folderSync = glob.sync(`${folderPath}\\*json`.replace(/\\/g, "/"));
       else folderSync = glob.sync(`${folderPath}/*json`);
-      const mappedFolder = folderSync.map((name: string) => ({ name, ctime: fs.statSync(name).ctime }));
-      const newestFile = mappedFolder.sort((a: any, b: any) => b.ctime - a.ctime);
+      type FolderMapType = { name: string; ctime: Date };
+      const mappedFolder: FolderMapType[] = folderSync.map((name: string) => ({
+        name,
+        ctime: fs.statSync(name).ctime,
+      }));
+      const newestFile = mappedFolder.sort((a: FolderMapType, b: FolderMapType) => b.ctime.getTime() - a.ctime.getTime());
 
       // Loading latest backup for the device
       const loadedFile = JSON.parse(fs.readFileSync(newestFile[0].name, "utf-8"));
-      console.log("selected backup content: ", loadedFile);
-      console.log("Restored latest backup");
+      log.info("selected backup content: ", loadedFile);
+      log.info("Restored latest backup");
       return loadedFile;
     } catch (error) {
-      console.error(error);
+      log.error(error);
       return undefined;
     }
   };
 
-  static isBackupType = (backup: any): backup is BackupType => "backup" in backup;
+  static isBackupType = (backup: any): backup is any => "backup" in backup;
 }

@@ -18,7 +18,7 @@
  */
 
 import React from "react";
-import ListModifiersKey from "../../renderer/component/ListModifiers/ListModifiersKey";
+import ListModifiersKey from "@Renderer/components/molecules/ListModifiers/ListModifiersKey";
 
 interface KeyShapeProps {
   keyType: string;
@@ -97,14 +97,6 @@ function Key(props: KeyShapeProps) {
       ? setHyperApplied(true)
       : setHyperApplied(false);
   }, [centerPrimary, centerExtra]);
-
-  // React.useEffect(() => {
-  //   console.log("selectedKey internal: ", parseInt(selectedKey));
-  //   console.log("dataKeyIndex internal: ", dataKeyIndex);
-  //   if (parseInt(selectedKey) === parseInt(dataKeyIndex)) {
-  //     setIsActive(true);
-  //   }
-  // }, [selectedKey]);
 
   return (
     <>

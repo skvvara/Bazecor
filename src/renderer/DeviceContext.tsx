@@ -1,43 +1,90 @@
 /* eslint-disable no-await-in-loop */
 import React, { useReducer, createContext, useContext, useMemo } from "react";
-import { CountProviderProps, Action, State, DeviceClass, VirtualType } from "./types/devices";
-import serial, { isSerialType } from "../api/comms/serial";
-import Device from "../api/comms/Device";
+import log from "electron-log/renderer";
+import { VirtualType } from "./types/virtual";
+import serial from "../api/comms/serial";
+import Device, { State } from "../api/comms/Device";
 import HID from "../api/hid/hid";
 import { isVirtualType } from "../api/comms/virtual";
 
-type ContextType = {
-  state: State;
-  dispatch: React.Dispatch<Action>;
-};
+type CountProviderProps = { children: React.ReactNode };
+
+type ContextType =
+  | {
+      state: State;
+      dispatch: React.Dispatch<Action>;
+    }
+  | undefined;
+
+export type Action =
+  | { type: "changeCurrent"; payload: { selected: number; device: Device } }
+  | { type: "addDevice"; payload: Device }
+  | { type: "addDevices"; payload: Device[] }
+  | { type: "addDevicesList"; payload: Device[] }
+  | { type: "disconnect"; payload: string[] };
+
+export type ActionType = "changeCurrent" | "addDevice" | "addDevicesList" | "disconnect";
+
+export type Dispatch = (action: Action) => void;
 
 const DeviceContext = createContext<ContextType>(undefined);
 
 function deviceReducer(state: State, action: Action) {
-  // console.log("Entering DeviceREDUCER!!!", state, action);
+  // log.verbose("Entering DeviceREDUCER!!!", state, action);
   switch (action.type) {
     case "changeCurrent": {
-      if (action.payload.selected < state.deviceList.length && action.payload.selected >= 0) {
-        const deviceList = [...state.deviceList];
-        deviceList[action.payload.selected] = action.payload.device;
-        return { ...state, selected: action.payload.selected, currentDevice: action.payload.device, deviceList };
+      if (action.payload.selected === -1) {
+        // We are working with Virtual keyboards here
+        const newList = [...state.deviceList];
+        newList.push(action.payload.device);
+        log.warn("EXECUTED changeCurrent with selected === -1: ", action.payload, newList);
+        return { selected: newList.length - 1, currentDevice: newList[newList.length - 1], deviceList: newList };
       }
-      const deviceList = [...state.deviceList];
-      deviceList.push(action.payload.device);
-      return { ...state, selected: deviceList.length - 1, currentDevice: action.payload.device, deviceList };
+      const newCurrent = state.deviceList[action.payload.selected];
+      log.warn("EXECUTED changeCurrent: ", action.payload, newCurrent);
+      return { ...state, selected: action.payload.selected, currentDevice: newCurrent };
     }
     case "addDevice": {
-      const newDevices = state.deviceList;
+      const newDevices = [...state.deviceList];
       newDevices.push(action.payload);
-      return { ...state, deviceList: newDevices };
+      log.warn("EXECUTED addDevice: ", action.payload, newDevices);
+      return { ...state, deviceList: newDevices, currentDevice: state.currentDevice, selected: state.selected };
+    }
+    case "addDevices": {
+      let newDevices = [...state.deviceList];
+      newDevices = newDevices.concat(action.payload);
+      log.warn("EXECUTED addDevices: ", action.payload, newDevices);
+      return { ...state, deviceList: newDevices, currentDevice: state.currentDevice, selected: state.selected };
     }
     case "addDevicesList": {
-      const newDevices = action.payload;
+      const newDevices = [...action.payload];
+      log.warn("EXECUTED addDevicesList: ", action.payload, newDevices);
       return { ...state, deviceList: newDevices };
     }
     case "disconnect": {
-      const newDevices = state.deviceList.filter(device => device.type !== "virtual");
-      return { ...state, deviceList: newDevices, currentDevice: undefined, selected: -1 };
+      let newDevices = [...state.deviceList];
+      let newSelected: number = state.selected;
+      newDevices = newDevices.filter((device, index) => {
+        const isVirtual = device.type === "virtual";
+        const isNotPresent = action.payload.includes(device.serialNumber.toLowerCase());
+
+        if (index < state.selected && newSelected > -1) newSelected -= 1;
+        if (isNotPresent && state.selected === index) {
+          log.info("entered with", state.selected, index, isNotPresent, device.serialNumber.toLowerCase());
+          newSelected = -1;
+        }
+
+        return !isVirtual && !isNotPresent;
+      });
+      // newSelected = state.selected >= newDevices.length ? -1 : state.selected;
+      log.warn("EXECUTED disconnect: ", state.deviceList, state.selected, action.payload, newDevices);
+      log.warn("new disconnected device: ", newSelected);
+      return {
+        ...state,
+        deviceList: newDevices,
+        currentDevice: newSelected === -1 ? undefined : newDevices[newSelected],
+        selected: newSelected,
+      };
     }
     default: {
       throw new Error(`Unhandled action type: ${action}`);
@@ -62,92 +109,162 @@ function useDevice() {
   return context;
 }
 
-const isDeviceConnected = async (device: Device) => {
-  if (isSerialType(device)) {
-    const result = await serial.isDeviceConnected(device);
-    return result;
-  }
-  // const result = await HID.isDeviceConnected(device);
-  // return result;
-  return false;
-};
+// const isDeviceConnected = async (device: Device) => {
+//   log.info(device);
+//   return true;
+// };
 
-const isDeviceSupported = async (device: Device) => {
-  if (isSerialType(device)) {
-    const result = await serial.isDeviceSupported(device);
-    return result;
-  }
-  // const result = await HID.isDeviceSupported(device);
-  // return result;
-  return false;
-};
+// const isDeviceSupported = async (device: Device) => {
+//   log.info("going to check support: ", device.device, isSerialType(device));
+//   return false;
+// };
 
 const list = async () => {
   // working with serial
   const serialDevs = await serial.find();
   const finalDevices: Array<Device> = [];
   for (const dev of serialDevs) {
-    const connected = await isDeviceConnected(dev);
-    const supported = await isDeviceSupported(dev);
-    if (connected && supported) finalDevices.push(new Device(dev, "serial"));
+    log.info("Checking connected & supported for Serial");
+    finalDevices.push(new Device(dev, "serial"));
   }
 
   // working with hid
   const hidDevs = await HID.getDevices();
   for (const [index, device] of hidDevs.entries()) {
-    console.log("Checking: ", device);
+    log.verbose("Checking: ", device);
     const hid = new HID();
     const connected = await hid.isDeviceConnected(index);
     const supported = await hid.isDeviceSupported(index);
-    console.log("Checking connected & supported: ", connected, supported);
+    log.info("Checking connected & supported for HID: ", connected, supported);
     if (connected && supported) finalDevices.push(new Device(hid, "hid"));
   }
 
   return finalDevices;
 };
 
-const connect = async (device: DeviceClass | VirtualType) => {
+const enumerateSerial = async (bootloader: boolean) => {
+  const dev = await serial.enumerate(bootloader);
+  return dev;
+};
+
+const enumerateDevice = async (bootloader: boolean, device: USBDevice, existingIDs: string[]) => {
+  const dev = await serial.enumerate(bootloader, device, existingIDs);
+  // log.info("Data from enum dev:", dev, bootloader, existingIDs);
+  const newDevice = dev.map(d => new Device(d, "serial"));
+
+  // const hidDev = await HID.getDevices();
+  // for (const [index, d] of hidDev.entries()) {
+  //   if (!existingIDs.includes(d.productName)) {
+  //     log.verbose("Checking: ", d, existingIDs);
+  //     const hid = new HID();
+  //     const connected = await hid.isDeviceConnected(index);
+  //     const supported = await hid.isDeviceSupported(index);
+  //     log.info("Checking connected & supported for HID: ", connected, supported);
+  //     newDevice.push(new Device(hid, "hid"));
+  //   }
+  // }
+
+  // log.info("Resp enum Dev HID!!", hidDev, newDevice);
+  return newDevice;
+};
+
+const listNonConnected = async (bootloader: boolean, existingIDs: string[]) => {
+  const finalDevices: Array<Device> = [];
+
+  // Gathering SerialPort Devices
+  const ports = await serial.enumerate(bootloader, undefined, existingIDs);
+  ports.map(dev => finalDevices.push(new Device(dev, "serial")));
+  // log.info("Data from enum dev:", dev, bootloader, existingIDs);
+
+  // Gathering HID Devices
+  const hidDevs = await HID.getDevices();
+  for (const [index, device] of hidDevs.entries()) {
+    log.verbose("Checking: ", device);
+    const hid = new HID();
+    const connected = await hid.isDeviceConnected(index);
+    const supported = await hid.isDeviceSupported(index);
+    log.info("Checking connected & supported for HID: ", connected, supported);
+    if (connected && supported && !existingIDs.includes(hid.serialNumber)) finalDevices.push(new Device(hid, "hid"));
+  }
+
+  return finalDevices;
+};
+
+const currentSerialN = async (existingIDs: string[]) => {
+  const result: string[] = [];
+  const SN = (await serial.enumerate(false)).map(port => port.serialNumber.toLowerCase());
+  existingIDs.forEach(id => {
+    if (!SN.includes(id.toLowerCase())) result.push(id.toLowerCase());
+  });
+  return result;
+};
+
+const currentHIDN = async (existingPNs: string[]) => {
+  const result: string[] = [];
+  const SN = (await HID.getDevices()).map(hid => hid.productName);
+  existingPNs.forEach(id => {
+    if (!SN.includes(id)) result.push(id);
+  });
+  log.info("Parsing HID's: ", existingPNs, SN, result);
+  return result;
+};
+
+const connect = async (device: Device | VirtualType) => {
   try {
     if (isVirtualType(device)) {
       const result = await new Device(device, "virtual");
-      console.log("the device is virtual type: ", device, " and connected as: ", result);
+      result.device.chipId = result.serialNumber;
+      log.verbose(`the device is ${result.type} type, and connected as: `, result);
       return result;
     }
     if (Device.isDevice(device)) {
       if (device.type === "serial") {
         const result = await serial.connect(device);
-        device.addPort(result);
-        console.log("the device is serial type: ", device, " and connected as: ", result);
+        await device.addPort(result);
+        log.verbose(`the device is ${device.type} type, and connected as:`, result);
         return device;
       }
-      console.log(device.port);
-      const result = await (device.port as HID).connect();
-      await device.addHID();
-      console.log("the device is hid type: ", device, " and connected as: ", result);
-      return device;
+      if (device.type === "hid") {
+        log.verbose(device.port);
+        const result = await (device.port as HID).connect();
+        await device.addHID();
+        log.verbose(`the device is ${device.type} type, and connected as: `, result);
+        return device;
+      }
+      if (device.type === "virtual") {
+        const result = device;
+        result.isClosed = false;
+        return result;
+      }
     }
   } catch (error) {
-    console.error(error);
+    log.error(error);
     throw error;
   }
   return undefined;
 };
 
-const disconnect = async (device: DeviceClass) => {
+const disconnect = async (device: Device) => {
+  if (!device) return false;
   try {
     if (!device?.isClosed) {
       await device.close();
     }
-    console.log("device disconnected successfully");
+    log.verbose("device disconnected successfully");
     return true;
   } catch (error) {
-    console.error(error);
+    log.error(error);
     return false;
   }
 };
 
 const DeviceTools = {
   list,
+  enumerateSerial,
+  enumerateDevice,
+  listNonConnected,
+  currentSerialN,
+  currentHIDN,
   connect,
   disconnect,
 };

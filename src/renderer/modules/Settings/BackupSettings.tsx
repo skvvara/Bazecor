@@ -19,24 +19,25 @@ import React, { useState, useEffect } from "react";
 import { ipcRenderer } from "electron";
 import { toast } from "react-toastify";
 import fs from "fs";
+import log from "electron-log/renderer";
 
 // React Bootstrap Components
-import { Card, CardContent, CardHeader, CardTitle } from "@Renderer/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@Renderer/components/atoms/Card";
 
 // Own Components
 import { useDevice } from "@Renderer/DeviceContext";
-import ToastMessage from "@Renderer/component/ToastMessage";
+import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import { i18n } from "@Renderer/i18n";
-import { RegularButton } from "@Renderer/component/Button";
+import { Button } from "@Renderer/components/atoms/Button";
 
 // Icons Imports
-import { IconArrowDownWithLine, IconFloppyDisk } from "@Renderer/component/Icon";
+import { IconArrowDownWithLine, IconFloppyDisk } from "@Renderer/components/atoms/icons";
 
 // Utils
 import { BackupSettingsProps } from "@Renderer/types/preferences";
-import WaitForRestoreDialog from "@Renderer/component/WaitForRestoreDialog";
+import WaitForRestoreDialog from "@Renderer/components/molecules/CustomModal/WaitForRestoreDialog";
 import { BackupType } from "@Renderer/types/backups";
-import { VirtualType } from "@Renderer/types/devices";
+import { VirtualType } from "@Renderer/types/virtual";
 import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
 import Backup from "../../../api/backup";
 
@@ -124,27 +125,27 @@ const BackupSettings = (props: BackupSettingsProps) => {
     const resp = await ipcRenderer.invoke("open-dialog", options);
 
     if (!resp.canceled) {
-      console.log(resp.filePaths);
+      log.info(resp.filePaths);
       let loadedFile;
       try {
         loadedFile = JSON.parse(fs.readFileSync(resp.filePaths[0], "utf-8"));
         if (loadedFile.virtual !== undefined) {
           await localRestoreVirtual(loadedFile as VirtualType);
           await destroyContext();
-          console.log("Restored Virtual backup");
+          log.info("Restored Virtual backup");
           return;
         }
         if (loadedFile.backup !== undefined || loadedFile[0].command !== undefined) {
           await localRestoreBackup(loadedFile);
           await destroyContext();
-          console.log("Restored normal backup");
+          log.info("Restored normal backup");
         }
       } catch (e) {
-        console.error(e);
+        log.error(e);
         alert("The file is not a valid global backup");
       }
     } else {
-      console.log("user closed SaveDialog");
+      log.info("user closed SaveDialog");
     }
   };
 
@@ -153,11 +154,21 @@ const BackupSettings = (props: BackupSettingsProps) => {
       const loadedFile = await Backup.getLatestBackup(backupFolder, neuronID, state.currentDevice);
       await localRestoreBackup(loadedFile);
       await destroyContext();
-      console.log("Restored latest backup");
+      log.info("Restored latest backup");
     } catch (error) {
-      console.error(error);
+      log.error(error);
       alert(`The loaded backup could not be restored`);
     }
+  };
+
+  const triggerGetLatestBackup = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    localGetLatestBackup();
+  };
+
+  const triggerGetBackup = (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    GetBackup();
   };
 
   return (
@@ -171,8 +182,12 @@ const BackupSettings = (props: BackupSettingsProps) => {
         <form>
           <h3 className="mb-1 text-gray-400 dark:text-gray-100 tracking-tight font-semibold">Backup actions</h3>
           <div className="flex gap-3">
-            <RegularButton onClick={GetBackup} styles="short" buttonText="Restore backup from file..." disabled={!connected} />
-            <RegularButton onClick={localGetLatestBackup} styles="short" buttonText="Restore from last backup" />
+            <Button variant="short" onClick={event => triggerGetBackup(event)} disabled={!connected}>
+              Restore backup from file...
+            </Button>
+            <Button variant="short" onClick={event => triggerGetLatestBackup(event)} disabled={!connected}>
+              Restore from last backup
+            </Button>
             <WaitForRestoreDialog title="Restoring Backup" open={performingBackup} />
           </div>
         </form>

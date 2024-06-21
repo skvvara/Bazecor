@@ -14,39 +14,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect } from "react";
-import Slider from "@appigram/react-rangeslider";
+import React, { useState } from "react";
 import { ipcRenderer } from "electron";
 
 // React Bootstrap Components
-import { Card, CardContent, CardHeader, CardTitle } from "@Renderer/components/ui/card";
-import Form from "react-bootstrap/Form";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import { Card, CardContent, CardHeader, CardTitle } from "@Renderer/components/atoms/Card";
 
 // Own Components
 import { i18n } from "@Renderer/i18n";
 
 // Icons Imports
-import { IconFolder } from "@Renderer/component/Icon";
+import { IconFolder } from "@Renderer/components/atoms/icons";
 
 // Utils
+import { Slider } from "@Renderer/components/atoms/slider";
+import log from "electron-log";
 import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
 
 const FileBackUpHandling = () => {
-  const [backupFolder, setBackupFolder] = useState("");
-  const [storeBackups, setStoreBackups] = useState(13);
-  useEffect(() => {
-    const freq = storage.backupFrequency;
-    setBackupFolder(storage.backupFolder);
-    if (freq === 0) {
-      setStoreBackups(13);
-      storage.backupFrequency = 13;
-    } else {
-      setStoreBackups(freq);
-    }
-  }, []);
-
+  const [backupFolder, setBackupFolder] = useState(storage.backupFolder);
+  const [storeBackups, setStoreBackups] = useState(storage.backupFrequency);
   const ChooseBackupFolder = async () => {
     const options = {
       title: i18n.keyboardSettings.backupFolder.title,
@@ -65,13 +52,9 @@ const FileBackUpHandling = () => {
     }
   };
 
-  const onSetStoreBackups = (value: any) => {
-    // console.log("changed backup period to: ", value);
-    const val = Number.parseInt(String(value), 10);
-    if (Number.isNaN(val)) {
-      console.warn(`Invalid value for backup frequency: ${value}... ignoring`);
-      return;
-    }
+  const onSetStoreBackups = (value: number[]) => {
+    log.info("onSetStoreBackups", value);
+    const val = value[0];
     setStoreBackups(val);
     storage.backupFrequency = val;
   };
@@ -98,19 +81,17 @@ const FileBackUpHandling = () => {
             {i18n.keyboardSettings.backupFolder.storeTime}
           </h3>
           <div className="flex w-full">
-            <Form.Group controlId="backupFolder" className="mb-0 w-full">
-              <Row>
-                <Col xs={2} className="p-0 text-center align-self-center">
-                  <span className="tagsfix">1 month</span>
-                </Col>
-                <Col xs={8} className="px-1">
-                  <Slider min={1} max={13} step={1} value={storeBackups} onChange={onSetStoreBackups} />
-                </Col>
-                <Col xs={2} className="p-0 text-center align-self-center">
-                  <span className="tagsfix">Forever</span>
-                </Col>
-              </Row>
-            </Form.Group>
+            <div className="mb-0 w-full flex gap-2">
+              <div className="flex max-w-16 p-0 text-center items-center">
+                <span className="tagsfix">1 month</span>
+              </div>
+              <div className="w-full flex items-center p-0">
+                <Slider min={1} max={13} step={1} value={[storeBackups]} onValueChange={onSetStoreBackups} />
+              </div>
+              <div className="flex max-w-16 p-0 text-center items-center">
+                <span className="tagsfix">Forever</span>
+              </div>
+            </div>
           </div>
         </form>
       </CardContent>

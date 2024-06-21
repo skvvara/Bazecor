@@ -15,7 +15,7 @@
  * this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-import Focus from "../focus";
+// import Focus from "../focus";
 import { rgb2w, rgbw2b } from "../color";
 
 global.colormap_instance = null;
@@ -125,7 +125,6 @@ export default class Colormap {
         return aux;
       });
       args = this._flatten(paletteAux.map(color => [color.r, color.g, color.b, color.w])).map(v => v.toString());
-      console.log(palette, paletteAux, args);
     }
 
     return await s.request("palette", ...args);
@@ -136,17 +135,17 @@ export default class Colormap {
     return await s.request("colormap.map", ...args);
   }
 
-  async focus(s, palette, colormap) {
-    if (!palette && !colormap) {
-      return this._pull(s);
-    }
+  // async focus(s, palette, colormap) {
+  //   if (!palette && !colormap) {
+  //     return this._pull(s);
+  //   }
 
-    if (palette) await this._updatePalette(s, palette);
-    if (colormap) await this._updateColormap(s, colormap);
-  }
+  //   if (palette) await this._updatePalette(s, palette);
+  //   if (colormap) await this._updateColormap(s, colormap);
+  // }
 }
 
-const focus = Focus.getInstance();
-focus.addCommands({ colormap: new Colormap() });
-focus.addMethod("setLayerSize", "colormap");
-focus.addMethod("setLEDMode", "colormap");
+// const focus = Focus.getInstance();
+// focus.addCommands({ colormap: new Colormap() });
+// focus.addMethod("setLayerSize", "colormap");
+// focus.addMethod("setLEDMode", "colormap");

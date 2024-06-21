@@ -19,23 +19,16 @@
  */
 
 import React, { useState } from "react";
-import Styled from "styled-components";
-import Container from "react-bootstrap/Container";
-import Row from "react-bootstrap/Row";
-import Col from "react-bootstrap/Col";
+import log from "electron-log/renderer";
 import { Link } from "react-router-dom";
 import { PageHeader } from "@Renderer/modules/PageHeader";
 import { useDevice, DeviceTools } from "@Renderer/DeviceContext";
-import { NavigationButton, RegularButton } from "../component/Button";
-import { IconHome } from "../component/Icon";
+import { IconConnected } from "@Renderer/components/atoms/icons";
+import { Button } from "@Renderer/components/atoms/Button";
 import HID from "../../api/hid/hid";
 import Device from "../../api/comms/Device";
-
-const Styles = Styled.div`
-.button-container {
-
-}
-`;
+import { toast } from "react-toastify";
+import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 
 const BazecorDevtools = () => {
   const { state, dispatch } = useDevice();
@@ -47,16 +40,16 @@ const BazecorDevtools = () => {
 
   const onGetHIDDevices = async () => {
     const gDevices = await HID.getDevices();
-    console.log(gDevices);
+    log.info(gDevices);
   };
 
   const onHIDConnect = async () => {
     try {
       connectedDevice = await hid.connectDevice(0);
-      console.log("Connected to");
-      console.log(connectedDevice);
+      log.info("Connected to");
+      log.info(connectedDevice);
     } catch (err) {
-      console.log(err);
+      log.info(err);
     }
   };
 
@@ -64,7 +57,7 @@ const BazecorDevtools = () => {
     try {
       await hid.open();
     } catch (err) {
-      console.log(err);
+      log.info(err);
     }
   };
 
@@ -79,17 +72,17 @@ const BazecorDevtools = () => {
         inputReports = collection.inputReports;
         outputReports = collection.outputReports;
         featureReports = collection.featureReports;
-        console.log("Input reports");
+        log.info("Input reports");
         for (const inputReport of inputReports) {
-          console.log(inputReport);
+          log.info(inputReport);
         }
-        console.log("Output reports");
+        log.info("Output reports");
         for (const outputReport of outputReports) {
-          console.log(outputReport);
+          log.info(outputReport);
         }
-        console.log("Feature reports");
+        log.info("Feature reports");
         for (const featureReport of featureReports) {
-          console.log(featureReport);
+          log.info(featureReport);
         }
       }
     }
@@ -97,40 +90,40 @@ const BazecorDevtools = () => {
 
   const onHIDHelp = async () => {
     try {
-      console.log("Sending help...");
+      log.info("Sending help...");
       await hid.sendData(
         "help\n",
         rxData => {
-          console.log("All data received");
-          console.log(rxData);
+          log.info("All data received");
+          log.info(rxData);
         },
         err => {
-          console.log(err);
+          log.info(err);
         },
       );
     } catch (err) {
-      console.log(err);
+      log.info(err);
     }
   };
 
   const onHIDGetKeymap = async () => {
     try {
-      console.log("Getting keymap...");
+      log.info("Getting keymap...");
       await hid.sendData(
         "keymap.custom\n",
         rxData => {
-          console.log("All data received");
-          console.log(rxData);
+          log.info("All data received");
+          log.info(rxData);
           const encodedRX = new TextEncoder().encode(rxData);
-          console.log(encodedRX);
+          log.info(encodedRX);
           setKeymap(rxData);
         },
         err => {
-          console.log(err);
+          log.info(err);
         },
       );
     } catch (err) {
-      console.log(err);
+      log.info(err);
     }
   };
 
@@ -141,94 +134,186 @@ const BazecorDevtools = () => {
       await hid.sendData(
         `keymap.custom ${hardcodedKeymap}\n`,
         rxData => {
-          console.log("All data received");
-          console.log(rxData);
+          log.info("All data received");
+          log.info(rxData);
         },
         err => {
-          console.log(err);
+          log.info(err);
         },
       );
     } catch (err) {
-      console.log(err);
+      log.info(err);
     }
   };
 
   const onHIDSetOriginalKeymap = async () => {
     try {
-      console.log("Setting original keymap...");
+      log.info("Setting original keymap...");
       await hid.sendData(
         `keymap.custom ${keymap}\n`,
         rxData => {
-          console.log("All data received");
-          console.log(rxData);
+          log.info("All data received");
+          log.info(rxData);
         },
         err => {
-          console.log(err);
+          log.info(err);
         },
       );
     } catch (err) {
-      console.log(err);
+      log.info(err);
     }
   };
 
   const onListSerialDevices = async () => {
     const response = await DeviceTools.list();
-    console.log("Listing Serial Devices", response);
+    log.info("Listing Serial Devices", response);
     dispatch({ type: "addDevicesList", payload: response });
   };
 
   const onMessageSend = async () => {
     const dev = state.currentDevice;
     const message = await dev.command("palette");
-    console.log("retrieving message help: ", message);
+    log.info("retrieving message help: ", message);
   };
 
   const onSerialConnect = async (selected: number) => {
     try {
-      console.log("going to connect to device: ");
+      log.info("going to connect to device: ");
       const response = await DeviceTools.connect(state.deviceList[selected]);
       dispatch({ type: "changeCurrent", payload: { selected, device: response } });
-      console.log("Connected!", state);
+      log.info("Connected!", state);
     } catch (err) {
-      console.log("error when connecting");
-      console.error(err);
+      log.info("error when connecting");
+      log.error(err);
     }
   };
 
   const onSerialDisconnect = async () => {
     try {
       const response = await state.currentDevice.close();
-      console.log("Disconnected!", response);
+      log.info("Disconnected!", response);
     } catch (err) {
-      console.log("error when disconnecting");
-      console.error(err);
+      log.info("error when disconnecting");
+      log.error(err);
     }
   };
 
+  const onClickToastTest = () => {
+    console.log("Test click");
+  };
+
+  const ToastMessageRegular = () => {
+    toast.success(
+      <ToastMessage
+        icon={<IconConnected />}
+        title="Testing success message"
+        content="This is the description field for the toast message. The primary purpose of the application is to allow one to configure their keyboard without having to compile or flash firmware."
+        onClickDismiss={onClickToastTest}
+        clickActionText="Dismiss"
+        onClickAction={onClickToastTest}
+        clickDismissText="Action"
+      />,
+      { autoClose: 100000, icon: "", closeOnClick: false },
+    );
+  };
+
+  const ToastMessageError = () => {
+    toast.error(
+      <ToastMessage
+        icon={<IconConnected />}
+        title="Testing error message"
+        content="This is the description field for the toast message. The primary purpose of the application is to allow one to configure their keyboard without having to compile or flash firmware."
+        onClickDismiss={onClickToastTest}
+        clickActionText="Dismiss"
+        onClickAction={onClickToastTest}
+        clickDismissText="Action"
+      />,
+      { autoClose: 100000, icon: "", closeOnClick: false },
+    );
+  };
+
+  const ToastMessageWarning = () => {
+    toast.warn(
+      <ToastMessage
+        icon={<IconConnected />}
+        title="Testing warning message"
+        content="This is the description field for the toast message. The primary purpose of the application is to allow one to configure their keyboard without having to compile or flash firmware."
+        onClickDismiss={onClickToastTest}
+        clickActionText="Dismiss"
+        onClickAction={onClickToastTest}
+        clickDismissText="Action"
+      />,
+      { autoClose: 100000, icon: "", closeOnClick: false },
+    );
+  };
+
+  const ToastMessageInfo = () => {
+    toast.info(
+      <ToastMessage
+        icon={<IconConnected />}
+        title="Testing warning message"
+        content="This is the description field for the toast message. The primary purpose of the application is to allow one to configure their keyboard without having to compile or flash firmware."
+        onClickDismiss={onClickToastTest}
+        clickActionText="Dismiss"
+        onClickAction={onClickToastTest}
+        clickDismissText="Action"
+      />,
+      { autoClose: 100000, icon: "", closeOnClick: false },
+    );
+  };
+
   return (
-    <Styles>
-      <Container fluid className="center-content">
+    <div className="h-full">
+      <div className="px-3 h-full">
         <PageHeader text="Bazecor dev tools" />
-        <Row className="button-container">
-          <Col className="my-4 col-3">
+        <div className="columns-3 gap-4">
+          <div className="w-full py-4">
             <h4>HID Testing Buttons</h4>
-            <RegularButton buttonText="List of HID Devices" styles="primary" onClick={onGetHIDDevices} />
-            <RegularButton buttonText="Connect by HID" styles="primary" onClick={onHIDConnect} />
-            <RegularButton buttonText="Open device" styles="primary" onClick={onHIDOpen} />
-            <RegularButton buttonText="List reports" styles="primary" onClick={onHIDReports} />
-            <RegularButton buttonText="Send help" styles="primary" onClick={onHIDHelp} />
-            <RegularButton buttonText="Get keymap" styles="primary" onClick={onHIDGetKeymap} />
-            <RegularButton buttonText="Harcoded keymap" styles="primary" onClick={onHIDHardcodedKeymap} />
-            <RegularButton buttonText="Restore keymap" styles="primary" onClick={onHIDSetOriginalKeymap} />
-          </Col>
-          <Col className="my-4 col-3">
+            <div className="flex gap-4">
+              <Button variant="primary" onClick={onGetHIDDevices}>
+                List of HID Devices
+              </Button>
+              <Button variant="primary" onClick={onHIDConnect}>
+                Connect by HID
+              </Button>
+              <Button variant="primary" onClick={onHIDOpen}>
+                Open device
+              </Button>
+              <Button variant="primary" onClick={onHIDReports}>
+                List reports
+              </Button>
+              <Button variant="primary" onClick={onHIDHelp}>
+                Send help
+              </Button>
+              <Button variant="primary" onClick={onHIDGetKeymap}>
+                Get keymap
+              </Button>
+              <Button variant="primary" onClick={onHIDHardcodedKeymap}>
+                Harcoded keymap
+              </Button>
+              <Button variant="primary" onClick={onHIDSetOriginalKeymap}>
+                Restore keymap
+              </Button>
+            </div>
+          </div>
+          <div className="w-full py-4">
             <h4>Serial Testing Buttons</h4>
-            <RegularButton buttonText="List of Serial Devices" styles="primary" onClick={onListSerialDevices} />
-            <RegularButton buttonText="Connect to Serial Device" styles="primary" onClick={() => onSerialConnect(0)} />
-            <RegularButton buttonText="Send message" styles="primary" onClick={onMessageSend} />
-            <RegularButton buttonText="Disconnect" styles="primary" onClick={onSerialDisconnect} />
-          </Col>
-          <Col className="col-3">
+            <div className="flex gap-4">
+              <Button variant="primary" onClick={onListSerialDevices}>
+                List of Serial Devices
+              </Button>
+              <Button variant="primary" onClick={() => onSerialConnect(0)}>
+                Connect to Serial Device
+              </Button>
+              <Button variant="primary" onClick={onMessageSend}>
+                Send message
+              </Button>
+              <Button variant="primary" onClick={onSerialDisconnect}>
+                Disconnect
+              </Button>
+            </div>
+          </div>
+          {/* <div className="w-full py-4">
             <Link to="/device-manager" className="list-link">
               <NavigationButton
                 selected={false}
@@ -238,10 +323,24 @@ const BazecorDevtools = () => {
                 disabled={false}
               />
             </Link>
-          </Col>
-        </Row>
-        <Row>
-          <Col md={6}>
+          </div> */}
+        </div>
+        <div className="flex w-full gap-2">
+          <Button variant="primary" size="sm" onClick={ToastMessageRegular}>
+            Test ToastMessage Success
+          </Button>
+          <Button variant="destructive" size="sm" onClick={ToastMessageError}>
+            Test ToastMessage Error
+          </Button>
+          <Button variant="warning" size="sm" onClick={ToastMessageWarning}>
+            Test ToastMessage Warning
+          </Button>
+          <Button variant="short" size="sm" onClick={ToastMessageInfo}>
+            Test ToastMessage info
+          </Button>
+        </div>
+        {/* <div className="columns-2 gap-4">
+          <div className="w-full py-4">
             <div>
               <h4>Connection data</h4>
               <ul>
@@ -250,8 +349,8 @@ const BazecorDevtools = () => {
                 ))}
               </ul>
             </div>
-          </Col>
-          <Col md={6}>
+          </div>
+          <div className="w-full py-4">
             <div>
               <h4>Connected device</h4>
               <ul>
@@ -270,10 +369,10 @@ const BazecorDevtools = () => {
                   : ""}
               </ul>
             </div>
-          </Col>
-        </Row>
-      </Container>
-    </Styles>
+          </div>
+        </div> */}
+      </div>
+    </div>
   );
 };
 

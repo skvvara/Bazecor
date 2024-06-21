@@ -27,10 +27,10 @@ import videoFirmwareUpdateDefyReleaseSRC from "@Assets/videos/release-key-defy.m
 import FirmwareNeuronHelp from "@Renderer/modules/Firmware/FirmwareNeuronHelp";
 import FirmwareDefyUpdatingStatus from "@Renderer/modules/Firmware/FirmwareDefyUpdatingStatus";
 
-import { IconCheckmarkSm } from "@Renderer/component/Icon";
-import { BadgeFirmware } from "@Renderer/component/Badge";
+import { IconCheckmark } from "@Renderer/components/atoms/icons";
+import BadgeFirmware from "@Renderer/component/Badge/BadgeFirmware";
 
-const Style = Styled.div`   
+const Style = Styled.div`
 .updatingRaise {
   margin:auto;
   align-self: center;
@@ -52,7 +52,7 @@ const Style = Styled.div`
 .processCanvas {
   position: relative;
   canvas {
-    max-width: 100%; 
+    max-width: 100%;
   }
   .status-icon {
     position: absolute;
@@ -106,6 +106,7 @@ interface FirmwareImageHelpProps {
   retriesLeft: number | undefined;
   retriesRight: number | undefined;
   retriesDefyWired: number | undefined;
+  retriesNeuron: number | undefined;
 }
 
 const FirmwareImageHelp: React.FC<FirmwareImageHelpProps> = ({
@@ -117,6 +118,7 @@ const FirmwareImageHelp: React.FC<FirmwareImageHelpProps> = ({
   retriesLeft,
   retriesRight,
   retriesDefyWired,
+  retriesNeuron,
 }) => {
   const videoIntro = useRef<HTMLVideoElement | null>(null);
   const videoIntroDefy = useRef<HTMLVideoElement | null>(null);
@@ -191,7 +193,7 @@ const FirmwareImageHelp: React.FC<FirmwareImageHelpProps> = ({
           <div className="videoWrapper">
             <div className="videoInner">
               <div className="firmwareCheck animWaiting" ref={checkSuccess}>
-                <IconCheckmarkSm />
+                <IconCheckmark size="sm" />
               </div>
               {deviceProduct === "Raise" ? (
                 <>
@@ -245,6 +247,7 @@ const FirmwareImageHelp: React.FC<FirmwareImageHelpProps> = ({
                   retriesLeft={retriesLeft}
                   retriesRight={retriesRight}
                   retriesDefyWired={retriesDefyWired}
+                  retriesNeuron={retriesNeuron}
                 />
               ) : (
                 <FirmwareNeuronHelp countdown={countdown} deviceProduct={deviceProduct} steps={steps} error={error} />

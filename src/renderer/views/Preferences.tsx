@@ -19,7 +19,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { ipcRenderer } from "electron";
 import { motion } from "framer-motion";
-
+import log from "electron-log/renderer";
 import { toast } from "react-toastify";
 import { i18n } from "@Renderer/i18n";
 import "react-toastify/dist/ReactToastify.css";
@@ -40,7 +40,7 @@ import {
 } from "@Renderer/modules/Settings";
 
 import { PageHeader } from "@Renderer/modules/PageHeader";
-import ToastMessage from "@Renderer/component/ToastMessage";
+import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import {
   IconBattery,
   IconFlashlight,
@@ -48,18 +48,18 @@ import {
   IconKeyboard,
   IconLogoDygma,
   IconSignal,
-  IconWrench,
   IconNeuronManager,
   IconChip,
-} from "@Renderer/component/Icon";
-import Version from "@Renderer/component/Version/Version";
+  IconWrench,
+} from "@Renderer/components/atoms/icons";
+import Version from "@Renderer/components/atoms/Version";
 
 import Store from "@Renderer/utils/Store";
 import { useDevice } from "@Renderer/DeviceContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@Renderer/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@Renderer/components/atoms/Tabs";
 import { KBDataPref, PrefState, PreferencesProps } from "@Renderer/types/preferences";
 import { WirelessInterface } from "@Renderer/types/wireless";
-import { LogoLoader } from "@Renderer/component/Loader";
+import LogoLoader from "@Renderer/components/atoms/loader/LogoLoader";
 import { Neuron } from "@Renderer/types/neurons";
 import { ApplicationPreferencesProvider, ApplicationPreferencesProvider as storage } from "../../common/store/AppSettings";
 import Backup from "../../api/backup";
@@ -398,7 +398,7 @@ const Preferences = (props: PreferencesProps) => {
     setKbData(initialKBData);
     await getNeuronData();
     if (state.currentDevice.device.info.keyboardType === "wireless" || state.currentDevice.device.wireless) {
-      console.log("setting wireless");
+      log.info("setting wireless");
       setWireless(initialWireless);
       await getWirelessPreferences();
     }
@@ -428,7 +428,7 @@ const Preferences = (props: PreferencesProps) => {
         icon: "",
       });
     } catch (error) {
-      console.error(error);
+      log.error(error);
       toast.error(
         <ToastMessage
           title={i18n.errors.preferenceFailOnSave}
@@ -482,7 +482,7 @@ const Preferences = (props: PreferencesProps) => {
         devTools: checked,
       }));
     } catch (error) {
-      console.error("error when opening devTools");
+      log.error("error when opening devTools");
     }
   };
 
@@ -563,7 +563,7 @@ const Preferences = (props: PreferencesProps) => {
     if (state.currentDevice) {
       try {
         const result = await state.currentDevice.command("wireless.rf.syncPairing");
-        console.log("command returned", result);
+        log.info("command returned", result);
         toast.success(<ToastMessage title={`${i18n.success.pairedSuccesfully}`} icon={<IconChip />} />, {
           position: "top-right",
           autoClose: 2000,
@@ -575,7 +575,7 @@ const Preferences = (props: PreferencesProps) => {
           icon: "",
         });
       } catch (error) {
-        console.error(error);
+        log.error(error);
       }
     }
   };
@@ -630,7 +630,7 @@ const Preferences = (props: PreferencesProps) => {
     );
 
   return (
-    <div className="px-2">
+    <div className="px-3">
       <PageHeader
         text={i18n.preferences.title}
         showSaving
@@ -650,7 +650,7 @@ const Preferences = (props: PreferencesProps) => {
           onValueChange={handleTabChange}
         >
           <div className="flex gap-3 w-full pb-4">
-            <TabsList className="sticky top-20 flex flex-col self-start gap-1 px-4 py-4 text-left min-w-64 rounded-xl bg-tabMenu dark:bg-tabMenuDark">
+            <TabsList className="sticky top-20 flex flex-col self-start gap-1 px-5 py-4 text-left min-w-64 rounded-xl bg-tabMenu dark:bg-tabMenuDark">
               {connected && state.currentDevice ? (
                 <>
                   <DeviceConnectedPreview

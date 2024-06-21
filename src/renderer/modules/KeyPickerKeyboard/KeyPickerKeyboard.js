@@ -1,17 +1,17 @@
-import React, { Component, Fragment } from "react";
+import React, { Component } from "react";
 import Styled from "styled-components";
 
 // Internal components
+import ListModifier from "@Renderer/components/molecules/ListModifiers/ListModifiers";
+import { IconKeysPress, IconKeysTapHold, IconKeysHold, IconKeys2Tap, IconKeys2TapHold } from "@Renderer/components/atoms/icons";
 import { KeymapDB } from "../../../api/keymap";
 import { Picker } from ".";
-import ListModifiers from "../../component/ListModifiers/ListModifiers";
 
 import ModPicker from "./ModPicker";
 import KeyVisualizer from "../KeyVisualizer";
 import DualFunctionPicker from "./DualFunctionPicker";
 
 // Icons
-import { IconKeysPress, IconKeysTapHold, IconKeysHold, IconKeys2Tap, IconKeys2TapHold } from "../../component/Icon";
 
 const Style = Styled.div`
 width: -webkit-fill-available;
@@ -153,11 +153,6 @@ width: -webkit-fill-available;
 
 }
 
-@media (max-height: 890px) {
-  .callOut {
-    max-width: 100%!important;
-  }
-}
 @media screen and (max-width: 1240px) {
   // .singleViewWrapper {
   //   grid-template-columns: 1fr;
@@ -372,14 +367,14 @@ class KeyPickerKeyboard extends Component {
   updateSelectorPosition = () => {
     const elPosition = this.layoutSelectorWatcherPosition.current.getBoundingClientRect();
     if (this.props.refreshLayoutSelectorPosition) {
-      this.props.refreshLayoutSelectorPosition(elPosition.left, elPosition.top);
+      this.props.refreshLayoutSelectorPosition(elPosition.left, elPosition.top - 102);
     }
   };
 
   parseKey(keycode) {
     if (keycode >= 53980 && keycode < 54108) {
       let superk = "";
-      console.log(this.props.superkeys[keycode - 53980]);
+      // console.log(this.props.superkeys[keycode - 53980]);
       superk = `SUPER\n${
         this.props.superkeys[keycode - 53980] ? this.props.superkeys[keycode - 53980].name : keycode - 53980 + 1
       }`;
@@ -387,7 +382,7 @@ class KeyPickerKeyboard extends Component {
     }
     if (keycode > 53851 && keycode < 53979) {
       let macroN = "";
-      console.log(this.props.macros[keycode - 53852]);
+      // console.log(this.props.macros[keycode - 53852]);
       macroN = `MACRO\n${this.props.macros[keycode - 53852] ? this.props.macros[keycode - 53852].name : keycode - 53852}`;
       return macroN;
     }
@@ -500,7 +495,7 @@ class KeyPickerKeyboard extends Component {
                         </div>
                         <div className="superKey">
                           {this.translateSuperKeyAction(superkeys[superk.indexOf(KC)].actions[index])}
-                          <ListModifiers keyCode={superkeys[superk.indexOf(KC)].actions[index]} />
+                          <ListModifier keyCode={superkeys[superk.indexOf(KC)].actions[index]} />
                         </div>
                       </div>
                     ))}

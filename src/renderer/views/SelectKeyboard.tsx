@@ -19,20 +19,20 @@ import React, { useState, useEffect, useCallback } from "react";
 import Styled from "styled-components";
 import { toast } from "react-toastify";
 import { ipcRenderer } from "electron";
-import Container from "react-bootstrap/Container";
 import { useDevice, DeviceTools } from "@Renderer/DeviceContext";
+import log from "electron-log/renderer";
 
 import { DeviceItemsType, SelectKeyboardProps } from "@Renderer/types/selectKeyboard";
 import { DeviceClass } from "@Renderer/types/devices";
 import { Neuron } from "@Renderer/types/neurons";
 
-import { Banner } from "@Renderer/component/Banner";
-import Title from "@Renderer/component/Title";
-import { IconArrowDownWithLine, IconBluetooth } from "@Renderer/component/Icon";
+import Banner from "@Renderer/components/atoms/Banner";
+import Heading from "@Renderer/components/atoms/Heading";
+import { IconArrowDownWithLine, IconBluetooth } from "@Renderer/components/atoms/icons";
 import { PageHeader } from "@Renderer/modules/PageHeader";
 import { i18n, refreshHardware } from "@Renderer/i18n";
 import NeuronConnection from "@Renderer/modules/NeuronConnection";
-import ToastMessage from "@Renderer/component/ToastMessage";
+import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import VirtualSelector from "@Renderer/modules/VirtualKeyboards/VirtualSelector";
 
 import Store from "../utils/Store";
@@ -183,8 +183,6 @@ height: 100vh;
     }
   }
 }
-
-
 `;
 
 const SelectKeyboard = (props: SelectKeyboardProps) => {
@@ -194,6 +192,7 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
   const [deviceItems, setDeviceItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [scanFoundDevices, setScanFoundDevices] = useState(false);
+  const [openDialogVirtualKB, setOpenDialogVirtualKB] = useState(false);
   const { onConnect, onDisconnect, connected, setLoading, restoredOk } = props;
 
   const loadingHandler = useCallback(
@@ -219,12 +218,12 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
     try {
       const list = (await DeviceTools.list()) as Device[];
       dispatch({ type: "addDevicesList", payload: list });
-      console.log("Devices Available:", list);
+      log.info("Devices Available:", list);
       loadingHandler(false);
       setDevices(list);
       return list;
     } catch (err) {
-      console.log("Error while finding keyboards", err);
+      log.info("Error while finding keyboards", err);
       loadingHandler(false);
       setDevices(undefined);
       return undefined;
@@ -234,7 +233,7 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
   const getDeviceItems: () => Array<DeviceItemsType> = useCallback(() => {
     const neurons = store.get("neurons") as Neuron[];
     const result = devices?.map((dev, index) => {
-      // console.log("checking device :", device);
+      // log.info("checking device :", device);
       const devName = dev.type === "hid" ? "Bluetooth" : dev.type;
       if (dev.device.bootloader)
         return {
@@ -260,7 +259,7 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
     const finder = () => findKeyboards();
 
     const disconnectedfinder = (event: unknown, DygmaDev: string) => {
-      console.log("Disconnected: ", DygmaDev);
+      log.info("Disconnected: ", DygmaDev);
       setSelectedPortIndex(0);
       findKeyboards();
       if (state.currentDevice) {
@@ -306,7 +305,7 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
     const isAccessible = await ipcRenderer.invoke("ask-for-accessibility", "");
 
     const keyboards = await findKeyboards();
-    console.log("found devices!!", keyboards, isAccessible);
+    log.info("found devices!!", keyboards, isAccessible);
     setScanFoundDevices(keyboards?.length > 0);
     setTimeout(() => {
       setScanFoundDevices(false);
@@ -314,16 +313,16 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
   };
 
   const selectPort = (event: string) => {
-    // console.log(event);
+    // log.info(event);
     setSelectedPortIndex(parseInt(event, 10));
   };
 
   const onKeyboardConnect = async () => {
     const { deviceList } = state;
-    console.log("trying to connect to:", deviceList, selectedPortIndex, deviceList[selectedPortIndex]);
+    // log.info("trying to connect to:", deviceList, selectedPortIndex, deviceList[selectedPortIndex]);
     try {
       const response = await DeviceTools.connect(deviceList[selectedPortIndex]);
-      console.log("GOING TO CONNECT TO!!", selectedPortIndex, response);
+      log.info("GOING TO CONNECT TO!!", selectedPortIndex, response.device);
       dispatch({ type: "changeCurrent", payload: { selected: selectedPortIndex, device: response } });
       await onConnect(response);
     } catch (err) {
@@ -338,7 +337,7 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
     setDeviceItems(newDevices);
     setSelectedPortIndex(0);
     await DeviceTools.disconnect(state.currentDevice);
-    dispatch({ type: "disconnect", payload: selectedPortIndex });
+    // dispatch({ type: "disconnect", payload: selectedPortIndex });
     await onDisconnect();
   };
 
@@ -375,7 +374,7 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
 
   return (
     <Styles>
-      <Container fluid className="keyboard-select center-content">
+      <div className="keyboard-select center-content px-3">
         <PageHeader text={i18n.keyboardSelect.title} />
         <div className="keyboardSelection-wrapper">
           <NeuronConnection
@@ -397,16 +396,23 @@ const SelectKeyboard = (props: SelectKeyboardProps) => {
           />
           <div className="card-alert" style={{ marginTop: "16px" }}>
             <Banner icon={<IconBluetooth />} variant="warning">
-              <Title text="Defy owners!" headingLevel={5} />
+              <Heading headingLevel={5} renderAs="h5">
+                Defy owners!
+              </Heading>
               <p
                 style={{ maxWidth: "610px" }}
                 dangerouslySetInnerHTML={{ __html: i18n.keyboardSelect.HIDReminderOfManuallyScan }}
               />
             </Banner>
           </div>
-          <VirtualSelector handleVirtualConnect={handleVirtualConnect} />
+          <VirtualSelector
+            handleVirtualConnect={handleVirtualConnect}
+            openDialogVirtualKB={openDialogVirtualKB}
+            setOpenDialogVirtualKB={setOpenDialogVirtualKB}
+            showButton
+          />
         </div>
-      </Container>
+      </div>
     </Styles>
   );
 };

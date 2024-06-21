@@ -1,5 +1,5 @@
-// eslint-disable-next-line import/no-cycle
-import { DygmaDeviceType } from "@Renderer/types/devices";
+import log from "electron-log/renderer";
+import { DygmaDeviceType } from "@Renderer/types/dygmaDefs";
 import { ExtHIDInterface } from "../comms/types";
 import Hardware from "../hardware";
 
@@ -41,9 +41,19 @@ class HID {
   static getDevices = async (): Promise<HIDDevice[]> => {
     const grantedDevices = await navigator.hid.getDevices();
     const filteredDevices = grantedDevices.filter(dev => dev.vendorId === DygmavendorID && dev.productId === DygmaproductID);
-    const foundDevices = [];
+    const foundDevices: ExtHIDInterface[] = [];
 
-    for (const device of filteredDevices) {
+    filteredDevices.forEach(device => {
+      let name;
+      let wireless;
+      let layout;
+      if (device.productName.includes("Raise2")) {
+        const [nme, wless, ly] = device.productName.split(" ")[0].split("-");
+        name = nme;
+        wireless = wless.includes("Wless");
+        layout = ly.includes("A") ? "ANSI" : "ISO";
+        log.info("Raise2 Data", name, wireless, layout);
+      }
       for (const Hdevice of Hardware.serial) {
         if (device.productId === Hdevice.usb.productId && device.vendorId === Hdevice.usb.vendorId) {
           const newHID: ExtHIDInterface = device;
@@ -51,14 +61,14 @@ class HID {
           foundDevices.push(newHID);
         }
       }
-    }
-    console.log("Usable found devices:", foundDevices);
+    });
+    log.info("Usable found devices:", foundDevices);
     return foundDevices;
   };
 
   connectDevice = async (index: number) => {
     // if we are already connected, we do not care and connect again
-    console.log("Trying to connect HID");
+    log.info("Trying to connect HID");
     if (this.connectedDevice) {
       throw new HIDError("Device already connected");
     }
@@ -84,7 +94,7 @@ class HID {
     ]);
     try {
       const devices = (await connectPromise) as HIDDevice[];
-      console.log("list of devices: ", devices);
+      log.info("list of devices: ", devices);
       if (devices.length > 0) {
         const connectedDevice = devices[index];
         this.connectedDevice = connectedDevice;
@@ -103,13 +113,13 @@ class HID {
     // } catch (e) {
     //   return false;
     // }
-    console.log("checking if device is connected: ", index, this.isConnected());
+    log.info("checking if device is connected: ", index, this.isConnected());
     return true;
   };
 
   isDeviceSupported = async (index: number) => {
     // if (!device.device.isDeviceSupported) {
-    console.log("checking if device is supported: ", index);
+    log.info("checking if device is supported: ", index);
     try {
       await this.connectDevice(index);
       await this.open();
@@ -120,11 +130,12 @@ class HID {
           chipid = rxData;
         },
         err => {
-          console.log(err);
+          log.info(err);
         },
       );
       this.serialNumber = chipid;
     } catch (error) {
+      log.warn("Error when checking support: ", error);
       return false;
     }
     return true;
@@ -134,15 +145,15 @@ class HID {
     try {
       await this.open();
     } catch (error) {
-      console.log("Not able to connect to device", error);
+      log.info("Not able to connect to device", error);
     }
   };
 
   open = async () => {
     if (this.isConnected() && !this.isOpen()) {
       await this.connectedDevice.open();
-      console.log("Device open");
-      console.log(this.connectedDevice);
+      log.info("Device open");
+      log.info(this.connectedDevice);
       return;
     }
     if (!this.isConnected()) {
