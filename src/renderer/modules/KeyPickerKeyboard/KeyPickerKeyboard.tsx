@@ -318,10 +318,11 @@ function KeyPickerKeyboard(props: Props) {
   };
 
   useEffect(() => {
-    const keynum = code != null ? code.modified + code.base : 0;
-    const keynumOld = prevProps.current.code != null ? prevProps.current.code.modified + prevProps.current.code.base : 0;
+    const distinctKeyIndex = prevProps.current.keyIndex !== keyIndex;
+    const keynum = code != null ? code.modified + code.base : -1;
+    const keynumOld = prevProps.current.code != null ? prevProps.current.code.modified + prevProps.current.code.base : -1;
 
-    if (keynumOld !== keynum) {
+    if (keynumOld !== keynum || distinctKeyIndex) {
       const localdisable = keyIndex === -1;
       // log.info("This kenumOld : ", keynumOld, keynum, localdisable, keyIndex);
       const lstate = { ...state };
