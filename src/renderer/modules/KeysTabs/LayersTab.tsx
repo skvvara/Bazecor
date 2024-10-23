@@ -37,6 +37,8 @@ const LayersTab = ({
 }: LayersTabProps) => {
   const [disableOneShotButtons, setDisableOneShotButtons] = useState<boolean>(false);
   const [openKeysPopover, setOpenKeysPopover] = useState<boolean>(false);
+  const [activeLayerNumber, setActiveLayerNumber] = useState<number>(findLayerType(keyCode.base + keyCode.modified)?.layer);
+  const [activeLayerTab, setActiveLayerTab] = useState<string>(findLayerType(keyCode.base + keyCode.modified)?.type);
   const [KC, setKC] = useState<number>(0);
 
   const layers = useMemo(
@@ -95,9 +97,6 @@ const LayersTab = ({
     keyNumInternal = 0;
   }
 
-  const [activeLayerNumber, setActiveLayerNumber] = useState<number>(0);
-  const [activeLayerTab, setActiveLayerTab] = useState<string>("");
-
   const handleLayer = (layerNumber: number) => {
     const layerItem = findLayerType(undefined, activeLayerTab, layerNumber);
     // console.log("Layer inside handle: ", layerItem);
@@ -114,6 +113,12 @@ const LayersTab = ({
     }
   };
 
+  const handleSetActiveLayerTab = (value: "layerLock" | "layerShift" | "layerShot" | "layerDual") => {
+    setActiveLayerTab(value);
+    const layerItem = findLayerType(undefined, value, activeLayerNumber);
+    onKeySelect(layerItem.keynum);
+  };
+
   const handleDual = (keyBase: number) => {
     const layerItem = findLayerType(undefined, activeLayerTab, activeLayerNumber);
     if (layerItem && layerItem.type === "layerDual") {
@@ -126,9 +131,6 @@ const LayersTab = ({
     const layerItem = findLayerType(undefined, activeLayerTab, activeLayerNumber);
     if (macros && activeTab === "macro" && layerItem && triggerDeleteLastItem) {
       triggerDeleteLastItem.timelineEditorForm.current.timelineEditorMacroTable.current.onDeleteRow(macros.actions.length - 1);
-    }
-    if (layerItem && layerItem.type !== "layerDual") {
-      onKeySelect(layerItem.keynum);
     }
     // eslint-disable-next-line
   }, [activeLayerTab]);
@@ -284,9 +286,9 @@ const LayersTab = ({
                     <div className="pl-0.5">Turn into layer lock</div>
                   </>
                 }
-                onClick={() => {
+                onClick={value => {
                   if (activeLayerNumber > 0) {
-                    setActiveLayerTab(previous => (previous === "layerLock" ? "layerShift" : "layerLock"));
+                    handleSetActiveLayerTab(value ? "layerLock" : "layerShift");
                   } else {
                     triggerToast();
                   }
@@ -314,9 +316,9 @@ const LayersTab = ({
                   <CustomRadioCheckBox
                     label={<div className="pl-0.5">Add a key on tap</div>}
                     disabled={activeLayerNumber >= 9}
-                    onClick={() => {
+                    onClick={value => {
                       if (activeLayerNumber > 0 && activeLayerNumber <= 8) {
-                        setActiveLayerTab(previous => (previous === "layerDual" ? "layerShift" : "layerDual"));
+                        handleSetActiveLayerTab(value ? "layerDual" : "layerShift");
                         setOpenKeysPopover(true);
                       } else if (activeLayerNumber >= 9) {
                         triggerToastOneShot();
@@ -351,9 +353,9 @@ const LayersTab = ({
                   <CustomRadioCheckBox
                     label={<div className="pl-0.5">Turn into OneShot layer</div>}
                     disabled={activeLayerNumber >= 9}
-                    onClick={() => {
+                    onClick={value => {
                       if (activeLayerNumber > 0 && activeLayerNumber <= 8) {
-                        setActiveLayerTab(previous => (previous === "layerShot" ? "layerShift" : "layerShot"));
+                        handleSetActiveLayerTab(value ? "layerShot" : "layerShift");
                         setDisableOneShotButtons(true);
                       } else if (activeLayerNumber >= 9) {
                         triggerToastOneShot();
