@@ -646,9 +646,9 @@ const English = {
       holdTimeoutTipDefault: "Default value: 250",
       minHold: "Add Key on Tap - Minimum Hold time",
       minHoldsub: "Low values will",
-      minHoldTip1: "Set the minimum interval between keypresses to be eligible to trigger the hold function.",
+      minHoldTip1: "Set the minimum time the key must be held before triggering the hold function",
       minHoldTip2:
-        "If the value is high, the hold function won't be triggered if you press this key shortly after pressing another key.",
+        "If you use home-row modifiers, we recommend setting this value to 80 or 90 ms to avoid accidentally triggering the hold function when rolling your keys.",
       minHoldTipDefault: "Default value: 50",
       minPrior: "Add Key on Tap - Minimum Prior Interval",
       minPriorsub: " - From 0 to 254 milliseconds",
