@@ -528,7 +528,7 @@ function KeyPickerKeyboard(props: Props) {
                     onMacrosPress={onKeySelect}
                     keyCode={code}
                     disabled={disable}
-                    actTab={actTab}
+                    actTab="editor"
                   />
                   {macros[KC - 53852] ? (
                     <div className="ball-container">
