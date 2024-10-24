@@ -1,21 +1,22 @@
-type RGB = {
-  r: number;
-  g: number;
-  b: number;
-};
+import { sanitizeIntensity } from "./sanitizeIntensity";
+import { RGB, RGBW } from "./types";
 
-export default function rgb2w(rgb: RGB) {
-  const Ri = rgb.r;
-  const Gi = rgb.g;
-  const Bi = rgb.b;
-  const minVal = Math.min(Ri, Math.min(Gi, Bi));
+/**
+ * Convert a RGB color to RGBW
+ * @param {RGB} color - A RGB color
+ * @returns {RGBW} - The color converted to RGBW
+ */
+export function rgb2w(color: RGB): RGBW {
+  const sanitizedR = sanitizeIntensity(color.r);
+  const sanitizedG = sanitizeIntensity(color.g);
+  const sanitizedB = sanitizeIntensity(color.b);
 
-  const w = minVal;
-  const b = Bi - minVal;
-  const r = Ri - minVal;
-  const g = Gi - minVal;
+  const minVal = Math.min(sanitizedR, Math.min(sanitizedG, sanitizedB));
 
-  const result = { r, g, b, w };
-
-  return result;
+  return {
+    r: sanitizedR - minVal,
+    b: sanitizedB - minVal,
+    g: sanitizedG - minVal,
+    w: minVal,
+  };
 }

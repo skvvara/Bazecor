@@ -1,16 +1,20 @@
-type RGBW = {
-  r: number;
-  g: number;
-  b: number;
-  w: number;
-};
+import { sanitizeIntensity } from "./sanitizeIntensity";
+import { RGB, RGBW } from "./types";
 
-export default function rgbw2b(rgbw: RGBW) {
-  const r = rgbw.w + rgbw.r > 255 ? 255 : rgbw.w + rgbw.r;
-  const g = rgbw.w + rgbw.g > 255 ? 255 : rgbw.w + rgbw.g;
-  const b = rgbw.w + rgbw.b > 255 ? 255 : rgbw.w + rgbw.b;
+/**
+ * Convert a RGBW color to RGB
+ * @param {RGBW} color - A RGBW color
+ * @returns {RGB} - The color converted to RGB
+ */
+export function rgbw2b(color: RGBW): RGB {
+  const sanitizedR = sanitizeIntensity(color.r);
+  const sanitizedG = sanitizeIntensity(color.g);
+  const sanitizedB = sanitizeIntensity(color.b);
+  const sanitizedW = sanitizeIntensity(color.w);
 
-  const result = `rgb(${r}, ${g}, ${b})`;
+  const r = sanitizeIntensity(sanitizedW + sanitizedR);
+  const g = sanitizeIntensity(sanitizedW + sanitizedG);
+  const b = sanitizeIntensity(sanitizedW + sanitizedB);
 
-  return { r, g, b, rgb: result };
+  return { r, g, b, rgb: `rgb(${r}, ${g}, ${b})` };
 }
