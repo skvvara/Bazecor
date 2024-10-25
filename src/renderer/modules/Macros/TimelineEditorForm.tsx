@@ -3,6 +3,7 @@ import Styled from "styled-components";
 import { IconArrowChevronLeft, IconArrowChevronRight } from "@Renderer/components/atoms/icons";
 import { i18n } from "@Renderer/i18n";
 
+import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
 import TimelineEditorMacroTable from "./TimelineEditorMacroTable";
 
 const Styles = Styled.div`
@@ -84,17 +85,16 @@ display: flex;
 `;
 
 interface Props {
-  macro: any;
-  macros: any;
-  updateActions: any;
-  keymapDB: any;
-  componentWidth: any;
-  updateScroll: any;
-  scrollPos: any;
+  macro: MacrosType;
+  macros: MacrosType[];
+  updateActions: (actions: MacroActionsType[]) => void;
+  componentWidth: number;
+  updateScroll: (scroll: number) => void;
+  scrollPos: number;
 }
 
 const MacroForm = (props: Props) => {
-  const { macro, macros, updateActions, keymapDB, componentWidth, updateScroll, scrollPos } = props;
+  const { macro, macros, updateActions, componentWidth, updateScroll, scrollPos } = props;
 
   const wheelPosStart = () => {
     const scrollContainer = document.getElementById("hwTracker")?.firstChild as HTMLElement;
@@ -119,11 +119,9 @@ const MacroForm = (props: Props) => {
         <IconArrowChevronLeft />{" "}
       </button>
       <TimelineEditorMacroTable
-        key={JSON.stringify(macro.actions)}
         macro={macro}
         macros={macros}
         updateActions={updateActions}
-        keymapDB={keymapDB}
         componentWidth={componentWidth}
         updateScroll={updateScroll}
         scrollPos={scrollPos}

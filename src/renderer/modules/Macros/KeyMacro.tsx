@@ -15,6 +15,7 @@ import {
 import Heading from "@Renderer/components/atoms/Heading";
 import { Button } from "@Renderer/components/atoms/Button";
 import OSKey from "@Renderer/components/molecules/KeyTags/OSKey";
+import { RowsRepresentation } from "@Renderer/types/macros";
 
 interface Modifier {
   id: number;
@@ -25,17 +26,10 @@ interface ActionType {
   name: string;
 }
 
-interface Item {
-  id: number;
-  keyCode: number;
-  action: number;
-  symbol: string | JSX.Element;
-}
-
 interface KeyMacroProps {
   provided: any;
   snapshot: any;
-  item: Item;
+  item: RowsRepresentation;
   modifiers: Modifier[];
   addModifier: (id: number, index: number) => void;
   actionTypes: Record<number, ActionType>;
@@ -71,7 +65,7 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
     [theme.styles.macroKey],
   );
 
-  const isModifier = useMemo(() => item.keyCode > 223 && item.keyCode < 232 && item.action !== 2, [item]);
+  const isModifier = useMemo(() => (item.keyCode as number) > 223 && (item.keyCode as number) < 232 && item.type !== 2, [item]);
 
   return (
     <div>
@@ -83,7 +77,7 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
       >
         <div
           className={`keyMacroWrapper relative flex flex-wrap flex-col p-0 !m-0 after:absolute after:content-[' '] after:w-full after:h-[1px] after:top-[71px] after:left-0 after:bg-white/80 after:dark:bg-[#2B2C43] keyCode-${item.keyCode} ${isModifier ? "isModifier" : ""} ${
-            item.action === 1 || item.action === 2 ? "isDelay" : ""
+            item.type === 1 || item.type === 2 ? "isDelay" : ""
           } item-id-${item.id}`}
         >
           <div className="keyMacro">
@@ -112,10 +106,10 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                           renderAs="h4"
                           className="m-0 uppercase !text-ssm text-gray-300 dark:text-gray-500"
                         >
-                          {item.action === 1 || item.action === 2 ? i18n.editor.macros.delay : i18n.general.key}
+                          {item.type === 1 || item.type === 2 ? i18n.editor.macros.delay : i18n.general.key}
                         </Heading>
                         <p className="keyValue text-2xl">
-                          {item.symbol} {item.action === 1 || item.action === 2 ? <small>ms</small> : ""}
+                          {item.symbol} {item.type === 1 || item.type === 2 ? <small>ms</small> : ""}
                         </p>
                       </div>
                       <div className="keyFunctions py-[12px] px-[12px] bg-gray-50/40 dark:bg-gray-800 border-t-[1px] border-gray-50 dark:border-gray-700">
@@ -131,8 +125,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             iconDirection="left"
                             variant="config"
                             icon={<IconPress size="sm" />}
-                            selected={actionTypes[item.action].name === "Key Press"}
-                            disabled={!!(item.action === 1 || item.action === 2)}
+                            selected={actionTypes[item.type].name === "Key Press"}
+                            disabled={!!(item.type === 1 || item.type === 2)}
                             onClick={() => updateAction(item.id, 6)}
                             size="sm"
                           >
@@ -142,8 +136,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             iconDirection="left"
                             variant="config"
                             icon={<IconRelease size="sm" />}
-                            selected={actionTypes[item.action].name === "Key Release"}
-                            disabled={!!(item.action === 1 || item.action === 2)}
+                            selected={actionTypes[item.type].name === "Key Release"}
+                            disabled={!!(item.type === 1 || item.type === 2)}
                             onClick={() => updateAction(item.id, 7)}
                             size="sm"
                           >
@@ -153,8 +147,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             iconDirection="left"
                             variant="config"
                             icon={<IconPressAndRelease size="sm" />}
-                            selected={actionTypes[item.action].name === "Key Press & Rel."}
-                            disabled={!!(item.action === 1 || item.action === 2)}
+                            selected={actionTypes[item.type].name === "Key Press & Rel."}
+                            disabled={!!(item.type === 1 || item.type === 2)}
                             onClick={() => updateAction(item.id, 8)}
                             size="sm"
                           >
@@ -224,10 +218,10 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                 {item.symbol}
               </p>
               <div className="actionicon">
-                {actionTypes[item.action].name === "Key Press" ? <IconPress size="sm" /> : ""}
-                {actionTypes[item.action].name === "Key Release" ? <IconRelease size="sm" /> : ""}
-                {actionTypes[item.action].name === "Key Press & Rel." ? <IconPressAndRelease size="sm" /> : ""}
-                {actionTypes[item.action].name === "Delay" ? <IconStopWatch size="sm" /> : ""}
+                {actionTypes[item.type].name === "Key Press" ? <IconPress size="sm" /> : ""}
+                {actionTypes[item.type].name === "Key Release" ? <IconRelease size="sm" /> : ""}
+                {actionTypes[item.type].name === "Key Press & Rel." ? <IconPressAndRelease size="sm" /> : ""}
+                {actionTypes[item.type].name === "Delay" ? <IconStopWatch size="sm" /> : ""}
               </div>
             </div>
           </div>

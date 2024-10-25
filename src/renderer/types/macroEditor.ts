@@ -14,7 +14,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { LanguageType } from "src/api/keymap/types";
+import { LanguageType } from "../../../api/keymap/types";
 import { KeyType, KeymapType } from "./layout";
 import { MacroActionsType, MacrosType } from "./macros";
 import { Neuron } from "./neurons";
