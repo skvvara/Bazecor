@@ -49,7 +49,7 @@ const Styles = Styled.div`
     margin: auto 2px;
     transition: 300ms height;
     transition-timing-function: cubic-bezier(.95,0,.17,1);
-    
+
 }
 &.isRecording {
     .marquee .marqueeInner {
@@ -75,10 +75,10 @@ const Styles = Styled.div`
 }
 `;
 
-function AnimatedTimelineRecording({ isRecording }) {
+function AnimatedTimelineRecording({ isRecording }: { isRecording: boolean }) {
   let generateBars = "";
-  for (let i = 1; i < 30; i++) {
-    for (let i = 1; i < 5; i++) {
+  for (let i = 1; i < 30; i += 1) {
+    for (let j = 1; j < 5; j += 1) {
       generateBars = `${generateBars}<div class="recBar"></div>`;
     }
     generateBars = `${generateBars}<div class="recBar recBarSeparator"></div>`;

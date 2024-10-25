@@ -242,6 +242,7 @@ const English = {
       macroTab: {
         callout: "That's right! You can add macros inside macros! 🔥",
         label: "Select macro",
+        noMacro: "No Macro",
       },
       memoryUsage: {
         title: "Memory Usage",

@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import Styled from "styled-components";
 import { IconArrowChevronLeft, IconArrowChevronRight } from "@Renderer/components/atoms/icons";
 import { i18n } from "@Renderer/i18n";
@@ -83,54 +83,55 @@ position: relative;
 display: flex;
 `;
 
-class MacroForm extends Component {
-  constructor(props) {
-    super(props);
-    this.timelineEditorMacroTable = React.createRef();
-  }
+interface Props {
+  macro: any;
+  macros: any;
+  updateActions: any;
+  keymapDB: any;
+  componentWidth: any;
+  updateScroll: any;
+  scrollPos: any;
+}
 
-  wheelPosStart = () => {
-    const { updateScroll } = this.props;
-    const scrollContainer = document.getElementById("hwTracker")?.firstChild;
+const MacroForm = (props: Props) => {
+  const { macro, macros, updateActions, keymapDB, componentWidth, updateScroll, scrollPos } = props;
+
+  const wheelPosStart = () => {
+    const scrollContainer = document.getElementById("hwTracker")?.firstChild as HTMLElement;
     if (scrollContainer?.scrollLeft !== undefined) {
       scrollContainer.scrollLeft = 0;
       updateScroll(0);
     }
   };
 
-  wheelPosEnd = () => {
-    const { updateScroll } = this.props;
-    const scrollContainer = document.getElementById("hwTracker")?.firstChild;
+  const wheelPosEnd = () => {
+    const scrollContainer = document.getElementById("hwTracker")?.firstChild as HTMLElement;
     // console.log("checking end pos of scroll", scrollContainer, scrollContainer.scrollWidth);
     if (scrollContainer?.scrollWidth !== undefined) updateScroll(scrollContainer.scrollWidth);
   };
 
-  render() {
-    const { macro, macros, updateActions, keymapDB, componentWidth, updateScroll, scrollPos } = this.props;
-    if (macro === undefined || macro.actions === undefined) {
-      return <div>{i18n.editor.macros.macroTab.noMacro}</div>;
-    }
-    return (
-      <Styles>
-        <div className="goStart" onClick={this.wheelPosStart}>
-          <IconArrowChevronLeft />
-        </div>
-        <TimelineEditorMacroTable
-          key={JSON.stringify(macro.actions)}
-          macro={macro}
-          macros={macros}
-          updateActions={updateActions}
-          keymapDB={keymapDB}
-          componentWidth={componentWidth}
-          updateScroll={updateScroll}
-          scrollPos={scrollPos}
-          ref={this.timelineEditorMacroTable}
-        />
-        <div className="goEnd" onClick={this.wheelPosEnd}>
-          <IconArrowChevronRight />
-        </div>
-      </Styles>
-    );
+  if (macro === undefined || macro.actions === undefined) {
+    return <div>{i18n.editor.macros.macroTab.noMacro}</div>;
   }
-}
+  return (
+    <Styles>
+      <button type="button" className="goStart" onClick={wheelPosStart}>
+        <IconArrowChevronLeft />{" "}
+      </button>
+      <TimelineEditorMacroTable
+        key={JSON.stringify(macro.actions)}
+        macro={macro}
+        macros={macros}
+        updateActions={updateActions}
+        keymapDB={keymapDB}
+        componentWidth={componentWidth}
+        updateScroll={updateScroll}
+        scrollPos={scrollPos}
+      />
+      <button type="button" className="goEnd" onClick={wheelPosEnd}>
+        <IconArrowChevronRight />{" "}
+      </button>
+    </Styles>
+  );
+};
 export default MacroForm;
