@@ -417,7 +417,7 @@ class KeyPicker extends Component<Props> {
         onKeyPress={this.onKeyPress}
         centered={key.centered}
         content={key.content}
-        iconpresent={key.icon}
+        iconpresent={!!key.icon}
         icon={
           <IconColor
             color={
