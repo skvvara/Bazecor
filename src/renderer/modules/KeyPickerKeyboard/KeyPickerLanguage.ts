@@ -100,7 +100,7 @@ const languages = {
   "it-XX-iso105": itXXiso105,
 };
 
-type LangOptions =
+export type LangOptions =
   | "en-US"
   | "en-GB"
   | "es-ES"

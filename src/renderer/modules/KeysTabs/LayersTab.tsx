@@ -1,8 +1,8 @@
+/* eslint-disable import/no-cycle */
 import React, { useMemo, useState, useEffect, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "react-toastify";
 
-import Callout from "@Renderer/components/molecules/Callout/Callout";
 import { Button } from "@Renderer/components/atoms/Button";
 import Heading from "@Renderer/components/atoms/Heading";
 import findLayerType from "@Renderer/utils/findLayerType";
@@ -11,52 +11,34 @@ import { Popover, PopoverContent, PopoverTrigger } from "@Renderer/components/at
 import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import CustomRadioCheckBox from "@Renderer/components/molecules/Form/CustomRadioCheckBox";
 import { Separator } from "@Renderer/components/atoms/Separator";
+import { SegmentedKeyType } from "@Renderer/types/layout";
 import { KeymapDB } from "../../../api/keymap";
-// eslint-disable-next-line
 import { Picker } from "../KeyPickerKeyboard";
 
 interface LayersTabProps {
-  keyCode: any;
-  isStandardView: boolean;
-  disableMods: boolean;
+  keyCode: SegmentedKeyType;
+
   onKeySelect: (value: number) => void;
   disabled?: boolean;
-  actions?: any;
-  action?: any;
-  baseCode?: any;
-  modCode?: any;
-  activeTab?: any;
-  selectedlanguage?: any;
-  // selKeys?: any;
-  superkeys?: any;
-  kbtype?: any;
+  activeTab?: string;
+  selectedlanguage?: string;
   macros?: any;
-  isWireless?: any;
   triggerDeleteLastItem?: any;
 }
 
 const LayersTab = ({
   keyCode,
-  isStandardView,
-  disableMods,
   onKeySelect,
   disabled,
-  actions,
-  action,
-  baseCode,
-  modCode,
   activeTab,
   selectedlanguage,
-  // selKeys,
-  superkeys,
-  kbtype,
   macros,
-  isWireless,
   triggerDeleteLastItem,
 }: LayersTabProps) => {
-  // const [disableOneShot, setDisableOneShot] = useState<boolean>(false);
   const [disableOneShotButtons, setDisableOneShotButtons] = useState<boolean>(false);
   const [openKeysPopover, setOpenKeysPopover] = useState<boolean>(false);
+  const [activeLayerNumber, setActiveLayerNumber] = useState<number>(findLayerType(keyCode.base + keyCode.modified)?.layer);
+  const [activeLayerTab, setActiveLayerTab] = useState<string>(findLayerType(keyCode.base + keyCode.modified)?.type);
   const [KC, setKC] = useState<number>(0);
 
   const layers = useMemo(
@@ -115,15 +97,6 @@ const LayersTab = ({
     keyNumInternal = 0;
   }
 
-  // const layerInfo = findLayerType(keyNumInternal);
-
-  const [activeLayerNumber, setActiveLayerNumber] = useState<number>(0);
-  const [activeLayerTab, setActiveLayerTab] = useState<string>("");
-
-  // console.log("activeLayerTab : ", activeLayerTab);
-  // console.log("disableMods: ", disableMods);
-  // console.log("KeyCode modified: ", keyCode.modified);
-
   const handleLayer = (layerNumber: number) => {
     const layerItem = findLayerType(undefined, activeLayerTab, layerNumber);
     // console.log("Layer inside handle: ", layerItem);
@@ -140,6 +113,12 @@ const LayersTab = ({
     }
   };
 
+  const handleSetActiveLayerTab = (value: "layerLock" | "layerShift" | "layerShot" | "layerDual") => {
+    setActiveLayerTab(value);
+    const layerItem = findLayerType(undefined, value, activeLayerNumber);
+    onKeySelect(layerItem.keynum);
+  };
+
   const handleDual = (keyBase: number) => {
     const layerItem = findLayerType(undefined, activeLayerTab, activeLayerNumber);
     if (layerItem && layerItem.type === "layerDual") {
@@ -150,17 +129,8 @@ const LayersTab = ({
 
   useEffect(() => {
     const layerItem = findLayerType(undefined, activeLayerTab, activeLayerNumber);
-
-    // if (activeLayerNumber > 8) {
-    //   setDisableOneShot(true);
-    // } else {
-    //   setDisableOneShot(false);
-    // }
     if (macros && activeTab === "macro" && layerItem && triggerDeleteLastItem) {
       triggerDeleteLastItem.timelineEditorForm.current.timelineEditorMacroTable.current.onDeleteRow(macros.actions.length - 1);
-    }
-    if (layerItem && layerItem.type !== "layerDual") {
-      onKeySelect(layerItem.keynum);
     }
     // eslint-disable-next-line
   }, [activeLayerTab]);
@@ -176,7 +146,7 @@ const LayersTab = ({
         setDisableOneShotButtons(false);
       }
     } else {
-      setActiveLayerTab(disableMods ? "layerLock" : "layerShift");
+      setActiveLayerTab("layerShift");
       setActiveLayerNumber(0);
     }
     // eslint-disable-next-line
@@ -193,28 +163,8 @@ const LayersTab = ({
   );
 
   return (
-    <div
-      className={`flex flex-wrap h-[inherit] ${isStandardView ? "standardViewTab" : ""} ${disabled ? "opacity-50 pointer-events-none" : ""} tabsLayer`}
-    >
+    <div className={`flex flex-wrap h-[inherit] ${disabled ? "opacity-50 pointer-events-none" : ""} tabsLayer`}>
       <div className="tabContentWrapper w-full">
-        {/* <Heading headingLevel={isStandardView ? 3 : 4} renderAs={isStandardView ? "h3" : "h4"}>
-            {i18n.editor.layers.title}
-          </Heading> */}
-        {isStandardView ? (
-          <Callout
-            size="sm"
-            className="mt-0 mb-4"
-            hasVideo
-            media="wsx0OtkKXXg"
-            videoTitle="This 60% keyboard can have +2500 keys!"
-            videoDuration="6:50"
-          >
-            <p>
-              Easily access your layers. Select the layer you want to shift to and enhance its functionality by turning it into a
-              Layer Lock, choosing a key on tap, or activating a OneShot Layer.
-            </p>
-          </Callout>
-        ) : null}
         <div className="w-full flex flex-col gap-2">
           <div className="w-full flex flex-row flex-wrap gap-6">
             <div className="flex flex-col gap-2">
@@ -308,21 +258,13 @@ const LayersTab = ({
                               </span>
                             </Heading>
                             <Picker
-                              actions={actions}
-                              action={action}
                               disable={disabled}
-                              baseCode={baseCode}
-                              modCode={modCode}
+                              baseCode={keyCode.base}
+                              modCode={keyCode.modified}
                               onKeySelect={handleDual}
-                              // activeTab={activeTab}
-                              activeTab="dualFunction"
                               selectedlanguage={selectedlanguage}
-                              // selKeys={selKeys}
-                              superkeys={superkeys}
-                              kbtype={kbtype}
-                              keyCode={keyCode}
-                              macros={macros}
-                              isWireless={isWireless}
+                              disableMods
+                              disableMove={false}
                             />
                           </div>
                         </div>
@@ -344,12 +286,9 @@ const LayersTab = ({
                     <div className="pl-0.5">Turn into layer lock</div>
                   </>
                 }
-                onClick={() => {
-                  if (activeTab === "super" && disableMods) {
-                    return;
-                  }
+                onClick={value => {
                   if (activeLayerNumber > 0) {
-                    setActiveLayerTab(previous => (previous === "layerLock" ? "layerShift" : "layerLock"));
+                    handleSetActiveLayerTab(value ? "layerLock" : "layerShift");
                   } else {
                     triggerToast();
                   }
@@ -377,9 +316,9 @@ const LayersTab = ({
                   <CustomRadioCheckBox
                     label={<div className="pl-0.5">Add a key on tap</div>}
                     disabled={activeLayerNumber >= 9}
-                    onClick={() => {
+                    onClick={value => {
                       if (activeLayerNumber > 0 && activeLayerNumber <= 8) {
-                        setActiveLayerTab(previous => (previous === "layerDual" ? "layerShift" : "layerDual"));
+                        handleSetActiveLayerTab(value ? "layerDual" : "layerShift");
                         setOpenKeysPopover(true);
                       } else if (activeLayerNumber >= 9) {
                         triggerToastOneShot();
@@ -414,9 +353,9 @@ const LayersTab = ({
                   <CustomRadioCheckBox
                     label={<div className="pl-0.5">Turn into OneShot layer</div>}
                     disabled={activeLayerNumber >= 9}
-                    onClick={() => {
+                    onClick={value => {
                       if (activeLayerNumber > 0 && activeLayerNumber <= 8) {
-                        setActiveLayerTab(previous => (previous === "layerShot" ? "layerShift" : "layerShot"));
+                        handleSetActiveLayerTab(value ? "layerShot" : "layerShift");
                         setDisableOneShotButtons(true);
                       } else if (activeLayerNumber >= 9) {
                         triggerToastOneShot();
