@@ -143,6 +143,7 @@ const RecordMacroModal = (props: Props) => {
   };
 
   const undoRecording = () => {
+    setRecLength(recLength + 1);
     recording.current = [];
   };
 
@@ -158,7 +159,6 @@ const RecordMacroModal = (props: Props) => {
 
   const toggleShow = () => {
     recording.current = [];
-
     setShowModal(!showModal);
   };
 
