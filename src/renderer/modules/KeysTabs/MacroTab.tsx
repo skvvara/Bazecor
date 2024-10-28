@@ -69,7 +69,7 @@ const MacroTab = (props: MacroTabProps) => {
   }, [keyCode, oldKC]);
 
   return (
-    <div className={`h-[inherit] tabsMacro ${disabled ? "opacity-50 pointer-events-none" : ""}`}>
+    <div className={`h-[inherit] tabsMacro ${disabled ? "opacity-50" : ""}`}>
       <div className="h-fit flex flex-wrap flex-initial">
         <div className="w-full py-4">
           <Heading headingLevel={4} renderAs="h4" className="!mt-0 !mb-1 !text-base">

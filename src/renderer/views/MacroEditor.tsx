@@ -741,7 +741,6 @@ function MacroEditor(props: MacroEditorProps) {
     usedMemory,
     totalMemory,
     showDeleteModal,
-    kbtype,
     currentLanguageLayout,
     loading,
     scrollPos,
@@ -863,7 +862,6 @@ function MacroEditor(props: MacroEditorProps) {
               selected={selectedMacro}
               addToActions={addToActions}
               selectedlanguage={currentLanguageLayout}
-              kbtype={kbtype}
               triggerDeleteLastItem={timelineRef.current}
             />
           </>

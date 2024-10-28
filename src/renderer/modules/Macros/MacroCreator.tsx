@@ -45,7 +45,7 @@ import MouseTab from "../KeysTabs/MouseTab";
 import { KeymapDB } from "../../../api/keymap";
 import { MacroActionsType, MacrosType, RowsRepresentation } from "@Renderer/types/macros";
 import { LanguageType } from "../../../api/keymap/types";
-import { addModToKey, assignColor, createConversion, modifiers, revertConversion } from "./utils";
+import { addModToKey, assignColor, createConversion, revertConversion } from "./utils";
 
 const Styles = Styled.div`
 .card {
@@ -180,12 +180,11 @@ interface Props {
   selected: number;
   addToActions: (actions: MacroActionsType[]) => void;
   selectedlanguage: LanguageType;
-  kbtype: string;
   triggerDeleteLastItem: any;
 }
 
 const MacroCreator = (props: Props) => {
-  const { macro, macros, selected, addToActions, selectedlanguage, kbtype, triggerDeleteLastItem } = props;
+  const { macro, macros, selected, addToActions, selectedlanguage, triggerDeleteLastItem } = props;
   const prevProps = useRef<Props>(props);
   const [keymapDB] = useState(new KeymapDB());
   const [addText, setAddText] = useState("");
@@ -207,6 +206,17 @@ const MacroCreator = (props: Props) => {
       log.warn("Error Happened", e);
     }
   }, [macro.actions, macros, props]);
+
+  const updateRows = (rows: RowsRepresentation[]) => {
+    log.info("Macro creator updaterows", rows);
+    const newRows = rows.map((item, index) => {
+      const aux = item;
+      aux.id = index;
+      return aux;
+    });
+    setRows(newRows);
+    addToActions(revertConversion(rows));
+  };
 
   const onAddText = () => {
     log.info("MacroCreator onAddText", addText);
@@ -299,17 +309,6 @@ const MacroCreator = (props: Props) => {
       })),
     );
     updateRows(createConversion(newRows, macros));
-  };
-
-  const updateRows = (rows: RowsRepresentation[]) => {
-    log.info("Macro creator updaterows", rows);
-    const newRows = rows.map((item, index) => {
-      const aux = item;
-      aux.id = index;
-      return aux;
-    });
-    setRows(newRows);
-    addToActions(revertConversion(rows));
   };
 
   const onAddSymbol = (keyCode: number, type: number) => {
@@ -414,7 +413,7 @@ const MacroCreator = (props: Props) => {
             <Heading headingLevel={3} renderAs="h3">
               {i18n.general.actions}
             </Heading>
-            <RecordMacroModal onAddRecorded={onAddRecorded} keymapDB={keymapDB} />
+            <RecordMacroModal onAddRecorded={onAddRecorded} />
             <TabsList className="flex flex-col gap-1">
               <TabsTrigger value="tabText" variant="tab">
                 <IconLetterColor />
