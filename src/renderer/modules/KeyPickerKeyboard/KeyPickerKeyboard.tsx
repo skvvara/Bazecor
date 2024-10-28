@@ -124,6 +124,7 @@ width: -webkit-fill-available;
 }
 .ball-inner {
   display: ruby-text;
+  text-align: left;
   padding: 8px;
   overflow-y: auto;
   border: 1px solid ${({ theme }) => theme.styles.standardView.superkeys.key.border};
