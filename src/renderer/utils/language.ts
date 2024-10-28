@@ -1,4 +1,4 @@
-import { LanguageType } from "../../../api/keymap/types";
+import { LanguageType } from "../../api/keymap/types";
 
 // Do NOT modify this object - languages available in 1.3.8 and before
 const legacyLanguage: { [key: string]: string } = {
