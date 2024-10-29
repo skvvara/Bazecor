@@ -741,7 +741,6 @@ function MacroEditor(props: MacroEditorProps) {
     usedMemory,
     totalMemory,
     showDeleteModal,
-    kbtype,
     currentLanguageLayout,
     loading,
     scrollPos,
@@ -853,21 +852,16 @@ function MacroEditor(props: MacroEditorProps) {
               macro={macros[selectedMacro]}
               macros={macros}
               clearMacro={clearMacro}
-              keymapDB={keymapDB}
               updateActions={updateActions}
               updateScroll={updateScroll}
               scrollPos={scrollPos}
-              ref={timelineRef}
             />
             <MacroCreator
               macro={{ ...macros[selectedMacro] }}
               macros={macros}
               selected={selectedMacro}
               addToActions={addToActions}
-              changeSelected={changeSelected}
-              keymapDB={keymapDB}
               selectedlanguage={currentLanguageLayout}
-              kbtype={kbtype}
               triggerDeleteLastItem={timelineRef.current}
             />
           </>

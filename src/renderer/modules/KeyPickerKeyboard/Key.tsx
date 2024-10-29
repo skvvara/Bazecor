@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable eqeqeq */
 /* eslint-disable react/jsx-filename-extension */
 import React from "react";
@@ -341,20 +342,22 @@ const ksl: KslType = {
   },
 };
 
-interface KeyProps {
+export interface KeyProps {
   id: number;
-  keyCode: SegmentedKeyType;
+  keyCode?: SegmentedKeyType;
   x: number;
   y: number;
-  selected: boolean;
-  clicked: () => void;
-  onKeyPress: (keyCode: number) => void;
+  selected?: boolean;
+  clicked?: () => void;
+  onKeyPress?: (keyCode: number) => void;
   centered: boolean;
-  iconpresent: boolean;
-  icon: JSX.Element;
-  iconsize: number;
-  iconx: number;
-  icony: number;
+  iconpresent?: boolean;
+  iconname?: string;
+  icon: JSX.Element | boolean;
+  iconsize?: number;
+  iconx?: number;
+  icony?: number;
+  tooltip?: string[];
   content: {
     type: string;
     first: string;
@@ -362,9 +365,12 @@ interface KeyProps {
     third: string;
     fourth: string;
   };
+  mod?: boolean;
+  move?: boolean;
+  tap?: boolean;
   idArray: string | number[];
-  disabled: boolean;
-  platform: string;
+  disabled?: boolean;
+  platform?: string;
   theme?: any;
 }
 
@@ -413,6 +419,11 @@ function Key(props: KeyProps) {
     disabled,
     theme,
     platform,
+    iconname,
+    tooltip,
+    mod,
+    move,
+    tap,
   } = props;
 
   return (

@@ -208,16 +208,16 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
     setKbData({ ...localKBData, SuperHoldstart: value[0] });
   };
 
-  const setSuperOverlapThreshold = (value: number[]) => {
-    setLocalKBData(data => ({
-      ...data,
-      SuperOverlapThreshold: value[0],
-    }));
-    setKbData({
-      ...localKBData,
-      SuperOverlapThreshold: value[0],
-    });
-  };
+  // const setSuperOverlapThreshold = (value: number[]) => {
+  //   setLocalKBData(data => ({
+  //     ...data,
+  //     SuperOverlapThreshold: value[0],
+  //   }));
+  //   setKbData({
+  //     ...localKBData,
+  //     SuperOverlapThreshold: value[0],
+  //   });
+  // };
 
   const setSpeed = (value: number[]) => {
     setLocalKBData(data => ({
@@ -261,7 +261,7 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
     qukeysMinPrior,
     SuperTimeout,
     SuperHoldstart,
-    SuperOverlapThreshold,
+    // SuperOverlapThreshold,
     mouseSpeed,
     mouseAccelSpeed,
     mouseWheelSpeed,
@@ -529,7 +529,7 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                   </div>
                 </div>
               )}
-              {SuperOverlapThreshold >= 0 && (
+              {/* {SuperOverlapThreshold >= 0 && (
                 <div className="w-full">
                   <div className="w-full flex gap-2">
                     <div className="w-full">
@@ -567,7 +567,7 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
               {SuperTimeout >= 0 && (
                 <div className="w-full">
                   <div className="w-full flex gap-2">

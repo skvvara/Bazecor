@@ -37,6 +37,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { i18n } from "@Renderer/i18n";
 import Keymap from "../../../api/keymap";
 import Store from "../../utils/Store";
+import { LangOptions } from "../KeyPickerKeyboard/KeyPickerLanguage";
 
 const GeneralSettingsWrapper = Styled.div`
 .dropdown-menu {
@@ -75,14 +76,14 @@ const GeneralSettings = ({
   autoUpdate,
   onChangeAutoUpdate,
 }: GeneralSettingsProps) => {
-  const [selectedLanguage, setSelectedLanguage] = useState("");
+  const [selectedLanguage, setSelectedLanguage] = useState<LangOptions>();
   const { state } = useDevice();
 
   useEffect(() => {
     setSelectedLanguage(getLanguage(store.get("settings.language") as string));
   }, []);
 
-  const changeLanguage = (language: string) => {
+  const changeLanguage = (language: LangOptions) => {
     try {
       setSelectedLanguage(language);
       store.set("settings.language", `${language}`);
@@ -192,12 +193,10 @@ const GeneralSettings = ({
           </Select>
           <KeyPickerPreview
             code={code}
-            disableMods="disabled"
-            disableMove="preferences"
+            disableMods={false}
+            disableMove={false}
             disableAll={false}
             selectedlanguage={selectedLanguage}
-            kbtype="ansi"
-            activeTab="preferences"
           />
         </CardContent>
       </Card>

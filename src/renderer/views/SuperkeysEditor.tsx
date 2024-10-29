@@ -658,7 +658,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
   const updateScroll = useCallback((e: WheelEvent) => {
     // log.info("Scroll WHEEL event!", e);
     const direction = e.deltaY > 0 ? 1 : -1;
-    setMouseWheel(direction);
+    if (!(e.target as HTMLElement).outerHTML.includes('<div role="option"')) setMouseWheel(direction);
   }, []);
 
   useEffect(() => {
@@ -701,7 +701,8 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
     loading,
   } = state;
 
-  const tempkey = keymapDB.parse(superkeys[selectedSuper] !== undefined ? superkeys[selectedSuper].actions[selectedAction] : 0);
+  const tempKC = superkeys[selectedSuper] !== undefined ? superkeys[selectedSuper].actions[selectedAction] : -1;
+  const tempkey = tempKC === -1 ? keymapDB.parse(0) : keymapDB.parse(tempKC);
   const code = keymapDB.keySegmentator(tempkey.keyCode);
 
   const listOfSKK = listToDelete.map(({ layer, pos, superIdx }) => (
@@ -768,7 +769,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
           superkeys={superkeys}
           actTab="super"
           selectedlanguage={currentLanguageLayout}
-          keyIndex={1}
+          keyIndex={tempKC}
           isWireless={false}
           mouseWheel={mouseWheel}
           resetScroll={resetScroll}

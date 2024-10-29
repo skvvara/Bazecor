@@ -1717,7 +1717,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   const updateScroll = useCallback((e: WheelEvent) => {
     // log.info("Scroll WHEEL event!", e);
     const direction = e.deltaY > 0 ? 1 : -1;
-    setMouseWheel(direction);
+    if (!(e.target as HTMLElement).outerHTML.includes('<div role="option"')) setMouseWheel(direction);
   }, []);
 
   useEffect(() => {

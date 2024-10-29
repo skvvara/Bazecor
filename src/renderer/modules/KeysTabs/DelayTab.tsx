@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FormEvent } from "react";
 import Styled from "styled-components";
 import log from "electron-log/renderer";
 import { i18n } from "@Renderer/i18n";
@@ -46,7 +46,7 @@ const Styles = Styled.div`
   }
 }
 .inputGroupRandom {
-  
+
   .inputMin {
     border-right-color: transparent;
     &:focus {
@@ -180,7 +180,7 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
                     min={0}
                     max={65535}
                     type="number"
-                    onChange={(e: any) => {
+                    onChange={(e: FormEvent<HTMLInputElement>) => {
                       this.updateFixed(e);
                     }}
                     value={fixedValue}
@@ -203,7 +203,7 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
                     placeholder="Min."
                     min={0}
                     type="number"
-                    onChange={(e: any) => {
+                    onChange={(e: FormEvent<HTMLInputElement>) => {
                       this.updateRandomMin(e);
                     }}
                     value={randomValue.min}
@@ -213,7 +213,7 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
                     placeholder="Max"
                     min={1}
                     type="number"
-                    onChange={(e: any) => {
+                    onChange={(e: FormEvent<HTMLInputElement>) => {
                       this.updateRandomMax(e);
                     }}
                     value={randomValue.max}

@@ -72,8 +72,9 @@ import frXXbepo from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-bepo.j
 import frXXoptimot from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-optimot.json";
 import frXXergol from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-ergol.json";
 import esMX from "@Renderer/modules/KeyPickerKeyboard/languages/es/MX.json";
+import { KeyProps } from "./Key";
 
-const languages = {
+const languages: { [key in LangOptions]: Array<KeyProps> } = {
   // Keycaps
   "en-US": enUS,
   "en-GB": enGB,

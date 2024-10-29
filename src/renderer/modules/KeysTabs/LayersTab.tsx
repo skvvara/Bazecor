@@ -16,8 +16,7 @@ import { KeymapDB } from "../../../api/keymap";
 import { Picker } from "../KeyPickerKeyboard";
 
 interface LayersTabProps {
-  keyCode: SegmentedKeyType;
-
+  keyCode?: SegmentedKeyType;
   onKeySelect: (value: number) => void;
   disabled?: boolean;
   activeTab?: string;
@@ -37,8 +36,12 @@ const LayersTab = ({
 }: LayersTabProps) => {
   const [disableOneShotButtons, setDisableOneShotButtons] = useState<boolean>(false);
   const [openKeysPopover, setOpenKeysPopover] = useState<boolean>(false);
-  const [activeLayerNumber, setActiveLayerNumber] = useState<number>(findLayerType(keyCode.base + keyCode.modified)?.layer);
-  const [activeLayerTab, setActiveLayerTab] = useState<string>(findLayerType(keyCode.base + keyCode.modified)?.type);
+  const [activeLayerNumber, setActiveLayerNumber] = useState<number>(
+    findLayerType(keyCode ? keyCode.base + keyCode.modified : 17492)?.layer,
+  );
+  const [activeLayerTab, setActiveLayerTab] = useState<string>(
+    findLayerType(keyCode ? keyCode.base + keyCode.modified : 17492)?.type,
+  );
   const [KC, setKC] = useState<number>(0);
 
   const layers = useMemo(
