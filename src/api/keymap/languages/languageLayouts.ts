@@ -98,6 +98,7 @@ import { enXXeurkey, enXXeurkeyModifiedTables } from "./en/XX-eurkey";
 import { frXXbepo, frXXbepoModifiedTables } from "./fr/XX-bepo";
 import { frXXoptimot, frXXoptimotModifiedTables } from "./fr/XX-optimot";
 import { frXXergol, frXXergolModifiedTables } from "./fr/XX-ergol";
+import { itXXiso105, itXXiso105ModifiedTables } from "./it/XX-iso105";
 import { KeymapCodeTableType } from "../types";
 
 const supportModifiedTables = {
@@ -122,6 +123,7 @@ const supportModifiedTables = {
   "fr-XX-bepo": frXXbepoModifiedTables,
   "fr-XX-optimot": frXXoptimotModifiedTables,
   "fr-XX-ergol": frXXergolModifiedTables,
+  "it-XX-iso105": itXXiso105ModifiedTables,
 };
 
 const languages: {
@@ -149,6 +151,7 @@ const languages: {
   "fr-XX-bepo": frXXbepo,
   "fr-XX-optimot": frXXoptimot,
   "fr-XX-ergol": frXXergol,
+  "it-XX-iso105": itXXiso105,
 };
 
 export { languages as languagesDB, supportModifiedTables };
