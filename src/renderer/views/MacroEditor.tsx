@@ -275,8 +275,8 @@ function MacroEditor(props: MacroEditorProps) {
     const { startContext } = props;
     const { macros, selectedMacro, modified } = state;
 
-    const macrosList = macros;
-    macrosList[selectedMacro].actions = actions;
+    const macrosList = JSON.parse(JSON.stringify(macros));
+    macrosList[selectedMacro].actions = JSON.parse(JSON.stringify(actions));
     if (!modified) {
       state.macros = macrosList;
       state.modified = true;
