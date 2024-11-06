@@ -141,7 +141,7 @@ const TimelineEditorMacroTable = (props: Props) => {
     }
     if (macro !== prevProps.current.macro) {
       const localRows = createConversion(macro.actions, macros);
-      log.info("TiEMTa CompDidUpdate", localRows);
+      log.info("TiEMTa UpdateUseEffect", localRows);
       const newRows = localRows.map((item, index) => {
         const aux = item;
         aux.id = index;
@@ -149,7 +149,7 @@ const TimelineEditorMacroTable = (props: Props) => {
       });
       setRows(newRows);
     }
-    if (prevProps.current !== props) prevProps.current = props;
+    if (prevProps.current !== props) prevProps.current = { ...props };
     return () => {
       if (rows.length !== 0) {
         scrollContainer.removeEventListener("wheel", scrollUpdate);
@@ -158,12 +158,13 @@ const TimelineEditorMacroTable = (props: Props) => {
   }, [horizontalWheel, keymapDB, macro, macros, props, rows.length, scrollPos, scrollUpdate]);
 
   const updateRows = (localRows: RowsRepresentation[]) => {
-    log.info("TiEMTa updaterows", localRows);
+    // log.info("TiEMTa updaterows", localRows);
     const newRows = localRows.map((item, index) => {
       const aux = item;
       aux.id = index;
       return aux;
     });
+    // log.info("newRows generaterd", newRows);
     setRows(newRows);
     const revConv = revertConversion(localRows);
     // log.info("TiEMTa revConv", revConv);
@@ -177,10 +178,13 @@ const TimelineEditorMacroTable = (props: Props) => {
   };
 
   const onCloneRow = (id: number) => {
-    const uid = rows.filter(x => x.id === id)[0];
+    const randID = new Date().getTime() + Math.floor(Math.random() * 1000);
+    const elem = JSON.parse(JSON.stringify(rows.filter(x => x.id === id)[0]));
+    elem.uid = randID;
     const preAux = rows.slice(0, id);
     const postAux = rows.slice(id);
-    preAux.push(uid);
+    // log.info("cloning data:", elem, preAux, postAux);
+    preAux.push(elem);
     updateRows(preAux.concat(postAux));
   };
 
