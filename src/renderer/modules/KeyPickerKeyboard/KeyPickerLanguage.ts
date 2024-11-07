@@ -65,6 +65,8 @@ import jaJP from "@Renderer/modules/KeyPickerKeyboard/languages/ja/JP.json";
 import koKR from "@Renderer/modules/KeyPickerKeyboard/languages/ko/KR.json";
 import plPL from "@Renderer/modules/KeyPickerKeyboard/languages/pl/PL.json";
 import deCH from "@Renderer/modules/KeyPickerKeyboard/languages/de/CH.json";
+import ruRU from "@Renderer/modules/KeyPickerKeyboard/languages/ru/RU.json";
+
 
 // Dygma - Layouts (community/third-party)
 import enXXeurkey from "@Renderer/modules/KeyPickerKeyboard/languages/en/XX-eurkey.json";
@@ -93,6 +95,7 @@ const languages: { [key in LangOptions]: Array<KeyProps> } = {
   "pl-PL": plPL,
   "de-CH": deCH,
   "es-MX": esMX,
+  "ru-RU": ruRU,
   // Community
   "en-XX-eurkey": enXXeurkey,
   "fr-XX-bepo": frXXbepo,
@@ -117,12 +120,12 @@ export type LangOptions =
   | "ko-KR"
   | "pl-PL"
   | "de-CH"
+  | "ru-RU"
   | "en-XX-eurkey"
   | "fr-XX-bepo"
   | "fr-XX-optimot"
   | "fr-XX-ergol"
   | "it-XX-iso105";
-
 /**
  * Is a JavaScript function that changes key picker layout
  * @param {string} selectedlanguage Selected language

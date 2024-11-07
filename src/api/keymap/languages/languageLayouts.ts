@@ -92,6 +92,8 @@ import { koKR, koKRModifiedTables } from "./ko/KR";
 import { plPL, plPLModifiedTables } from "./pl/PL";
 import { deCH, deCHModifiedTables } from "./de/CH";
 import { esMX, esMXModifiedTables } from "./es/MX";
+import { ruRU, ruRUModifiedTables} from "./ru/RU";
+
 
 // Dygma - Layouts (community/third-party)
 import { enXXeurkey, enXXeurkeyModifiedTables } from "./en/XX-eurkey";
@@ -118,6 +120,7 @@ const supportModifiedTables = {
   "ko-KR": koKRModifiedTables,
   "pl-PL": plPLModifiedTables,
   "de-CH": deCHModifiedTables,
+  "ru-RU": ruRUModifiedTables,
   // Community
   "en-XX-eurkey": enXXeurkeyModifiedTables,
   "fr-XX-bepo": frXXbepoModifiedTables,
@@ -146,6 +149,7 @@ const languages: {
   "ko-KR": koKR,
   "pl-PL": plPL,
   "de-CH": deCH,
+  "ru-XX-ansi": ruRU,
   // Community
   "en-XX-eurkey": enXXeurkey,
   "fr-XX-bepo": frXXbepo,

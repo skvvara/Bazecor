@@ -31,6 +31,7 @@ export type LanguageType =
   | "ja-JP"
   | "ko-KR"
   | "pl-PL"
+  | "ru-RU"
   | "de-CH"
   | "en-XX-eurkey"
   | "fr-XX-bepo"
