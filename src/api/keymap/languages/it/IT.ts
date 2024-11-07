@@ -100,7 +100,7 @@ const itITModifierKeys: KeymapCodeTableType[] = [
 ];
 
 const shiftModifier: BaseKeycodeTableType = {
-  groupName: "Shifted Italian ISO105",
+  groupName: "Shifted Italian",
   keys: [
     // R4
     {
@@ -243,7 +243,7 @@ const shiftModifier: BaseKeycodeTableType = {
 };
 
 const altCtrlModifier: BaseKeycodeTableType = {
-  groupName: "AltCtrl Italian ISO105",
+  groupName: "AltCtrl Italian",
   keys: [
     // R4
     {
@@ -294,7 +294,7 @@ const altCtrlModifier: BaseKeycodeTableType = {
 };
 
 const altGrModifier: BaseKeycodeTableType = {
-  groupName: "AltGr Italian ISO105",
+  groupName: "AltGr Italian",
   keys: [
     // R4
     {
@@ -345,7 +345,7 @@ const altGrModifier: BaseKeycodeTableType = {
 };
 
 const altGrShiftModifier: BaseKeycodeTableType = {
-  groupName: "AltGrShift Italian ISO105",
+  groupName: "AltGrShift Italian",
   keys: [
     // R3
     {

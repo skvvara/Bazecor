@@ -28,6 +28,7 @@ export type LanguageType =
   | "nb-NO"
   | "sv-SE"
   | "is-IS"
+  | "it-IT"
   | "ja-JP"
   | "ko-KR"
   | "pl-PL"

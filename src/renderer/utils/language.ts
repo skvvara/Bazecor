@@ -1,6 +1,9 @@
 import { LanguageType } from "../../api/keymap/types";
+import Store from "./Store";
 
-// Do NOT modify this object - languages available in 1.3.8 and before
+const store = Store.getStore();
+
+// Do NOT modify this object - languages available in 1.3.8 and before (except italian, which is it-XX-iso105 and was added later to fix a categorization issue of that language)
 const legacyLanguage: { [key: string]: string } = {
   english: "en-US",
   british: "en-GB",
@@ -14,11 +17,11 @@ const legacyLanguage: { [key: string]: string } = {
   danish: "da-DK",
   norwegian: "nb-NO",
   icelandic: "is-IS",
-  italian: "it-IT",
   japanese: "ja-JP",
   korean: "ko-KR",
   swissGerman: "de-CH",
   eurkey: "en-XX-eurkey",
+  "it-XX-iso105": "it-IT",
 };
 
 /**
@@ -30,6 +33,7 @@ function getLanguage(storedLanguage: string, defaultLanguage = "en-US"): Languag
   const language = storedLanguage || defaultLanguage;
 
   if (legacyLanguage[language] !== undefined) {
+    store.set("settings.language", `${legacyLanguage[language]}`);
     return legacyLanguage[language] as LanguageType;
   }
 
