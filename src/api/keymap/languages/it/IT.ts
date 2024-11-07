@@ -18,9 +18,9 @@
 import { withModifiers, ModifierCodes } from "../../db/utils";
 import { BaseKeycodeTableType, KeymapCodeTableType } from "../../types";
 
-const itXXiso105Letters: KeymapCodeTableType[] = [];
+const itITLetters: KeymapCodeTableType[] = [];
 
-const itXXiso105ModifierKeys: KeymapCodeTableType[] = [
+const itITModifierKeys: KeymapCodeTableType[] = [
   // R4
   {
     code: 53,
@@ -365,50 +365,50 @@ const altGrShiftModifier: BaseKeycodeTableType = {
   ],
 };
 
-const itXXiso105 = itXXiso105Letters.concat(itXXiso105ModifierKeys);
+const itIT = itITLetters.concat(itITModifierKeys);
 
-const table: BaseKeycodeTableType = { keys: itXXiso105, groupName: "" };
-const tableWithoutModifier: BaseKeycodeTableType = { keys: itXXiso105Letters, groupName: "" };
+const table: BaseKeycodeTableType = { keys: itIT, groupName: "" };
+const tableWithoutModifier: BaseKeycodeTableType = { keys: itITLetters, groupName: "" };
 
-const itXXiso105CtrlTable = withModifiers(table, "Control +", "C+", 256);
-const itXXiso105LAltTable = withModifiers(table, "Alt +", "A+", 512);
-const itXXiso105RAltTable = withModifiers(table, "AltGr +", "AGr+", 1024);
-const itXXiso105ShiftTable = withModifiers(tableWithoutModifier, "Shift +", "S+", 2048);
-const itXXiso105GuiTable = withModifiers(table, "Os+", "O+", 4096);
+const itITCtrlTable = withModifiers(table, "Control +", "C+", 256);
+const itITLAltTable = withModifiers(table, "Alt +", "A+", 512);
+const itITRAltTable = withModifiers(table, "AltGr +", "AGr+", 1024);
+const itITShiftTable = withModifiers(tableWithoutModifier, "Shift +", "S+", 2048);
+const itITGuiTable = withModifiers(table, "Os+", "O+", 4096);
 
 // Double
 
-const itXXiso105CATable = withModifiers(table, "Control + Alt +", "C+A+", 768);
-const itXXiso105CAGrTable = withModifiers(table, "Control + AltGr +", "C+AGr+", 1280);
-const itXXiso105CSTable = withModifiers(table, "Control + Shift +", "C+S+", 2304);
-const itXXiso105CGTable = withModifiers(table, "Control + Os +", "C+O+", 4352);
-const itXXiso105AAGrTable = withModifiers(table, "Alt + AltGr +", "A+AGr+", 1536);
-const itXXiso105ASTable = withModifiers(table, "Alt + Shift +", "A+S+", 2560);
-const itXXiso105AGTable = withModifiers(table, "Alt + Os +", "A+O+", 4608);
-const itXXiso105AGrSTable = withModifiers(altGrShiftModifier, "AltGr + Shift +", "AGr+S+", 3072);
-const itXXiso105AGrGTable = withModifiers(table, "AltGr + Os +", "AGr+O+", 5120);
-const itXXiso105SGTable = withModifiers(table, "Shift + Os +", "S+O+", 6144);
+const itITCATable = withModifiers(table, "Control + Alt +", "C+A+", 768);
+const itITCAGrTable = withModifiers(table, "Control + AltGr +", "C+AGr+", 1280);
+const itITCSTable = withModifiers(table, "Control + Shift +", "C+S+", 2304);
+const itITCGTable = withModifiers(table, "Control + Os +", "C+O+", 4352);
+const itITAAGrTable = withModifiers(table, "Alt + AltGr +", "A+AGr+", 1536);
+const itITASTable = withModifiers(table, "Alt + Shift +", "A+S+", 2560);
+const itITAGTable = withModifiers(table, "Alt + Os +", "A+O+", 4608);
+const itITAGrSTable = withModifiers(altGrShiftModifier, "AltGr + Shift +", "AGr+S+", 3072);
+const itITAGrGTable = withModifiers(table, "AltGr + Os +", "AGr+O+", 5120);
+const itITSGTable = withModifiers(table, "Shift + Os +", "S+O+", 6144);
 
 // Triple
 
-const itXXiso105CAAGTable = withModifiers(table, "Control + Alt + AltGr +", "C+A+AGr+", 1792);
-const itXXiso105CASTable = withModifiers(table, "Meh +", "Meh+", 2816);
-const itXXiso105CAGTable = withModifiers(table, "Control + Alt + Os +", "C+A+O+", 4864);
-const itXXiso105CAGSTable = withModifiers(table, "Control + AltGr + Shift +", "C+AGr+S+", 3328);
-const itXXiso105CAGGTable = withModifiers(table, "Control + AltGr + Os +", "C+AGr+O+", 5376);
-const itXXiso105CSGTable = withModifiers(table, "Control + Shift + Os +", "C+S+O+", 6400);
-const itXXiso105AAGSTable = withModifiers(table, "Alt + AltGr + Shift +", "A+AGr+S+", 3584);
-const itXXiso105AAGGTable = withModifiers(table, "Alt + AltGr + Os +", "A+AGr+O+", 5632);
-const itXXiso105ASGTable = withModifiers(table, "Alt + Shift + Os +", "A+S+O+", 6656);
-const itXXiso105AGSGTable = withModifiers(table, "AltGr + Shift + Os +", "AGr+S+O+", 7168);
+const itITCAAGTable = withModifiers(table, "Control + Alt + AltGr +", "C+A+AGr+", 1792);
+const itITCASTable = withModifiers(table, "Meh +", "Meh+", 2816);
+const itITCAGTable = withModifiers(table, "Control + Alt + Os +", "C+A+O+", 4864);
+const itITCAGSTable = withModifiers(table, "Control + AltGr + Shift +", "C+AGr+S+", 3328);
+const itITCAGGTable = withModifiers(table, "Control + AltGr + Os +", "C+AGr+O+", 5376);
+const itITCSGTable = withModifiers(table, "Control + Shift + Os +", "C+S+O+", 6400);
+const itITAAGSTable = withModifiers(table, "Alt + AltGr + Shift +", "A+AGr+S+", 3584);
+const itITAAGGTable = withModifiers(table, "Alt + AltGr + Os +", "A+AGr+O+", 5632);
+const itITASGTable = withModifiers(table, "Alt + Shift + Os +", "A+S+O+", 6656);
+const itITAGSGTable = withModifiers(table, "AltGr + Shift + Os +", "AGr+S+O+", 7168);
 
 // Quad
 
-const itXXiso105CAAGrSTable = withModifiers(table, "Meh + AltGr +", "M+AGr+", 3840);
-const itXXiso105CAAGrGTable = withModifiers(table, "Control + Alt + AltGr + Os +", "C+A+AGr+O+", 5888);
-const itXXiso105CAGrSGTable = withModifiers(table, "Control + AltGr + Shift + Os +", "C+AGr+S+O+", 7424);
-const itXXiso105AAGrSGTable = withModifiers(table, "Alt + AltGr + Shift + Os +", "A+AGr+S+O+", 7680);
-const itXXiso105AllModTable = withModifiers(table, "Hyper + AltGr +", "H+AGr+", 7936);
+const itITCAAGrSTable = withModifiers(table, "Meh + AltGr +", "M+AGr+", 3840);
+const itITCAAGrGTable = withModifiers(table, "Control + Alt + AltGr + Os +", "C+A+AGr+O+", 5888);
+const itITCAGrSGTable = withModifiers(table, "Control + AltGr + Shift + Os +", "C+AGr+S+O+", 7424);
+const itITAAGrSGTable = withModifiers(table, "Alt + AltGr + Shift + Os +", "A+AGr+S+O+", 7680);
+const itITAllModTable = withModifiers(table, "Hyper + AltGr +", "H+AGr+", 7936);
 
 const DualUseCtrlTable = withModifiers(table, "Control /", "CTRL/", 49169);
 const DualUseShiftTable = withModifiers(table, "Shift /", "SHIFT/", 49425);
@@ -424,42 +424,42 @@ const DualUseLayer6Tables = withModifiers(table, "Layer #6 /", "L#6/", 52498);
 const DualUseLayer7Tables = withModifiers(table, "Layer #7 /", "L#7/", 52754);
 const DualUseLayer8Tables = withModifiers(table, "Layer #8 /", "L#8/", 53010);
 
-const itXXiso105ModifiedTables = [
+const itITModifiedTables = [
   shiftModifier,
-  itXXiso105CtrlTable,
-  itXXiso105LAltTable,
-  itXXiso105RAltTable,
-  itXXiso105ShiftTable,
-  itXXiso105GuiTable,
-  itXXiso105CATable,
+  itITCtrlTable,
+  itITLAltTable,
+  itITRAltTable,
+  itITShiftTable,
+  itITGuiTable,
+  itITCATable,
   altCtrlModifier,
   altGrModifier,
   altGrShiftModifier,
-  itXXiso105CAGrTable,
-  itXXiso105CSTable,
-  itXXiso105CGTable,
-  itXXiso105AAGrTable,
-  itXXiso105ASTable,
-  itXXiso105AGTable,
-  itXXiso105AGrSTable,
-  itXXiso105AGrGTable,
-  itXXiso105SGTable,
-  itXXiso105CAAGTable,
-  itXXiso105CASTable,
-  itXXiso105CAGTable,
-  itXXiso105CAGSTable,
-  itXXiso105CAGGTable,
-  itXXiso105CSGTable,
-  itXXiso105AAGSTable,
-  itXXiso105AAGGTable,
-  itXXiso105ASGTable,
-  itXXiso105AGSGTable,
-  itXXiso105CAAGrSTable,
-  itXXiso105CAAGrGTable,
+  itITCAGrTable,
+  itITCSTable,
+  itITCGTable,
+  itITAAGrTable,
+  itITASTable,
+  itITAGTable,
+  itITAGrSTable,
+  itITAGrGTable,
+  itITSGTable,
+  itITCAAGTable,
+  itITCASTable,
+  itITCAGTable,
+  itITCAGSTable,
+  itITCAGGTable,
+  itITCSGTable,
+  itITAAGSTable,
+  itITAAGGTable,
+  itITASGTable,
+  itITAGSGTable,
+  itITCAAGrSTable,
+  itITCAAGrGTable,
   withModifiers(table, "Hyper +", "Hyper+", 6912),
-  itXXiso105CAGrSGTable,
-  itXXiso105AAGrSGTable,
-  itXXiso105AllModTable,
+  itITCAGrSGTable,
+  itITAAGrSGTable,
+  itITAllModTable,
   DualUseCtrlTable,
   DualUseShiftTable,
   DualUseAltTable,
@@ -475,4 +475,4 @@ const itXXiso105ModifiedTables = [
   DualUseLayer8Tables,
 ];
 
-export { itXXiso105, itXXiso105ModifiedTables };
+export { itIT, itITModifiedTables };

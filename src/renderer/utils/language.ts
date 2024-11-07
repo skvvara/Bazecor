@@ -14,6 +14,7 @@ const legacyLanguage: { [key: string]: string } = {
   danish: "da-DK",
   norwegian: "nb-NO",
   icelandic: "is-IS",
+  italian: "it-IT",
   japanese: "ja-JP",
   korean: "ko-KR",
   swissGerman: "de-CH",
