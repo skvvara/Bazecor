@@ -61,6 +61,7 @@ import svSE from "@Renderer/modules/KeyPickerKeyboard/languages/sv/SE.json";
 
 // Dygma - Layouts (official/native)
 import isIS from "@Renderer/modules/KeyPickerKeyboard/languages/is/IS.json";
+import itIT from "@Renderer/modules/KeyPickerKeyboard/languages/it/IT.json";
 import jaJP from "@Renderer/modules/KeyPickerKeyboard/languages/ja/JP.json";
 import koKR from "@Renderer/modules/KeyPickerKeyboard/languages/ko/KR.json";
 import plPL from "@Renderer/modules/KeyPickerKeyboard/languages/pl/PL.json";
@@ -71,7 +72,6 @@ import enXXeurkey from "@Renderer/modules/KeyPickerKeyboard/languages/en/XX-eurk
 import frXXbepo from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-bepo.json";
 import frXXoptimot from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-optimot.json";
 import frXXergol from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-ergol.json";
-import itXXiso105 from "@Renderer/modules/KeyPickerKeyboard/languages/it/XX-iso105.json";
 import esMX from "@Renderer/modules/KeyPickerKeyboard/languages/es/MX.json";
 import { KeyProps } from "./Key";
 
@@ -88,6 +88,7 @@ const languages: { [key in LangOptions]: Array<KeyProps> } = {
   "sv-SE": svSE,
   // Official
   "is-IS": isIS,
+  "it-IT": itIT,
   "ja-JP": jaJP,
   "ko-KR": koKR,
   "pl-PL": plPL,
@@ -98,7 +99,6 @@ const languages: { [key in LangOptions]: Array<KeyProps> } = {
   "fr-XX-bepo": frXXbepo,
   "fr-XX-optimot": frXXoptimot,
   "fr-XX-ergol": frXXergol,
-  "it-XX-iso105": itXXiso105,
 };
 
 export type LangOptions =
@@ -113,6 +113,7 @@ export type LangOptions =
   | "nb-NO"
   | "sv-SE"
   | "is-IS"
+  | "it-IT"
   | "ja-JP"
   | "ko-KR"
   | "pl-PL"
@@ -120,8 +121,7 @@ export type LangOptions =
   | "en-XX-eurkey"
   | "fr-XX-bepo"
   | "fr-XX-optimot"
-  | "fr-XX-ergol"
-  | "it-XX-iso105";
+  | "fr-XX-ergol";
 
 /**
  * Is a JavaScript function that changes key picker layout

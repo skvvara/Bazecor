@@ -262,6 +262,7 @@ interface State {
 function KeyPickerKeyboard(props: Props) {
   const { selectedlanguage, macros, actTab, superkeys, code, onKeySelect, isWireless, keyIndex, mouseWheel, resetScroll } = props;
   const prevProps = useRef(props);
+  const overflowRef = React.createRef<HTMLElement>();
 
   const initialState: State = {
     tabs: [],
@@ -337,7 +338,9 @@ function KeyPickerKeyboard(props: Props) {
   }, [props, code, keyIndex, state]);
 
   useEffect(() => {
-    if (!disable && mouseWheel !== 0) {
+    const elem = overflowRef.current;
+    const overflow = elem.scrollHeight > elem.offsetHeight;
+    if (!disable && mouseWheel !== 0 && !overflow) {
       if (mouseWheel === 1) {
         const lstate = { ...state };
         const indexTab = tabs.indexOf(lstate.currentTab);
@@ -354,7 +357,7 @@ function KeyPickerKeyboard(props: Props) {
         setState(lstate);
       }
     }
-  }, [state, mouseWheel, tabs, resetScroll, disable]);
+  }, [state, mouseWheel, tabs, resetScroll, disable, overflowRef]);
 
   const changeTab = (tab: string) => {
     log.info("Check tab change value", tab);
@@ -432,7 +435,10 @@ function KeyPickerKeyboard(props: Props) {
               </TabsList>
             </div>
           </div>
-          <div className="keyBoardPickerWrapper w-full rounded-regular py-4 px-8 bg-gray-25 dark:bg-[#25273B] shadow-lg h-[370px] overflow-auto">
+          <div
+            className="keyBoardPickerWrapper w-full rounded-regular py-4 px-8 bg-gray-25 dark:bg-[#25273B] shadow-lg h-[370px] overflow-auto"
+            ref={overflowRef}
+          >
             <TabsContent value="tabKeys">
               <motion.div initial="hidden" animate="visible" key="tabKeys" variants={tabVariants}>
                 <>
