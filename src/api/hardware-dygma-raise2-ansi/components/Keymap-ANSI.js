@@ -197,7 +197,7 @@ class KeymapANSI extends React.Component {
               rgb: "#ffffff",
             }));
 
-    log.info("colormap", this.props.colormap);
+    // log.info("colormap", this.props.colormap);
 
     const getColor = (row, col) => {
       const ledIndex =

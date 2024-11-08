@@ -196,7 +196,7 @@ class KeymapISO extends React.Component {
               rgb: "#ffffff",
             }));
 
-    log.info("colormap", colormap, this.props.colormap);
+    // log.info("colormap", colormap, this.props.colormap);
 
     // console.log("showing BARS", colormap, palette, led_map, no_key_led_map);
     const getColor = (row, col) => {
