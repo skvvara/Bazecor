@@ -6,6 +6,7 @@ import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
 import Device from "../comms/Device";
+import { rgb2w } from "../color";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
@@ -199,6 +200,9 @@ export default class Backup {
       localNeurons[index].id = neuronID;
       store.set("neurons", localNeurons);
     }
+    log.info("Checking if statement:", device.device.info.product === "Raise2", backup.neuron.device.info.product === "Raise");
+    if (device.device.info.product === "Raise2" && backup.neuron.device.info.product === "Raise")
+      data = Backup.convertRaiseToRaise2(backup, device);
     if (device) {
       try {
         for (let i = 0; i < data.length; i += 1) {
@@ -279,6 +283,100 @@ export default class Backup {
       log.error(error);
       return undefined;
     }
+  };
+
+  static convertRaiseToRaise2 = (backup: BackupType, dev: Device) => {
+    log.info("converting Raise Backup to Raise2");
+    // const keyLayerSize = 80;
+    const ColorLayerSize = 132;
+
+    const localBackup: BackupType = JSON.parse(JSON.stringify(backup));
+    localBackup.neuron.device = dev.device;
+    // const keymapIndex = localBackup.backup.findIndex(c => c.command === "keymap.custom");
+    const paletteIndex = localBackup.backup.findIndex(c => c.command === "palette");
+    const colormapIndex = localBackup.backup.findIndex(c => c.command === "colormap.map");
+
+    // const custom = localBackup.backup[keymapIndex].data
+    //   .split(" ")
+    //   .filter(v => v.length > 0)
+    //   .map((k: string) => parseInt(k, 10))
+    //   .reduce((resultArray, item, index) => {
+    //     const localResult = resultArray;
+    //     const chunkIndex = Math.floor(index / keyLayerSize);
+
+    //     if (!localResult[chunkIndex]) {
+    //       localResult[chunkIndex] = []; // start a new chunk
+    //     }
+    //     localResult[chunkIndex].push(item);
+    //     return localResult;
+    //   }, []);
+    log.info("CONVERSION 1:", paletteIndex, colormapIndex);
+    const palette = localBackup.backup[paletteIndex].data
+      .split(" ")
+      .filter(v => v.length > 0)
+      .map((k: string) => parseInt(k, 10))
+      .reduce((resultArray, item, index) => {
+        const localResult = resultArray;
+        const chunkIndex = Math.floor(index / 3);
+
+        if (!localResult[chunkIndex]) {
+          localResult[chunkIndex] = []; // start a new chunk
+        }
+        localResult[chunkIndex].push(item);
+        return localResult;
+      }, [])
+      .map(color => ({
+        r: color[0],
+        g: color[1],
+        b: color[2],
+        rgb: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
+      }));
+    log.info("CONVERSION 2:", palette);
+    const colormap = localBackup.backup[colormapIndex].data
+      .split(" ")
+      .filter(v => v.length > 0)
+      .map((k: string) => parseInt(k, 10))
+      .reduce((resultArray, item, index) => {
+        const localResult = resultArray;
+        const chunkIndex = Math.floor(index / ColorLayerSize);
+
+        if (!localResult[chunkIndex]) {
+          localResult[chunkIndex] = []; // start a new chunk
+        }
+        localResult[chunkIndex].push(item);
+        return localResult;
+      }, []);
+    log.info("CONVERSION 3:", colormap);
+
+    const colormapFinal = colormap.map((layer: number[]) => {
+      log.info("COLORMAP 1:", layer);
+      const color = layer[130];
+      log.info("COLORMAP 2:", color);
+      const rest = layer.slice(0, -1);
+      log.info("COLORMAP 3:", rest);
+      const result = rest.concat(new Array(45).fill(color));
+      log.info("COLORMAP 5:", result);
+      return result;
+    });
+
+    const paletteFinal = palette
+      .map(color => {
+        const rgbw = rgb2w(color);
+        return [rgbw.r, rgbw.g, rgbw.b, rgbw.w];
+      })
+      .flat()
+      .map(v => v.toString())
+      .join(" ");
+
+    log.info("CONVERSION 4:", paletteFinal, colormapFinal);
+    localBackup.backup[colormapIndex].data = colormapFinal
+      .flat()
+      .map(k => k.toString())
+      .join(" ");
+    localBackup.backup[paletteIndex].data = paletteFinal;
+
+    log.info("CONVERSION 5:", localBackup.backup);
+    return localBackup.backup;
   };
 
   static isBackupType = (backup: any): backup is any => "backup" in backup;

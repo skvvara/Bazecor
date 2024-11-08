@@ -1,7 +1,7 @@
 export type DygmaDeviceType = {
   info: {
-    vendor: string;
-    product: string;
+    vendor: "Dygma";
+    product: "Raise" | "Defy" | "Raise2";
     keyboardType: string;
     displayName: string;
     urls: {
