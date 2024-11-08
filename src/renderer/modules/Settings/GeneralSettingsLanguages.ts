@@ -39,7 +39,7 @@ import deCH from "@Assets/flags/deCH.png";
 // Dygma - Layouts (community/third-party)
 import enXXeurkey from "@Assets/flags/enXXeurkey.png";
 import esMX from "@Assets/flags/esMX.png";
-import itXXiso105 from "@Assets/flags/itXXiso105.png";
+import itIT from "@Assets/flags/itIT.png";
 
 // !!!
 // Sorting order below is based off display language (languageNames).
@@ -57,7 +57,7 @@ const flags = [
   frFR, // Ergo-L (French)
   deDE,
   isIS,
-  itXXiso105,
+  itIT,
   jaJP,
   koKR,
   nbNO,
@@ -80,7 +80,7 @@ const languages = [
   "fr-XX-ergol",
   "de-DE",
   "is-IS",
-  "it-XX-iso105",
+  "it-IT",
   "ja-JP",
   "ko-KR",
   "nb-NO",
@@ -103,7 +103,7 @@ const languageNames = [
   "French (Ergo-L)",
   "German",
   "Icelandic",
-  "Italian (ISO105)",
+  "Italian",
   "Japanese",
   "Korean",
   "Norwegian",
