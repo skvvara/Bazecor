@@ -292,7 +292,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
                   variant="primary"
                   className="mt-3"
                   onClick={() => {
-                    let fileName = enumerator[selectedVirtualKeyboard].device.info.product;
+                    let fileName = enumerator[selectedVirtualKeyboard].device.info.product as string;
                     fileName =
                       fileName === "Defy"
                         ? `Virtual${fileName}`
