@@ -310,7 +310,7 @@ export default class Backup {
         localResult[chunkIndex].push(item);
         return localResult;
       }, []);
-    log.info("CONVERSION 1:", paletteIndex, colormapIndex);
+    // log.info("CONVERSION 1:", paletteIndex, colormapIndex);
     const palette = localBackup.backup[paletteIndex].data
       .split(" ")
       .filter(v => v.length > 0)
@@ -331,7 +331,7 @@ export default class Backup {
         b: color[2],
         rgb: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
       }));
-    log.info("CONVERSION 2:", palette);
+    // log.info("CONVERSION 2:", palette);
     const colormap = localBackup.backup[colormapIndex].data
       .split(" ")
       .filter(v => v.length > 0)
@@ -347,7 +347,7 @@ export default class Backup {
         return localResult;
       }, []);
 
-    log.info("CONVERSION 3:", colormap);
+    // log.info("CONVERSION 3:", colormap);
     const keymapFinal = custom.map((layer: number[]) => {
       let localLayer = [...layer];
       // restoring thumbcluster
@@ -356,18 +356,55 @@ export default class Backup {
       const movT = localLayer.slice(70, 72);
       const restT = localLayer.slice(72);
       localLayer = preT.concat(movT.concat(remT)).concat(restT);
+
+      // if ansi
+      if (dev.device.info.keyboardType === "ANSI") {
+        // Move enter (31<>47)
+        const symbolK = localLayer[31];
+        const enterK = localLayer[47];
+
+        localLayer[31] = enterK;
+        localLayer[47] = symbolK;
+        // Move shift (48<>49)
+        const shiftK = localLayer[48];
+        const extraK = localLayer[49];
+
+        localLayer[48] = extraK;
+        localLayer[49] = shiftK;
+      }
+
+      // if layout !== layout, solve shift & enter
       return localLayer;
     });
 
-    log.info("CONVERSION 4:", colormap);
+    // log.info("CONVERSION 4:", colormap);
     const colormapFinal = colormap.map((layer: number[]) => {
       const color = layer[130];
       const rest = layer.slice(0, -1);
       const result = rest.concat(new Array(45).fill(color));
+
+      if (dev.device.info.keyboardType === "ANSI") {
+        // Move enter (31<>47)
+        const symbolC = result[40];
+        const enterC = result[48];
+
+        result[40] = enterC;
+        result[48] = symbolC;
+      }
+
+      if (dev.device.info.keyboardType === "ANSI" && backup.neuron.device.info.keyboardType === "ISO") {
+        // Move shift (48<>49)
+        const shiftC = result[19];
+        const extraC = result[20];
+
+        result[20] = extraC;
+        result[19] = shiftC;
+      }
+
       return result;
     });
 
-    log.info("CONVERSION 5:", colormap);
+    // log.info("CONVERSION 5:", colormap);
     const paletteFinal = palette
       .map(color => {
         const rgbw = rgb2w(color);
@@ -377,7 +414,7 @@ export default class Backup {
       .map(v => v.toString())
       .join(" ");
 
-    log.info("CONVERSION 6:", paletteFinal, colormapFinal);
+    // log.info("CONVERSION 6:", paletteFinal, colormapFinal);
     localBackup.backup[colormapIndex].data = colormapFinal
       .flat()
       .map(k => k.toString())
