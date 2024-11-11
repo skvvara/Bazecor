@@ -287,29 +287,29 @@ export default class Backup {
 
   static convertRaiseToRaise2 = (backup: BackupType, dev: Device) => {
     log.info("converting Raise Backup to Raise2");
-    // const keyLayerSize = 80;
+    const keyLayerSize = 80;
     const ColorLayerSize = 132;
 
     const localBackup: BackupType = JSON.parse(JSON.stringify(backup));
     localBackup.neuron.device = dev.device;
-    // const keymapIndex = localBackup.backup.findIndex(c => c.command === "keymap.custom");
+    const keymapIndex = localBackup.backup.findIndex(c => c.command === "keymap.custom");
     const paletteIndex = localBackup.backup.findIndex(c => c.command === "palette");
     const colormapIndex = localBackup.backup.findIndex(c => c.command === "colormap.map");
 
-    // const custom = localBackup.backup[keymapIndex].data
-    //   .split(" ")
-    //   .filter(v => v.length > 0)
-    //   .map((k: string) => parseInt(k, 10))
-    //   .reduce((resultArray, item, index) => {
-    //     const localResult = resultArray;
-    //     const chunkIndex = Math.floor(index / keyLayerSize);
+    const custom = localBackup.backup[keymapIndex].data
+      .split(" ")
+      .filter(v => v.length > 0)
+      .map((k: string) => parseInt(k, 10))
+      .reduce((resultArray, item, index) => {
+        const localResult = resultArray;
+        const chunkIndex = Math.floor(index / keyLayerSize);
 
-    //     if (!localResult[chunkIndex]) {
-    //       localResult[chunkIndex] = []; // start a new chunk
-    //     }
-    //     localResult[chunkIndex].push(item);
-    //     return localResult;
-    //   }, []);
+        if (!localResult[chunkIndex]) {
+          localResult[chunkIndex] = []; // start a new chunk
+        }
+        localResult[chunkIndex].push(item);
+        return localResult;
+      }, []);
     log.info("CONVERSION 1:", paletteIndex, colormapIndex);
     const palette = localBackup.backup[paletteIndex].data
       .split(" ")
@@ -346,19 +346,28 @@ export default class Backup {
         localResult[chunkIndex].push(item);
         return localResult;
       }, []);
-    log.info("CONVERSION 3:", colormap);
 
+    log.info("CONVERSION 3:", colormap);
+    const keymapFinal = custom.map((layer: number[]) => {
+      let localLayer = [...layer];
+      // restoring thumbcluster
+      const preT = localLayer.slice(0, 69);
+      const remT = localLayer[69];
+      const movT = localLayer.slice(70, 72);
+      const restT = localLayer.slice(72);
+      localLayer = preT.concat(movT.concat(remT)).concat(restT);
+      return localLayer;
+    });
+
+    log.info("CONVERSION 4:", colormap);
     const colormapFinal = colormap.map((layer: number[]) => {
-      log.info("COLORMAP 1:", layer);
       const color = layer[130];
-      log.info("COLORMAP 2:", color);
       const rest = layer.slice(0, -1);
-      log.info("COLORMAP 3:", rest);
       const result = rest.concat(new Array(45).fill(color));
-      log.info("COLORMAP 5:", result);
       return result;
     });
 
+    log.info("CONVERSION 5:", colormap);
     const paletteFinal = palette
       .map(color => {
         const rgbw = rgb2w(color);
@@ -368,14 +377,18 @@ export default class Backup {
       .map(v => v.toString())
       .join(" ");
 
-    log.info("CONVERSION 4:", paletteFinal, colormapFinal);
+    log.info("CONVERSION 6:", paletteFinal, colormapFinal);
     localBackup.backup[colormapIndex].data = colormapFinal
+      .flat()
+      .map(k => k.toString())
+      .join(" ");
+    localBackup.backup[keymapIndex].data = keymapFinal
       .flat()
       .map(k => k.toString())
       .join(" ");
     localBackup.backup[paletteIndex].data = paletteFinal;
 
-    log.info("CONVERSION 5:", localBackup.backup);
+    log.info("Final Backup:", localBackup.backup);
     return localBackup.backup;
   };
 

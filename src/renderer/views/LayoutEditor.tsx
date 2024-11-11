@@ -981,7 +981,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
           }
         }
 
-        // log.info("KEYMAP TEST!!", keymap, keymap.onlyCustom, onlyCustom);
+        log.info("KEYMAP", KeyMap.custom);
         if (empty && KeyMap.custom.length > 0) {
           log.info("Custom keymap is empty, copying defaults");
           for (let i = 0; i < KeyMap.default.length; i += 1) {
