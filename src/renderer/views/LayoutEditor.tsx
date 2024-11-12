@@ -1799,12 +1799,12 @@ const LayoutEditor = (props: LayoutEditorProps) => {
           if (
             macros[MNumber] !== undefined &&
             macros[MNumber].name !== undefined &&
-            macros[MNumber].name.substr(0, 5) !== "" &&
+            macros[MNumber].name.substring(0, 5) !== "" &&
             typeof key.label === "string" &&
             !/\p{L}/u.test(key.label)
           ) {
             log.info("macros:", macros);
-            newMKey.label = macros[MNumber].name.substr(0, 5);
+            newMKey.label = macros[MNumber].name.substring(0, 5);
           }
         }
         return newMKey;
@@ -1824,7 +1824,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
             typeof key.label === "string" &&
             !/\p{L}/u.test(key.label)
           ) {
-            newSKey.label = superkeys[SKNumber].name.substr(0, 5);
+            newSKey.label = superkeys[SKNumber].name.substring(0, 5);
           }
         }
         return newSKey;

@@ -132,7 +132,7 @@ const MacroManager = (props: Props) => {
     let macroName;
     const aux = keymapDB.parse(keycode);
     try {
-      macroName = macros[parseInt(aux.label as string, 10) - 1]?.name.substr(0, 5);
+      macroName = macros[parseInt(aux.label as string, 10) - 1]?.name.substring(0, 5);
     } catch (error) {
       log.warn("Warning, macro name not found, replacing", error);
       macroName = "*NotFound*";

@@ -1,7 +1,7 @@
 import * as React from "react";
 
 function IconLeaf() {
-  const pathHash = `${(Math.random() + 1).toString(36).substring(7)}`;
+  const pathHash = `${(Math.random() + 1).toString(36).substring(0, 7)}`;
   return (
     <svg width="24" height="25" viewBox="0 0 24 25" fill="none" xmlns="http://www.w3.org/2000/svg">
       <g id="Leaf" clipPath={`url(#clip0_4160_258872)-${pathHash}`}>
