@@ -35,7 +35,7 @@ import { useDevice } from "@Renderer/DeviceContext";
 import { LayerType, Neuron } from "@Renderer/types/neurons";
 import { ColormapType, KeymapType, KeyType, LayoutEditorProps, PaletteType, SegmentedKeyType } from "@Renderer/types/layout";
 import { SuperkeysType } from "@Renderer/types/superkeys";
-import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
+import { MacrosType } from "@Renderer/types/macros";
 import { DeviceClass } from "@Renderer/types/devices";
 
 // Modules
@@ -53,10 +53,21 @@ import { i18n } from "@Renderer/i18n";
 import Store from "@Renderer/utils/Store";
 import getLanguage from "@Renderer/utils/language";
 import { ClearLayerDialog } from "@Renderer/components/molecules/CustomModal/ClearLayerDialog";
+import { DygmaDeviceInfoType } from "@Renderer/types/dygmaDefs";
 import BlankTable from "../../api/keymap/db/blanks";
 import Keymap, { KeymapDB } from "../../api/keymap";
-import { rgb2w, rgbw2b } from "../../api/color";
+import { rgb2w } from "../../api/color";
 import Backup from "../../api/backup";
+import {
+  convertColormapRtoR2,
+  convertKeymapRtoR2,
+  parseColormapRaw,
+  parseKeymapRaw,
+  parseMacrosRaw,
+  parsePaletteRaw,
+  parseSuperkeysRaw,
+  serializeKeymap,
+} from "../../api/parsers";
 
 const store = Store.getStore();
 
@@ -519,237 +530,15 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     store.set("neurons", neurons);
   };
 
-  const superTranslator = (raw: string, sSuper: SuperkeysType[]): SuperkeysType[] => {
-    const superArray = raw.split(" 0 0")[0].split(" ").map(Number);
-
-    let skAction: number[] = [];
-    const sKeys: SuperkeysType[] = [];
-    let iter = 0;
-    let superindex = 0;
-
-    if (superArray.length < 1) {
-      log.info("Discarded Superkeys due to short length of string", raw, raw.length);
-      return [];
-    }
-    while (superArray.length > iter) {
-      // log.info(iter, raw[iter], superkey);
-      if (superArray[iter] === 0) {
-        sKeys[superindex] = { actions: skAction, name: "", id: superindex };
-        superindex += 1;
-        skAction = [];
-      } else {
-        skAction.push(superArray[iter]);
-      }
-      iter += 1;
-    }
-    sKeys[superindex] = { actions: skAction, name: "", id: superindex };
-
-    if (sKeys[0].actions.length === 0 || sKeys[0].actions.length > 5) {
-      log.info(`Superkeys were empty`);
-      return [];
-    }
-    log.info(`Got Superkeys:${JSON.stringify(sKeys)} from ${raw}`);
-    // TODO: Check if stored superKeys match the received ones, if they match, retrieve name and apply it to current superKeys
-    let finalSuper: SuperkeysType[] = [];
-    finalSuper = sKeys.map((superky, i) => {
-      const superk = superky;
-      superk.id = i;
-      if (sSuper.length > i && sSuper.length > 0) {
-        const aux = superk;
-        aux.name = sSuper[i].name;
-        return aux;
-      }
-      return superk;
-    });
-    log.info("final superkeys", finalSuper);
-    return finalSuper;
-  };
-
-  const macroTranslator = useCallback(
-    (raw: string | number[], storeMacros: MacrosType[]) => {
-      if (raw === "") {
-        return [
-          {
-            actions: [
-              { keyCode: 229, type: 6, id: 0 },
-              { keyCode: 11, type: 8, id: 1 },
-              { keyCode: 229, type: 7, id: 2 },
-              { keyCode: 8, type: 8, id: 3 },
-              { keyCode: 28, type: 8, id: 4 },
-              { keyCode: 54, type: 8, id: 5 },
-              { keyCode: 44, type: 8, id: 6 },
-              { keyCode: 229, type: 6, id: 7 },
-              { keyCode: 7, type: 8, id: 8 },
-              { keyCode: 229, type: 7, id: 9 },
-              { keyCode: 28, type: 8, id: 10 },
-              { keyCode: 10, type: 8, id: 11 },
-              { keyCode: 16, type: 8, id: 12 },
-              { keyCode: 4, type: 8, id: 13 },
-              { keyCode: 23, type: 8, id: 14 },
-              { keyCode: 8, type: 8, id: 15 },
-            ],
-            id: 0,
-            macro: "RIGHT SHIFT H RIGHT SHIFT E Y , SPACE RIGHT SHIFT D RIGHT SHIFT Y G M A T E",
-            name: "Hey, Dygmate!",
-          },
-        ];
-      }
-      // Translate received macros to human readable text
-      let i = 0;
-      let iter = 0;
-      let kcs = 0;
-      let type = 0;
-      let keyCode = [];
-      let actions = new Array<MacroActionsType>();
-      const mcros = new Array<MacrosType>();
-      actions = [];
-      while (raw.length > iter) {
-        if (kcs > 0) {
-          keyCode.push((raw as number[])[iter]);
-          kcs -= 1;
-        } else {
-          if (iter !== 0 && type !== 0) {
-            actions.push({
-              type,
-              keyCode,
-              id: undefined,
-            });
-            keyCode = [];
-          }
-          type = (raw as number[])[iter];
-          switch (type) {
-            case 0:
-              kcs = 0;
-              mcros[i] = { actions, id: i, name: "", macro: "" };
-              i += 1;
-              actions = [];
-              break;
-            case 1:
-              kcs = 4;
-              break;
-            case 2:
-            case 3:
-            case 4:
-            case 5:
-              kcs = 2;
-              break;
-            default:
-              kcs = 1;
-          }
-        }
-        iter += 1;
-      }
-      actions.push({
-        type,
-        keyCode,
-        id: undefined,
-      });
-      mcros[i] = {
-        actions,
-        id: i,
-        name: "",
-        macro: "",
-      };
-      const localMacros = mcros.map(m => {
-        const aux: MacroActionsType[] = m.actions.map((action, idx) => {
-          if (Array.isArray(action.keyCode))
-            switch (action.type) {
-              case 1:
-                return {
-                  type: action.type,
-                  keyCode: [(action.keyCode[0] << 8) + action.keyCode[1], (action.keyCode[2] << 8) + action.keyCode[3]],
-                  id: idx,
-                };
-              case 2:
-              case 3:
-              case 4:
-              case 5:
-                return {
-                  type: action.type,
-                  keyCode: (action.keyCode[0] << 8) + action.keyCode[1],
-                  id: idx,
-                };
-              default:
-                return {
-                  type: action.type,
-                  keyCode: action.keyCode[0],
-                  id: idx,
-                };
-            }
-          return action;
-        });
-        return { ...m, actions: aux };
-      });
-      // TODO: Check if stored macros match the received ones, if they match, retrieve name and apply it to current macros
-      let finalMacros = [];
-      log.info("Checking Macros", localMacros, storeMacros);
-      if (storeMacros === undefined) {
-        return localMacros;
-      }
-      finalMacros = localMacros.map((m, idx) => {
-        if (storeMacros.length > idx && storeMacros.length > 0) {
-          const aux = m;
-          aux.name = storeMacros[idx].name;
-          aux.macro = m.actions.map(k => keymapDB.parse(k.keyCode as number).label).join(" ");
-          return aux;
-        }
-        return m;
-      });
-
-      return finalMacros;
-    },
-    [keymapDB],
-  );
-
   const getColormap = useCallback(async (): Promise<ColormapType> => {
     const { currentDevice } = state;
     const layerSize = currentDevice.device.keyboardUnderglow.rows * currentDevice.device.keyboardUnderglow.columns;
-    const chunk = (a: number[], chunkSize: number) => {
-      const R = [];
-      for (let i = 0; i < a.length; i += chunkSize) R.push(a.slice(i, i + chunkSize));
-      return R;
-    };
-
     const paletteData = (await currentDevice?.command("palette")) as string;
     const colorMapData = (await currentDevice?.command("colormap.map")) as string;
 
-    const plette =
-      currentDevice?.device.RGBWMode !== true
-        ? chunk(
-            paletteData
-              .split(" ")
-              .filter((v: string) => v.length > 0)
-              .map((k: string) => parseInt(k, 10)),
-            3,
-          ).map(color => ({
-            r: color[0],
-            g: color[1],
-            b: color[2],
-            rgb: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
-          }))
-        : chunk(
-            paletteData
-              .split(" ")
-              .filter((v: string) => v.length > 0)
-              .map((k: string) => parseInt(k, 10)),
-            4,
-          ).map(color => {
-            const coloraux = rgbw2b({ r: color[0], g: color[1], b: color[2], w: color[3] });
-            return {
-              r: coloraux.r,
-              g: coloraux.g,
-              b: coloraux.b,
-              rgb: coloraux.rgb,
-            };
-          });
-
-    const colMap = chunk(
-      colorMapData
-        .split(" ")
-        .filter((v: string) => v.length > 0)
-        .map((k: string) => parseInt(k, 10)),
-      layerSize,
-    );
+    const plette = parsePaletteRaw(paletteData, currentDevice?.device.RGBWMode);
+    log.info("PARSED PALETTE: ", paletteData, plette, currentDevice?.device.RGBWMode);
+    const colMap = parseColormapRaw(colorMapData, layerSize);
 
     return {
       palette: plette,
@@ -941,34 +730,8 @@ const LayoutEditor = (props: LayoutEditorProps) => {
         };
 
         const layerSize = currentDevice.device.keyboard.rows * currentDevice.device.keyboard.columns;
-        KeyMap.custom = custom
-          .split(" ")
-          .filter(v => v.length > 0)
-          .map((k: string) => keymapDB.parse(parseInt(k, 10)))
-          .reduce((resultArray, item, index) => {
-            const localResult = resultArray;
-            const chunkIndex = Math.floor(index / layerSize);
-
-            if (!localResult[chunkIndex]) {
-              localResult[chunkIndex] = []; // start a new chunk
-            }
-            localResult[chunkIndex].push(item);
-            return localResult;
-          }, []);
-        KeyMap.default = defaults
-          .split(" ")
-          .filter(v => v.length > 0)
-          .map((k: string) => keymapDB.parse(parseInt(k, 10)))
-          .reduce((resultArray, item, index) => {
-            const localResult = resultArray;
-            const chunkIndex = Math.floor(index / layerSize);
-
-            if (!localResult[chunkIndex]) {
-              localResult[chunkIndex] = []; // start a new chunk
-            }
-            localResult[chunkIndex].push(item);
-            return localResult;
-          }, []);
+        KeyMap.custom = parseKeymapRaw(custom, layerSize).map(l => l.map((k: number) => keymapDB.parse(k)));
+        KeyMap.default = parseKeymapRaw(defaults, layerSize).map(l => l.map((k: number) => keymapDB.parse(k)));
         KeyMap.onlyCustom = onlyCustom;
 
         let empty = true;
@@ -981,7 +744,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
           }
         }
 
-        // log.info("KEYMAP TEST!!", keymap, keymap.onlyCustom, onlyCustom);
+        log.info("KEYMAP", KeyMap.custom);
         if (empty && KeyMap.custom.length > 0) {
           log.info("Custom keymap is empty, copying defaults");
           for (let i = 0; i < KeyMap.default.length; i += 1) {
@@ -999,18 +762,13 @@ const LayoutEditor = (props: LayoutEditorProps) => {
 
         // loading Macros
         setScanningStep(7);
-        let raw: string | number[] = (await currentDevice?.command("macros.map")) as string;
-        if (raw.search(" 0 0") !== -1) {
-          raw = raw.split(" 0 0")[0].split(" ").map(Number);
-        } else {
-          raw = "";
-        }
-        const parsedMacros = macroTranslator(raw, neuronData.storedMacros);
+        const rawMacros = (await currentDevice?.command("macros.map")) as string;
+        const parsedMacros = parseMacrosRaw(rawMacros, neuronData.storedMacros);
 
         // Loading Superkeys
         setScanningStep(8);
-        const raw2: string = (await currentDevice?.command("superkeys.map")) as string;
-        const parsedSuper = superTranslator(raw2, neuronData.storedSuper);
+        const rawSuper = (await currentDevice?.command("superkeys.map")) as string;
+        const parsedSuper = parseSuperkeysRaw(rawSuper, neuronData.storedSuper);
 
         setScanningStep(9);
         let showMM = false;
@@ -1050,7 +808,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
         onDisconnect();
       }
     },
-    [state, setLoading, AnalizeChipID, restoredOk, getColormap, macroTranslator, handleSetRestoredOk, keymapDB, onDisconnect],
+    [state, setLoading, AnalizeChipID, restoredOk, getColormap, handleSetRestoredOk, keymapDB, onDisconnect],
   );
 
   const onKeyChange = (keyCode: number) => {
@@ -1158,8 +916,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     try {
       setLoading(true);
       setIsSaving(true);
-      const args = flatten(keymap.custom).map(k => keymapDB.serialize(k).toString());
-      await currentDevice?.command("keymap.custom", ...args);
+      await currentDevice?.command("keymap.custom", serializeKeymap(keymap.custom));
       await currentDevice?.command("keymap.onlyCustom", keymap.onlyCustom ? "1" : "0");
       await updateColormap(currentDevice, colorMap);
       await updatePalette(currentDevice, palette);
@@ -1429,12 +1186,15 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   };
 
   const importLayer = (data: {
+    device: DygmaDeviceInfoType;
+    language: string;
     layerNames: LayerType[];
     layerName: string;
     keymap: KeyType[];
     colormap: number[];
     palette: PaletteType[];
   }) => {
+    const { currentDevice } = state;
     log.info("not loading the palette: ", palette);
     // if (data.palette.length > 0) state.palette = data.palette;
     const lNames = layerNames.slice();
@@ -1447,19 +1207,30 @@ const LayoutEditor = (props: LayoutEditorProps) => {
       }
       setLayerNames(lNames);
     }
-    const parsedKeymap = data.keymap.map(key => {
-      let localKey = key;
-      if (typeof localKey.extraLabel === "object" || typeof localKey.label === "object")
-        localKey = keymapDB.parse(localKey.keyCode);
-      return localKey;
-    });
+    let cleanKeymap: KeyType[];
+    let cleanColormap: number[];
+    if (currentDevice?.device.info.product === "Raise2" && data.device.product === "Raise") {
+      cleanKeymap = convertKeymapRtoR2(
+        data.keymap.map(k => k.keyCode),
+        currentDevice?.device.info.keyboardType,
+      ).map(k => keymapDB.parse(k));
+      cleanColormap = convertColormapRtoR2(data.colormap, currentDevice?.device.info.keyboardType, data.device.keyboardType);
+    } else {
+      cleanKeymap = data.keymap.map(key => {
+        let localKey = key;
+        if (typeof localKey.extraLabel === "object" || typeof localKey.label === "object")
+          localKey = keymapDB.parse(localKey.keyCode);
+        return localKey;
+      });
+      cleanColormap = data.colormap;
+    }
     if (data.keymap.length > 0 && data.colormap.length > 0) {
       if (keymap.onlyCustom) {
         if (currentLayer >= 0) {
           const newKeymap = keymap.custom.slice();
-          newKeymap[currentLayer] = parsedKeymap;
+          newKeymap[currentLayer] = cleanKeymap;
           const newColormap = colorMap.slice();
-          newColormap[currentLayer] = data.colormap.slice();
+          newColormap[currentLayer] = cleanColormap;
           setKeymap({
             default: keymap.default,
             custom: newKeymap,
@@ -1470,9 +1241,9 @@ const LayoutEditor = (props: LayoutEditorProps) => {
       } else if (currentLayer >= keymap.default.length) {
         const defLength = keymap.default.length;
         const newKeymap = keymap.custom.slice();
-        newKeymap[currentLayer - defLength] = parsedKeymap;
+        newKeymap[currentLayer - defLength] = cleanKeymap;
         const newColormap = colorMap.slice();
-        newColormap[currentLayer - defLength] = data.colormap.slice();
+        newColormap[currentLayer - defLength] = cleanColormap;
 
         setKeymap({
           default: keymap.default,

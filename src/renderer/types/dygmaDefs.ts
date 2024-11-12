@@ -1,14 +1,16 @@
+export type DygmaDeviceInfoType = {
+  vendor: "Dygma";
+  product: "Raise" | "Defy" | "Raise2";
+  keyboardType: string;
+  displayName: string;
+  urls: {
+    name: string;
+    url: string;
+  }[];
+};
+
 export type DygmaDeviceType = {
-  info: {
-    vendor: string;
-    product: string;
-    keyboardType: string;
-    displayName: string;
-    urls: {
-      name: string;
-      url: string;
-    }[];
-  };
+  info: DygmaDeviceInfoType;
   usb: {
     vendorId: number;
     productId: number;

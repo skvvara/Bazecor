@@ -34,8 +34,9 @@ export interface MacroEditorInitialStateType {
   macros: MacrosType[];
   superkeys: SuperkeysType[];
   storedMacros: MacrosType[];
+  storedSuper: SuperkeysType[];
   neurons: Neuron[];
-  neuronIdx: number;
+  neuronID: string;
   maxMacros: number;
   modified: boolean;
   selectedMacro: number;

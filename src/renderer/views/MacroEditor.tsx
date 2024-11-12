@@ -34,7 +34,6 @@ import {
 } from "@Renderer/types/macroEditor";
 import { Neuron } from "@Renderer/types/neurons";
 import { KeymapType } from "@Renderer/types/layout";
-import { SuperkeysType } from "@Renderer/types/superkeys";
 import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
 
 // Components
@@ -59,6 +58,14 @@ import Keymap, { KeymapDB } from "../../api/keymap";
 
 import Store from "../utils/Store";
 import getLanguage from "../utils/language";
+import {
+  parseKeymapRaw,
+  serializeKeymap,
+  parseMacrosRaw,
+  parseSuperkeysRaw,
+  serializeMacros,
+  serializeSuperkeys,
+} from "../../api/parsers";
 
 const store = Store.getStore();
 
@@ -108,15 +115,14 @@ function MacroEditor(props: MacroEditorProps) {
   const bkp = new Backup();
   const [isSaving, setIsSaving] = useState(false);
 
-  const flatten = (arr: unknown[]) => [].concat(...arr);
-
   const initialState: MacroEditorInitialStateType = {
     keymap: undefined,
     macros: [],
     superkeys: [],
     storedMacros: [],
+    storedSuper: [],
     neurons: [],
-    neuronIdx: 0,
+    neuronID: "",
     maxMacros: 128,
     modified: false,
     selectedMacro: 0,
@@ -137,126 +143,6 @@ function MacroEditor(props: MacroEditorProps) {
   const [state, setState] = useState(initialState);
   const { state: deviceState } = useDevice();
   const timelineRef = useRef(null);
-
-  const superTranslator = (raw: string) => {
-    const { neurons, neuronIdx } = state;
-    const superArray = raw.split(" 0 0")[0].split(" ").map(Number);
-
-    let skAction: number[] = [];
-    const superkeys: SuperkeysType[] = [];
-    let iter = 0;
-    let superindex = 0;
-
-    if (superArray.length < 1) {
-      log.info("Discarded Superkeys due to short length of string", raw, raw.length);
-      return [{ actions: [53, 2101, 1077, 41, 0], name: "Welcome to superkeys", id: superindex }];
-    }
-    while (superArray.length > iter) {
-      // log.info(iter, raw[iter], superkey);
-      if (superArray[iter] === 0) {
-        superkeys[superindex] = { actions: skAction, name: "", id: superindex };
-        superindex += 1;
-        skAction = [];
-      } else {
-        skAction.push(superArray[iter]);
-      }
-      iter += 1;
-    }
-    superkeys[superindex] = { actions: skAction, name: "", id: superindex };
-
-    if (superkeys[0].actions.length === 0 || superkeys[0].actions.length > 5) {
-      log.info(`Superkeys were empty`);
-      return [];
-    }
-    log.info(`Got Superkeys:${JSON.stringify(superkeys)} from ${raw}`);
-    // TODO: Check if stored superKeys match the received ones, if they match, retrieve name and apply it to current superKeys
-    let finalSuper: SuperkeysType[] = [];
-    const stored = neurons[neuronIdx].superkeys;
-    finalSuper = superkeys.map((superky, i) => {
-      const superk = superky;
-      superk.id = i;
-      if (stored.length > i && stored.length > 0) {
-        const aux = superk;
-        aux.name = stored[i].name;
-        return aux;
-      }
-      return superk;
-    });
-    log.info("final superkeys", finalSuper);
-    return finalSuper;
-  };
-
-  const superkeyMap = (superkeys: SuperkeysType[]) => {
-    if (
-      superkeys.length === 0 ||
-      (superkeys.length === 1 && superkeys[0].actions.length === 0) ||
-      (superkeys.length === 1 && superkeys[0].actions.length === 1 && superkeys[0].actions[0] === 0)
-    ) {
-      return Array(512).fill("65535").join(" ");
-    }
-    let keyMap = JSON.parse(JSON.stringify(superkeys));
-    // log.info("First", JSON.stringify(keyMap));
-    keyMap = keyMap.map((sky: SuperkeysType) => {
-      const sk = sky;
-      sk.actions = sk.actions.map(act => {
-        if (act === 0 || act === null || act === undefined) return 1;
-        return act;
-      });
-      if (sk.actions.length < 5) sk.actions = sk.actions.concat(Array(5 - sk.actions.length).fill(1));
-      return sk;
-    });
-    const mapped = keyMap
-      .map((superkey: SuperkeysType) => superkey.actions.filter(act => act !== 0).concat([0]))
-      .flat()
-      .concat([0])
-      .join(" ")
-      .split(",")
-      .join(" ");
-    log.info("Mapped superkeys: ", mapped, keyMap);
-    return mapped;
-  };
-
-  const macrosMap = (macros: MacrosType[]) => {
-    const { macrosEraser } = state;
-    log.info(
-      "Macros map function",
-      macros,
-      macrosEraser,
-      macros.length === 0,
-      macros.length === 1 && Array.isArray(macros[0].actions),
-    );
-    if (macros.length === 0 || (macros.length === 1 && !Array.isArray(macros[0].actions))) {
-      return macrosEraser;
-    }
-    const mapAction = (action: MacroActionsType): number[] => {
-      switch (action.type) {
-        case 1:
-          return [
-            action.type,
-            (action.keyCode as number[])[0] >> 8,
-            (action.keyCode as number[])[0] & 255,
-            (action.keyCode as number[])[1] >> 8,
-            (action.keyCode as number[])[1] & 255,
-          ];
-        case 2:
-        case 3:
-        case 4:
-        case 5:
-          return [action.type, (action.keyCode as number) >> 8, (action.keyCode as number) & 255];
-        default:
-          return [action.type, action.keyCode as number];
-      }
-    };
-    const result: string = macros
-      .map(macro => macro.actions.map((action: MacroActionsType) => mapAction(action)).concat([0]))
-      .flat()
-      .concat([0])
-      .join(" ")
-      .split(",")
-      .join(" ");
-    log.info("MACROS GOING TO BE SAVED", result);
-    return result;
-  };
 
   const addToActions = (actions: MacroActionsType[]) => {
     const { startContext } = props;
@@ -333,7 +219,7 @@ function MacroEditor(props: MacroEditorProps) {
   };
 
   const writeMacros = async () => {
-    const { macros, neurons, neuronIdx, keymap, superkeys } = state;
+    const { macros, neurons, neuronID, keymap, superkeys } = state;
     const { setLoading, cancelContext } = props;
     const { currentDevice } = deviceState;
     setIsSaving(true);
@@ -341,15 +227,15 @@ function MacroEditor(props: MacroEditorProps) {
     log.info("saving Macros:", macros, keymap, superkeys);
     const newMacros = macros;
     const localNeurons = [...neurons];
-    localNeurons[neuronIdx].macros = newMacros;
+    localNeurons[localNeurons.findIndex(n => n.id === neuronID)].macros = newMacros;
     store.set("neurons", localNeurons);
     try {
-      await currentDevice.command("macros.map", macrosMap(newMacros));
-      const args = flatten(keymap.custom).map(k => keymapDB.serialize(k).toString());
-      await currentDevice.command("keymap.custom", ...args);
-      await currentDevice.command("superkeys.map", superkeyMap(superkeys));
+      await currentDevice.command("macros.map", serializeMacros(newMacros, state.totalMemory));
+      log.info(keymap.custom);
+      await currentDevice.command("keymap.custom", serializeKeymap(keymap.custom));
+      await currentDevice.command("superkeys.map", serializeSuperkeys(superkeys));
       const commands = await Backup.Commands(currentDevice);
-      const backup = await bkp.DoBackup(commands, neurons[neuronIdx].id, currentDevice);
+      const backup = await bkp.DoBackup(commands, neurons[neurons.findIndex(n => n.id === neuronID)].id, currentDevice);
       Backup.SaveBackup(backup, currentDevice);
       toast.success(<ToastMessage title={i18n.editor.macros.successFlashTitle} content="" icon={<IconFloppyDisk />} />, {
         autoClose: 2000,
@@ -531,81 +417,6 @@ function MacroEditor(props: MacroEditorProps) {
     updateMacros(localMacros);
   };
 
-  const macroTranslator = (raw: string) => {
-    const { storedMacros } = state;
-    const macrosArray = raw.split(" 0 0")[0].split(" ").map(Number);
-
-    // Translate received macros to human readable text
-    const macros: MacrosType[] = [];
-    let iter = 0;
-    // macros are `0` terminated or when end of macrosArray has been reached, the outer loop
-    // must cycle once more than the inner
-    while (iter <= macrosArray.length) {
-      const actions: MacroActionsType[] = [];
-      while (iter < macrosArray.length) {
-        const type = macrosArray[iter];
-        if (type === 0) {
-          break;
-        }
-
-        switch (type) {
-          case 1:
-            actions.push({
-              type,
-              keyCode: [
-                (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)],
-                (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)],
-              ],
-            });
-            break;
-          case 2:
-          case 3:
-          case 4:
-          case 5:
-            actions.push({ type, keyCode: (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)] });
-            break;
-          case 6:
-          case 7:
-          case 8:
-            actions.push({ type, keyCode: macrosArray[(iter += 1)] });
-            break;
-          default:
-            break;
-        }
-
-        iter += 1;
-      }
-      macros.push({
-        actions,
-        name: "",
-        macro: "",
-      });
-      iter += 1;
-    }
-    macros.forEach((m, idx) => {
-      const aux = m;
-      aux.id = idx;
-      macros[idx] = aux;
-    });
-
-    // TODO: Check if stored macros match the received ones, if they match, retrieve name and apply it to current macros
-    const stored = storedMacros;
-    if (stored === undefined || stored.length === 0) {
-      return macros;
-    }
-    return macros.map((macro, i) => {
-      if (stored.length < i) {
-        return macro;
-      }
-
-      return {
-        ...macro,
-        name: stored[i]?.name,
-        macro: macro.actions.map(k => keymapDB.parse(k.keyCode as number).label).join(" "),
-      };
-    });
-  };
-
   const loadMacros = async () => {
     const { onDisconnect, cancelContext, setLoading } = props;
     const { currentDevice } = deviceState;
@@ -618,8 +429,9 @@ function MacroEditor(props: MacroEditorProps) {
       chipID = chipID.replace(/\s/g, "");
       const neurons = store.get("neurons") as Neuron[];
       state.neurons = neurons;
-      state.neuronIdx = neurons.findIndex(n => n.id === chipID);
-      state.storedMacros = neurons[state.neuronIdx].macros;
+      state.neuronID = chipID;
+      state.storedMacros = neurons[neurons.findIndex(n => n.id === chipID)].macros;
+      state.storedSuper = neurons[neurons.findIndex(n => n.id === chipID)].superkeys;
       setState({ ...state });
       const deviceLang = { ...currentDevice.device, language: true };
       currentDevice.commands.keymap = new Keymap(deviceLang);
@@ -645,41 +457,14 @@ function MacroEditor(props: MacroEditorProps) {
       const custom = await currentDevice.command("keymap.custom");
       const onlyCustom = Boolean(parseInt(await currentDevice.command("keymap.onlyCustom"), 10));
       const keymap: KeymapType = { custom: undefined, default: undefined, onlyCustom: false };
-
       const layerSize = currentDevice.device.keyboard.rows * currentDevice.device.keyboard.columns;
-      keymap.custom = custom
-        .split(" ")
-        .filter(v => v.length > 0)
-        .map(k => keymapDB.parse(parseInt(k, 10)))
-        .reduce((resultArray, item, index) => {
-          const localResultArray = resultArray;
-          const chunkIndex = Math.floor(index / layerSize);
-
-          if (!localResultArray[chunkIndex]) {
-            localResultArray[chunkIndex] = []; // start a new chunk
-          }
-          localResultArray[chunkIndex].push(item);
-          return localResultArray;
-        }, []);
-      keymap.default = defaults
-        .split(" ")
-        .filter(v => v.length > 0)
-        .map(k => keymapDB.parse(parseInt(k, 10)))
-        .reduce((resultArray, item, index) => {
-          const localResultArray = resultArray;
-          const chunkIndex = Math.floor(index / layerSize);
-
-          if (!localResultArray[chunkIndex]) {
-            localResultArray[chunkIndex] = []; // start a new chunk
-          }
-          localResultArray[chunkIndex].push(item);
-          return localResultArray;
-        }, []);
+      keymap.custom = parseKeymapRaw(custom, layerSize).map(l => l.map(k => keymapDB.parse(k)));
+      keymap.default = parseKeymapRaw(defaults, layerSize).map(l => l.map(k => keymapDB.parse(k)));
       keymap.onlyCustom = onlyCustom;
       const macrosRaw = await currentDevice.command("macros.map");
-      const parsedMacros = macroTranslator(macrosRaw);
+      const parsedMacros = parseMacrosRaw(macrosRaw, state.storedMacros);
       const supersRaw = await currentDevice.command("superkeys.map");
-      const parsedSuper = superTranslator(supersRaw);
+      const parsedSuper = parseSuperkeysRaw(supersRaw, state.storedSuper);
       state.macros = parsedMacros;
       state.superkeys = parsedSuper;
       state.keymap = keymap;
@@ -687,7 +472,6 @@ function MacroEditor(props: MacroEditorProps) {
       state.modified = false;
       state.usedMemory = parsedMacros.map(m => m.actions).flat().length;
       state.totalMemory = tMem;
-      state.macrosEraser = Array(tMem).fill("255").join(" ");
       state.loading = false;
       setState({ ...state });
       cancelContext();

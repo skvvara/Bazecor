@@ -6,6 +6,14 @@ import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
 import Device from "../comms/Device";
+import {
+  convertColormapRtoR2,
+  convertKeymapRtoR2,
+  convertPaletteRtoR2,
+  parseColormapRaw,
+  parseKeymapRaw,
+  parsePaletteRaw,
+} from "../parsers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
@@ -199,6 +207,9 @@ export default class Backup {
       localNeurons[index].id = neuronID;
       store.set("neurons", localNeurons);
     }
+    log.info("Checking if statement:", device.device.info.product === "Raise2", backup.neuron.device.info.product === "Raise");
+    if (device.device.info.product === "Raise2" && backup.neuron.device.info.product === "Raise")
+      data = Backup.convertRaiseToRaise2(backup, device);
     if (device) {
       try {
         for (let i = 0; i < data.length; i += 1) {
@@ -279,6 +290,45 @@ export default class Backup {
       log.error(error);
       return undefined;
     }
+  };
+
+  static convertRaiseToRaise2 = (backup: BackupType, dev: Device) => {
+    log.info("converting Raise Backup to Raise2");
+    const keyLayerSize = 80;
+    const colorLayerSize = 132;
+
+    const localBackup: BackupType = JSON.parse(JSON.stringify(backup));
+    localBackup.neuron.device = dev.device;
+    const keymapIndex = localBackup.backup.findIndex(c => c.command === "keymap.custom");
+    const paletteIndex = localBackup.backup.findIndex(c => c.command === "palette");
+    const colormapIndex = localBackup.backup.findIndex(c => c.command === "colormap.map");
+
+    const custom = parseKeymapRaw(localBackup.backup[keymapIndex].data, keyLayerSize);
+    const palette = parsePaletteRaw(localBackup.backup[paletteIndex].data, false);
+    const colormap = parseColormapRaw(localBackup.backup[colormapIndex].data, colorLayerSize);
+
+    const keymapFinal = custom.map((layer: number[]) => convertKeymapRtoR2(layer, dev.device.info.keyboardType));
+    const colormapFinal = colormap.map((layer: number[]) =>
+      convertColormapRtoR2(layer, dev.device.info.keyboardType, backup.neuron.device.info.keyboardType),
+    );
+    const paletteFinal = palette.map(color => convertPaletteRtoR2(color));
+
+    // log.info("CONVERSION 6:", paletteFinal, colormapFinal);
+    localBackup.backup[colormapIndex].data = colormapFinal
+      .flat()
+      .map(k => k.toString())
+      .join(" ");
+    localBackup.backup[keymapIndex].data = keymapFinal
+      .flat()
+      .map(k => k.toString())
+      .join(" ");
+    localBackup.backup[paletteIndex].data = paletteFinal
+      .flat()
+      .map(v => v.toString())
+      .join(" ");
+
+    log.info("Final Backup:", localBackup.backup);
+    return localBackup.backup;
   };
 
   static isBackupType = (backup: any): backup is any => "backup" in backup;
