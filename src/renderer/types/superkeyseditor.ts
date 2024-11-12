@@ -32,6 +32,7 @@ export interface SuperkeysEditorInitialStateType {
   macros: MacrosType[];
   superkeys: SuperkeysType[];
   storedMacros: MacrosType[];
+  storedSuper: SuperkeysType[];
   neurons: Neuron[];
   neuronID: string;
   kbtype: string;

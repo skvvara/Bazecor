@@ -181,23 +181,22 @@ const SuperkeysTab = ({ macros, keyCode, onKeySelect, superkeys, disabled }: Sup
             {superkeys[selected.current] !== undefined ? (
               <div className="superkeyHint p-4 flex flex-wrap gap-0.5">
                 {superKeysActions.map((item, index) => (
-                  <>
+                  <div key={`superHint-${item.title}${String(index)}`}>
                     <SuperkeyPicker
                       index={index}
-                      key={`superHint-${item.title}${String(index)}`}
                       selected={selected.current}
                       superkeys={superkeys}
                       icon={<></>}
                       title={item.title}
                       description=""
                       elementActive={false}
-                      onClick={() => console.log("onClick")}
+                      onClick={() => "onClick"}
                       macros={macros}
                       keymapDB={keymapDB}
-                      updateAction={() => console.log("update action")}
+                      updateAction={() => "update action"}
                       variant="subtle"
                     />
-                  </>
+                  </div>
                 ))}
               </div>
             ) : null}

@@ -6,7 +6,14 @@ import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
 import Device from "../comms/Device";
-import { rgb2w } from "../color";
+import {
+  convertColormapRtoR2,
+  convertKeymapRtoR2,
+  convertPaletteRtoR2,
+  parseColormapRaw,
+  parseKeymapRaw,
+  parsePaletteRaw,
+} from "../parsers";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
@@ -288,7 +295,7 @@ export default class Backup {
   static convertRaiseToRaise2 = (backup: BackupType, dev: Device) => {
     log.info("converting Raise Backup to Raise2");
     const keyLayerSize = 80;
-    const ColorLayerSize = 132;
+    const colorLayerSize = 132;
 
     const localBackup: BackupType = JSON.parse(JSON.stringify(backup));
     localBackup.neuron.device = dev.device;
@@ -296,123 +303,15 @@ export default class Backup {
     const paletteIndex = localBackup.backup.findIndex(c => c.command === "palette");
     const colormapIndex = localBackup.backup.findIndex(c => c.command === "colormap.map");
 
-    const custom = localBackup.backup[keymapIndex].data
-      .split(" ")
-      .filter(v => v.length > 0)
-      .map((k: string) => parseInt(k, 10))
-      .reduce((resultArray, item, index) => {
-        const localResult = resultArray;
-        const chunkIndex = Math.floor(index / keyLayerSize);
+    const custom = parseKeymapRaw(localBackup.backup[keymapIndex].data, keyLayerSize);
+    const palette = parsePaletteRaw(localBackup.backup[paletteIndex].data, false);
+    const colormap = parseColormapRaw(localBackup.backup[colormapIndex].data, colorLayerSize);
 
-        if (!localResult[chunkIndex]) {
-          localResult[chunkIndex] = []; // start a new chunk
-        }
-        localResult[chunkIndex].push(item);
-        return localResult;
-      }, []);
-    // log.info("CONVERSION 1:", paletteIndex, colormapIndex);
-    const palette = localBackup.backup[paletteIndex].data
-      .split(" ")
-      .filter(v => v.length > 0)
-      .map((k: string) => parseInt(k, 10))
-      .reduce((resultArray, item, index) => {
-        const localResult = resultArray;
-        const chunkIndex = Math.floor(index / 3);
-
-        if (!localResult[chunkIndex]) {
-          localResult[chunkIndex] = []; // start a new chunk
-        }
-        localResult[chunkIndex].push(item);
-        return localResult;
-      }, [])
-      .map(color => ({
-        r: color[0],
-        g: color[1],
-        b: color[2],
-        rgb: `rgb(${color[0]}, ${color[1]}, ${color[2]})`,
-      }));
-    // log.info("CONVERSION 2:", palette);
-    const colormap = localBackup.backup[colormapIndex].data
-      .split(" ")
-      .filter(v => v.length > 0)
-      .map((k: string) => parseInt(k, 10))
-      .reduce((resultArray, item, index) => {
-        const localResult = resultArray;
-        const chunkIndex = Math.floor(index / ColorLayerSize);
-
-        if (!localResult[chunkIndex]) {
-          localResult[chunkIndex] = []; // start a new chunk
-        }
-        localResult[chunkIndex].push(item);
-        return localResult;
-      }, []);
-
-    // log.info("CONVERSION 3:", colormap);
-    const keymapFinal = custom.map((layer: number[]) => {
-      let localLayer = [...layer];
-      // restoring thumbcluster
-      const preT = localLayer.slice(0, 69);
-      const remT = localLayer[69];
-      const movT = localLayer.slice(70, 72);
-      const restT = localLayer.slice(72);
-      localLayer = preT.concat(movT.concat(remT)).concat(restT);
-
-      // if ansi
-      if (dev.device.info.keyboardType === "ANSI") {
-        // Move enter (31<>47)
-        const symbolK = localLayer[31];
-        const enterK = localLayer[47];
-
-        localLayer[31] = enterK;
-        localLayer[47] = symbolK;
-        // Move shift (48<>49)
-        const shiftK = localLayer[48];
-        const extraK = localLayer[49];
-
-        localLayer[48] = extraK;
-        localLayer[49] = shiftK;
-      }
-
-      // if layout !== layout, solve shift & enter
-      return localLayer;
-    });
-
-    // log.info("CONVERSION 4:", colormap);
-    const colormapFinal = colormap.map((layer: number[]) => {
-      const color = layer[130];
-      const rest = layer.slice(0, -1);
-      const result = rest.concat(new Array(45).fill(color));
-
-      if (dev.device.info.keyboardType === "ANSI") {
-        // Move enter (31<>47)
-        const symbolC = result[40];
-        const enterC = result[48];
-
-        result[40] = enterC;
-        result[48] = symbolC;
-      }
-
-      if (dev.device.info.keyboardType === "ANSI" && backup.neuron.device.info.keyboardType === "ISO") {
-        // Move shift (48<>49)
-        const shiftC = result[19];
-        const extraC = result[20];
-
-        result[20] = extraC;
-        result[19] = shiftC;
-      }
-
-      return result;
-    });
-
-    // log.info("CONVERSION 5:", colormap);
-    const paletteFinal = palette
-      .map(color => {
-        const rgbw = rgb2w(color);
-        return [rgbw.r, rgbw.g, rgbw.b, rgbw.w];
-      })
-      .flat()
-      .map(v => v.toString())
-      .join(" ");
+    const keymapFinal = custom.map((layer: number[]) => convertKeymapRtoR2(layer, dev.device.info.keyboardType));
+    const colormapFinal = colormap.map((layer: number[]) =>
+      convertColormapRtoR2(layer, dev.device.info.keyboardType, backup.neuron.device.info.keyboardType),
+    );
+    const paletteFinal = palette.map(color => convertPaletteRtoR2(color));
 
     // log.info("CONVERSION 6:", paletteFinal, colormapFinal);
     localBackup.backup[colormapIndex].data = colormapFinal
@@ -423,7 +322,10 @@ export default class Backup {
       .flat()
       .map(k => k.toString())
       .join(" ");
-    localBackup.backup[paletteIndex].data = paletteFinal;
+    localBackup.backup[paletteIndex].data = paletteFinal
+      .flat()
+      .map(v => v.toString())
+      .join(" ");
 
     log.info("Final Backup:", localBackup.backup);
     return localBackup.backup;

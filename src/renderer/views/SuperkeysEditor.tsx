@@ -40,7 +40,6 @@ import { KeyPickerKeyboard } from "@Renderer/modules/KeyPickerKeyboard";
 
 // Types
 import { SuperkeysEditorInitialStateType, SuperkeysEditorProps } from "@Renderer/types/superkeyseditor";
-import { MacrosType } from "@Renderer/types/macros";
 import { SuperkeysType } from "@Renderer/types/superkeys";
 import { Neuron } from "@Renderer/types/neurons";
 import { KeymapType } from "@Renderer/types/layout";
@@ -52,6 +51,7 @@ import Store from "@Renderer/utils/Store";
 import getLanguage from "@Renderer/utils/language";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import Backup from "../../api/backup";
+import { parseMacrosRaw, parseSuperkeysRaw, serializeKeymap, serializeSuperkeys } from "../../api/parsers";
 
 const store = Store.getStore();
 
@@ -92,39 +92,12 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
   const [isSaving, setIsSaving] = useState(false);
   const [mouseWheel, setMouseWheel] = useState(0);
 
-  const flatten = (arr: unknown[]) => [].concat(...arr);
-
-  const defaultMacro = [
-    {
-      actions: [
-        { keyCode: 229, type: 6, id: 0 },
-        { keyCode: 11, type: 8, id: 1 },
-        { keyCode: 229, type: 7, id: 2 },
-        { keyCode: 8, type: 8, id: 3 },
-        { keyCode: 28, type: 8, id: 4 },
-        { keyCode: 54, type: 8, id: 5 },
-        { keyCode: 44, type: 8, id: 6 },
-        { keyCode: 229, type: 6, id: 7 },
-        { keyCode: 7, type: 8, id: 8 },
-        { keyCode: 229, type: 7, id: 9 },
-        { keyCode: 28, type: 8, id: 10 },
-        { keyCode: 10, type: 8, id: 11 },
-        { keyCode: 16, type: 8, id: 12 },
-        { keyCode: 4, type: 8, id: 13 },
-        { keyCode: 23, type: 8, id: 14 },
-        { keyCode: 8, type: 8, id: 15 },
-      ],
-      id: 0,
-      macro: "RIGHT SHIFT H RIGHT SHIFT E Y , SPACE RIGHT SHIFT D RIGHT SHIFT Y G M A T E",
-      name: "Hey, Dygmate!",
-    },
-  ];
-
   const initialState: SuperkeysEditorInitialStateType = {
     keymap: undefined,
     macros: [],
     superkeys: [],
     storedMacros: [],
+    storedSuper: [],
     neurons: [],
     neuronID: "",
     kbtype: "iso",
@@ -143,132 +116,6 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
   };
   const [state, setState] = useState(initialState);
   const { state: deviceState } = useDevice();
-
-  const macroTranslator = (raw: string) => {
-    const { storedMacros } = state;
-    if (typeof raw === "string" && raw.search(" 0 0") === -1) {
-      return defaultMacro;
-    }
-    const macrosArray = raw.split(" 0 0")[0].split(" ").map(Number);
-
-    // Translate received macros to human readable text
-    const macros = [];
-    let iter = 0;
-    // macros are `0` terminated or when end of macrosArray has been reached, the outer loop
-    // must cycle once more than the inner
-    while (iter <= macrosArray.length) {
-      const actions = [];
-      while (iter < macrosArray.length) {
-        const type = macrosArray[iter];
-        if (type === 0) {
-          break;
-        }
-
-        switch (type) {
-          case 1:
-            actions.push({
-              type,
-              keyCode: [
-                (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)],
-                (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)],
-              ],
-            });
-            break;
-          case 2:
-          case 3:
-          case 4:
-          case 5:
-            actions.push({ type, keyCode: (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)] });
-            break;
-          case 6:
-          case 7:
-          case 8:
-            actions.push({ type, keyCode: macrosArray[(iter += 1)] });
-            break;
-          default:
-            break;
-        }
-
-        iter += 1;
-      }
-      macros.push({
-        actions,
-        name: "",
-        macro: "",
-      });
-      iter += 1;
-    }
-    macros.forEach((m, idx) => {
-      const aux: MacrosType = m;
-      aux.id = idx;
-      macros[idx] = aux;
-    });
-
-    // TODO: Check if stored macros match the received ones, if they match, retrieve name and apply it to current macros
-    const stored = storedMacros;
-    if (stored === undefined || stored.length === 0) {
-      return macros;
-    }
-    return macros.map((macro, i) => {
-      if (stored.length < i) {
-        return macro;
-      }
-
-      return {
-        ...macro,
-        name: stored[i]?.name,
-        macro: macro.actions.map(k => keymapDB.parse(k.keyCode as number).label).join(" "),
-      };
-    });
-  };
-
-  const superTranslator = (raw: string) => {
-    const { neurons, neuronID } = state;
-    const superArray = raw.split(" 0 0")[0].split(" ").map(Number);
-
-    let superkey: number[] = [];
-    const superkeys: SuperkeysType[] = [];
-    let iter = 0;
-    let superindex = 0;
-
-    if (superArray.length < 1) {
-      log.info("Discarded Superkeys due to short length of string", raw, raw.length);
-      return [{ actions: [53, 2101, 1077, 41, 0], name: "Welcome to superkeys", id: superindex }];
-    }
-    // log.info(raw, raw.length);
-    while (superArray.length > iter) {
-      // log.info(iter, raw[iter], superkey);
-      if (superArray[iter] === 0) {
-        superkeys[superindex] = { actions: superkey, name: "", id: superindex };
-        superindex += 1;
-        superkey = [];
-      } else {
-        superkey.push(superArray[iter]);
-      }
-      iter += 1;
-    }
-    superkeys[superindex] = { actions: superkey, name: "", id: superindex };
-
-    if (superkeys[0].actions.length === 0 || superkeys[0].actions.length > 5) {
-      log.info(`Superkeys were empty`);
-      return [];
-    }
-    log.info(`Got Superkeys:${JSON.stringify(superkeys)} from ${raw}`);
-    // TODO: Check if stored superKeys match the received ones, if they match, retrieve name and apply it to current superKeys
-    let finalSuper: SuperkeysType[] = [];
-    const stored = neurons.find(n => n.id === neuronID).superkeys;
-    finalSuper = superkeys.map((superky, i) => {
-      const superk = superky;
-      if (stored.length > i && stored.length > 0) {
-        const aux = superk;
-        aux.name = stored[i].name;
-        return aux;
-      }
-      return superk;
-    });
-    log.info("final superkeys", finalSuper);
-    return finalSuper;
-  };
 
   const onKeyChange = (keyCode: number) => {
     const { superkeys, selectedSuper, selectedAction } = state;
@@ -300,6 +147,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
       state.neurons = neurons;
       state.neuronID = chipID;
       state.storedMacros = neuron.macros;
+      state.storedSuper = neuron.superkeys;
       setState({ ...state });
       const deviceLang = { ...currentDevice.device, language: true };
       currentDevice.commands.keymap = new Keymap(deviceLang);
@@ -347,9 +195,9 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
       keymap.onlyCustom = onlyCustom;
       // Macros
       const macrosRaw = await currentDevice.command("macros.map");
-      const parsedMacros = macroTranslator(macrosRaw);
+      const parsedMacros = parseMacrosRaw(macrosRaw, state.storedMacros);
       const supersRaw = await currentDevice.command("superkeys.map");
-      const parsedSuper = superTranslator(supersRaw);
+      const parsedSuper = parseSuperkeysRaw(supersRaw, state.storedSuper);
       state.modified = false;
       state.macros = parsedMacros;
       state.superkeys = parsedSuper;
@@ -368,37 +216,6 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
       onDisconnect();
     }
     return true;
-  };
-
-  const superkeyMap = (superkeys: SuperkeysType[]) => {
-    if (
-      superkeys.length === 0 ||
-      (superkeys.length === 1 && superkeys[0].actions.length === 0) ||
-      (superkeys.length === 1 && superkeys[0].actions.length === 1 && superkeys[0].actions[0] === 0)
-    ) {
-      return Array(512).fill("65535").join(" ");
-    }
-    let keyMap = JSON.parse(JSON.stringify(superkeys));
-    log.info("First", JSON.stringify(keyMap));
-    keyMap = keyMap.map((sky: SuperkeysType) => {
-      const sk = sky;
-      sk.actions = sk.actions.map(act => {
-        if (act === 0 || act === null || act === undefined) return 1;
-        return act;
-      });
-      if (sk.actions.length < 5) sk.actions = sk.actions.concat(Array(5 - sk.actions.length).fill(1));
-      return sk;
-    });
-    log.info("Third", JSON.parse(JSON.stringify(keyMap)));
-    const mapped = keyMap
-      .map((superkey: SuperkeysType) => superkey.actions.filter(act => act !== 0).concat([0]))
-      .flat()
-      .concat([0])
-      .join(" ")
-      .split(",")
-      .join(" ");
-    log.info("Mapped superkeys: ", mapped, keyMap);
-    return mapped;
   };
 
   const changeSelected = (id: number) => {
@@ -465,15 +282,11 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
     log.info("Loaded neurons: ", JSON.stringify(localNeurons));
     try {
       store.set("neurons", localNeurons);
-      const sendSK = superkeyMap(superkeys);
+      const sendSK = serializeSuperkeys(superkeys);
       log.info("Mod superK", sendSK);
       await currentDevice.command("superkeys.map", sendSK);
       if (modifiedKeymap) {
-        const args = flatten(keymap.custom)
-          .map(k => keymapDB.serialize(k))
-          .join(" ");
-        log.info("Mod keymap", args);
-        await currentDevice.command("keymap.custom", args);
+        await currentDevice.command("keymap.custom", serializeKeymap(keymap.custom));
       }
       state.modified = false;
       state.modifiedKeymap = false;

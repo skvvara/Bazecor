@@ -1,0 +1,121 @@
+/* eslint-disable no-bitwise */
+import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
+import { KeymapDB } from "../keymap";
+
+const macrosEraser = (tMem: number) => Array(tMem).fill("255").join(" ");
+
+export const parseMacrosRaw = (raw: string, storedMacros?: MacrosType[]) => {
+  const keymapDB = new KeymapDB();
+  const macrosArray = raw.split(" 0 0")[0].split(" ").map(Number);
+
+  // Translate received macros to human readable text
+  const macros: MacrosType[] = [];
+  let iter = 0;
+  // macros are `0` terminated or when end of macrosArray has been reached, the outer loop
+  // must cycle once more than the inner
+  while (iter <= macrosArray.length) {
+    const actions: MacroActionsType[] = [];
+    while (iter < macrosArray.length) {
+      const type = macrosArray[iter];
+      if (type === 0) {
+        break;
+      }
+
+      switch (type) {
+        case 1:
+          actions.push({
+            type,
+            keyCode: [
+              (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)],
+              (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)],
+            ],
+          });
+          break;
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+          actions.push({ type, keyCode: (macrosArray[(iter += 1)] << 8) + macrosArray[(iter += 1)] });
+          break;
+        case 6:
+        case 7:
+        case 8:
+          actions.push({ type, keyCode: macrosArray[(iter += 1)] });
+          break;
+        default:
+          break;
+      }
+
+      iter += 1;
+    }
+    macros.push({
+      actions,
+      name: "",
+      macro: "",
+    });
+    iter += 1;
+  }
+  macros.forEach((m, idx) => {
+    const aux = m;
+    aux.id = idx;
+    macros[idx] = aux;
+  });
+
+  // TODO: Check if stored macros match the received ones, if they match, retrieve name and apply it to current macros
+  const stored = storedMacros;
+  if (stored === undefined || stored.length === 0) {
+    return macros;
+  }
+  return macros.map((macro, i) => {
+    if (stored.length < i) {
+      return macro;
+    }
+
+    return {
+      ...macro,
+      name: stored[i]?.name,
+      macro: macro.actions.map(k => keymapDB.parse(k.keyCode as number).label).join(" "),
+    };
+  });
+};
+
+export const serializeMacros = (macros: MacrosType[], tMem: number) => {
+  // log.info(
+  //   "Macros map function",
+  //   macros,
+  //   macrosEraser,
+  //   macros.length === 0,
+  //   macros.length === 1 && Array.isArray(macros[0].actions),
+  // );
+  if (macros.length === 0 || (macros.length === 1 && !Array.isArray(macros[0].actions))) {
+    return macrosEraser(tMem);
+  }
+  const mapAction = (action: MacroActionsType): number[] => {
+    switch (action.type) {
+      case 1:
+        return [
+          action.type,
+          (action.keyCode as number[])[0] >> 8,
+          (action.keyCode as number[])[0] & 255,
+          (action.keyCode as number[])[1] >> 8,
+          (action.keyCode as number[])[1] & 255,
+        ];
+      case 2:
+      case 3:
+      case 4:
+      case 5:
+        return [action.type, (action.keyCode as number) >> 8, (action.keyCode as number) & 255];
+      default:
+        return [action.type, action.keyCode as number];
+    }
+  };
+  const result: string = macros
+    .map(macro => macro.actions.map((action: MacroActionsType) => mapAction(action)).concat([0]))
+    .flat()
+    .concat([0])
+    .join(" ")
+    .split(",")
+    .join(" ");
+  // log.info("MACROS GOING TO BE SAVED", result);
+  return result;
+};
