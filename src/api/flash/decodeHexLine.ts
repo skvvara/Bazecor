@@ -1,57 +1,40 @@
-export interface DecodedHexLine {
-  str: string;
-  len: number;
-  address: number;
-  type: number;
-  data: Uint8Array;
+function hex2byte(hex: string) {
+  const bytes = [];
+
+  for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substring(i, i + 2), 16));
+
+  return bytes;
 }
 
 /**
  * Decodes hex line to object.
- * Format of hex line string input:
- *  [0,1] = uint8 - Data length (in bytes)
- *  [2,5] = uint16 - Address
- *  [6,7] = uint8 - Record Type
- *  [8, (n*2)+8] = uint8[] - Data
  * @param line - One line from hex file.
  * @returns Struct for use in firmware.
  */
-export function decodeHexLine(line: string): DecodedHexLine {
-  if (line.length < 8) {
-    // Input not long enough to cover zero length with address and record type.
-    // TODO: Probably should exit early with undefined/error
-    // return undefined;
-  }
+export function decodeHexLine(line: string) {
+  let offset = 0;
 
-  const len = parseInt(line.substring(0, 2), 16);
+  const byteCount = parseInt(line.substring(offset, offset + 2), 16);
+  offset += 2;
+  const address = parseInt(line.substring(offset, offset + 4), 16);
+  offset += 4;
+  const recordtype = parseInt(line.substring(offset, offset + 2), 16);
+  offset += 2;
 
-  // Can remove this if exiting early due to invalid length
-  let lengthOfData = len;
+  const byteData = hex2byte(line.substring(offset, offset + byteCount * 2));
 
-  if (len * 2 + 8 !== line.length) {
-    // Input of incorrect size
-    // TODO: Probably should exit early with undefined/error
-    // return undefined;
+  const bytes = new ArrayBuffer(byteData.length);
+  const bytesView = new Uint8Array(bytes, 0, byteData.length);
 
-    // To preserve existing logic, hack the length to the remainder of the input/2
-    lengthOfData = line.length <= 8 ? 0 : Math.floor((line.length - 8) / 2);
-  }
-
-  const address = parseInt(line.substring(2, 6), 16);
-  const type = parseInt(line.substring(6, 8), 16);
-
-  const data = new Uint8Array(lengthOfData);
-  let index = 0;
-  for (let offset = 8; offset < line.length; offset += 2) {
-    data[index] = parseInt(line.substring(offset, offset + 2), 16);
-    index += 1;
+  for (let i = 0; i < byteData.length; i += 1) {
+    bytesView[i] = byteData[i];
   }
 
   return {
     str: line,
-    len,
+    len: byteCount,
     address,
-    type,
-    data,
+    type: recordtype,
+    data: bytesView,
   };
 }
