@@ -1186,10 +1186,10 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   };
 
   const importLayer = (data: {
-    device: DygmaDeviceInfoType;
-    language: string;
+    device?: DygmaDeviceInfoType;
+    language?: string;
     layerNames: LayerType[];
-    layerName: string;
+    layerName?: string;
     keymap: KeyType[];
     colormap: number[];
     palette: PaletteType[];
@@ -1209,12 +1209,12 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     }
     let cleanKeymap: KeyType[];
     let cleanColormap: number[];
-    if (currentDevice?.device.info.product === "Raise2" && data.device.product === "Raise") {
+    if (currentDevice?.device.info.product === "Raise2" && (data.device?.product === "Raise" || data.colormap.length === 132)) {
       cleanKeymap = convertKeymapRtoR2(
         data.keymap.map(k => k.keyCode),
         currentDevice?.device.info.keyboardType,
       ).map(k => keymapDB.parse(k));
-      cleanColormap = convertColormapRtoR2(data.colormap, currentDevice?.device.info.keyboardType, data.device.keyboardType);
+      cleanColormap = convertColormapRtoR2(data.colormap, currentDevice?.device.info.keyboardType, "Raise");
     } else {
       cleanKeymap = data.keymap.map(key => {
         let localKey = key;
