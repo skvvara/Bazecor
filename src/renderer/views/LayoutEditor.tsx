@@ -885,6 +885,11 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     const keyIndex = parseInt(currentTarget.getAttribute("data-key-index"), 10);
     const ledIndex = parseInt(currentTarget.getAttribute("data-led-index"), 10);
 
+    if (keyIndex === currentKeyIndex) {
+      setCurrentKeyIndex(-1);
+      return;
+    }
+
     setCurrentLayer(layer);
     if (colorMap.length > 0 && layer >= 0 && layer < colorMap.length) {
       setCurrentKeyIndex(keyIndex);
