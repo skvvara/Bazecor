@@ -885,6 +885,11 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     const keyIndex = parseInt(currentTarget.getAttribute("data-key-index"), 10);
     const ledIndex = parseInt(currentTarget.getAttribute("data-led-index"), 10);
 
+    if (keyIndex === currentKeyIndex) {
+      setCurrentKeyIndex(-1);
+      return;
+    }
+
     setCurrentLayer(layer);
     if (colorMap.length > 0 && layer >= 0 && layer < colorMap.length) {
       setCurrentKeyIndex(keyIndex);
@@ -1186,10 +1191,10 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   };
 
   const importLayer = (data: {
-    device: DygmaDeviceInfoType;
-    language: string;
+    device?: DygmaDeviceInfoType;
+    language?: string;
     layerNames: LayerType[];
-    layerName: string;
+    layerName?: string;
     keymap: KeyType[];
     colormap: number[];
     palette: PaletteType[];
@@ -1209,12 +1214,12 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     }
     let cleanKeymap: KeyType[];
     let cleanColormap: number[];
-    if (currentDevice?.device.info.product === "Raise2" && data.device.product === "Raise") {
+    if (currentDevice?.device.info.product === "Raise2" && (data.device?.product === "Raise" || data.colormap.length === 132)) {
       cleanKeymap = convertKeymapRtoR2(
         data.keymap.map(k => k.keyCode),
         currentDevice?.device.info.keyboardType,
       ).map(k => keymapDB.parse(k));
-      cleanColormap = convertColormapRtoR2(data.colormap, currentDevice?.device.info.keyboardType, data.device.keyboardType);
+      cleanColormap = convertColormapRtoR2(data.colormap, currentDevice?.device.info.keyboardType, "Raise");
     } else {
       cleanKeymap = data.keymap.map(key => {
         let localKey = key;
@@ -1461,9 +1466,8 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   const modeSelectToggle = (data: ModeType) => {
     setSelectedPaletteColor(null);
     setIsColorButtonSelected(false);
-    if (data === "keyboard") {
-      setCurrentLedIndex(-1);
-    }
+    setCurrentLedIndex(-1);
+    setCurrentKeyIndex(-1);
     setModeselect(data);
   };
 
