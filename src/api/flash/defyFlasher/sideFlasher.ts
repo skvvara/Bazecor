@@ -117,8 +117,11 @@ export default class SideFlaser {
       // Update process
       // log.info(this.firmwareSides);
       const seal = recoverSeal(this.firmwareSides.slice(0, 28));
-      log.info("This is the seal", seal);
-      // console.dir(seal);
+      // log.info("This is the seal from the FW file");
+      // eslint-disable-next-line no-console
+      console.info("This is the seal from the Neuron");
+      // eslint-disable-next-line no-console
+      console.table(seal);
 
       // Serial port instancing
       if (this.serialport !== undefined) {
@@ -166,7 +169,7 @@ export default class SideFlaser {
       // Begin upgrade process for selected side
       let ans;
       const sideId = side === "right" ? 0 : 1;
-      log.info("going to start writing to Neuron");
+      log.info(`going to start writing to the ${side} side`);
       this.serialport.write(`upgrade.keyscanner.isConnected ${sideId}\n`);
       const testRead = await readLine();
       log.info("testing after first read", testRead);
@@ -187,7 +190,7 @@ export default class SideFlaser {
       await readLine();
       ans = await readLine();
       if ((ans as string).trim() !== "true") {
-        log.info("not returned true when begin!!!", ans);
+        log.error("not returned true when begin!!!", ans);
         return {
           error: true,
           message: `${side} side disconnected from keyboard\n`,
@@ -206,6 +209,12 @@ export default class SideFlaser {
         programCrc: parseInt(ans[3], 10),
         validation: parseInt(ans[4], 10),
       };
+
+      // log.info("This is the seal from the Neuron");
+      // eslint-disable-next-line no-console
+      console.info("This is the seal from the Neuron");
+      // eslint-disable-next-line no-console
+      console.table(info);
 
       // Write Firmware FOR Loop
       let step = 0;
