@@ -14,7 +14,7 @@ export const parseMacrosRaw = (raw: string, storedMacros?: MacrosType[]) => {
   // macros are `0` terminated or when end of macrosArray has been reached, the outer loop
   // must cycle once more than the inner
   while (iter <= macrosArray.length) {
-    const actions: MacroActionsType[] = [];
+    let actions: MacroActionsType[] = [];
     while (iter < macrosArray.length) {
       const type = macrosArray[iter];
       if (type === 0) {
@@ -48,6 +48,15 @@ export const parseMacrosRaw = (raw: string, storedMacros?: MacrosType[]) => {
 
       iter += 1;
     }
+    actions = actions.filter(a => {
+      let result;
+      if (Array.isArray(a.keyCode)) {
+        a.keyCode.filter(k => !Number.isNaN(k));
+      } else {
+        result = !Number.isNaN(a.keyCode);
+      }
+      return result;
+    });
     macros.push({
       actions,
       name: "",
@@ -91,6 +100,12 @@ export const serializeMacros = (macros: MacrosType[], tMem: number) => {
     return macrosEraser(tMem);
   }
   const mapAction = (action: MacroActionsType): number[] => {
+    if (
+      Array.isArray(action.keyCode)
+        ? Number.isNaN(action.keyCode[0]) || Number.isNaN(action.keyCode[1])
+        : Number.isNaN(action.keyCode)
+    )
+      return [];
     switch (action.type) {
       case 1:
         return [

@@ -53,7 +53,7 @@ class HID {
         const [nme, wless, ly] = device.productName.split(" ")[0].split("-");
         name = nme;
         wireless = wless.includes("Wless");
-        layout = ly.includes("A") ? "ANSI" : "ISO";
+        layout = ly.includes("I") ? "ISO" : "ANSI";
         log.info("Raise2 Data", name, wireless, layout);
       }
       for (const Hdevice of Hardware.serial) {

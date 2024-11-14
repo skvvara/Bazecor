@@ -20,6 +20,8 @@ import React, { useEffect, useState, useRef } from "react";
 import { toast } from "react-toastify";
 import Styled from "styled-components";
 import log from "electron-log/renderer";
+import { ipcRenderer } from "electron";
+import fs from "fs";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@Renderer/components/atoms/Select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@Renderer/components/atoms/Dialog";
@@ -39,7 +41,7 @@ import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
 // Components
 import LogoLoader from "@Renderer/components/atoms/loader/LogoLoader";
 import { Button } from "@Renderer/components/atoms/Button";
-import { IconFloppyDisk, IconLoader } from "@Renderer/components/atoms/icons";
+import { IconArrowDownWithLine, IconArrowUpWithLine, IconFloppyDisk, IconLoader } from "@Renderer/components/atoms/icons";
 import MacroSelector from "@Renderer/components/organisms/Select/MacroSelector";
 import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import Callout from "@Renderer/components/molecules/Callout/Callout";
@@ -498,6 +500,122 @@ function MacroEditor(props: MacroEditorProps) {
     setLoading(state.loading);
   };
 
+  const parseImportedMacro = (macro: MacrosType) => {
+    const { macros, maxMacros } = state;
+    if (macros.length >= maxMacros) {
+      <ToastMessage
+        title={i18n.errors.preferenceFailOnSave}
+        content={i18n.errors.tooManyMacros}
+        icon={<IconArrowDownWithLine />}
+      />;
+      return;
+    }
+    const aux = macros;
+    const newID = aux.length;
+    aux.push({
+      actions: macro.actions,
+      name: macro.name,
+      id: newID,
+      macro: macro.macro,
+    });
+    updateMacros(aux);
+    changeSelected(newID);
+  };
+
+  const importMacro = async () => {
+    const options = {
+      title: "Load Macro file",
+      buttonLabel: "Load Macro",
+      filters: [
+        { name: "Json", extensions: ["json"] },
+        { name: "All Files", extensions: ["*"] },
+      ],
+    };
+
+    const resp = await ipcRenderer.invoke("open-dialog", options);
+    if (!resp.canceled) {
+      // log.info(resp.filePaths);
+      try {
+        const importedMacro: MacrosType = JSON.parse(fs.readFileSync(resp.filePaths[0], "utf-8"));
+        // log.info("Imported macro is: ", importedMacro);
+        parseImportedMacro(importedMacro);
+        toast.success(
+          <ToastMessage
+            title={i18n.editor.importSuccessCurrentLayerTitle}
+            content={i18n.editor.importSuccessCurrentMacro}
+            icon={<IconArrowDownWithLine />}
+          />,
+          {
+            autoClose: 2000,
+            icon: "",
+          },
+        );
+      } catch (e) {
+        log.error(e);
+        toast.error(
+          <ToastMessage
+            title={i18n.errors.preferenceFailOnSave}
+            content={i18n.errors.invalidMacroFile}
+            icon={<IconArrowDownWithLine />}
+          />,
+          {
+            autoClose: 2000,
+            icon: "",
+          },
+        );
+      }
+    } else {
+      log.info("user closed SaveDialog");
+    }
+  };
+  const exportMacro = async () => {
+    const { macros, selectedMacro } = state;
+    const data = JSON.stringify(macros[selectedMacro]);
+    const options = {
+      title: "Save Macro file",
+      defaultPath: `Macro${selectedMacro}-${macros[selectedMacro].name}.json`,
+      buttonLabel: "Save Macro",
+      filters: [
+        { name: "Json", extensions: ["json"] },
+        { name: "All Files", extensions: ["*"] },
+      ],
+    };
+
+    try {
+      const path = await ipcRenderer.invoke("save-dialog", options);
+      if (typeof path !== "undefined") {
+        log.info("path & data to export to: ", path, data);
+        fs.writeFileSync(path, data);
+        toast.success(
+          <ToastMessage
+            title={i18n.editor.exportSuccessCurrentLayer}
+            content={i18n.editor.exportSuccessCurrentMacroContent}
+            icon={<IconArrowUpWithLine />}
+          />,
+          {
+            autoClose: 2000,
+            icon: "",
+          },
+        );
+      } else {
+        log.info("user closed SaveDialog");
+      }
+    } catch (error) {
+      log.error(error);
+      toast.error(
+        <ToastMessage
+          title={i18n.errors.exportFailed}
+          content={i18n.errors.exportError + error}
+          icon={<IconArrowUpWithLine />}
+        />,
+        {
+          autoClose: 2000,
+          icon: "",
+        },
+      );
+    }
+  };
+
   useEffect(() => {
     const macrosLoader = async () => {
       const { setLoading } = props;
@@ -514,7 +632,6 @@ function MacroEditor(props: MacroEditorProps) {
 
   const {
     macros,
-    maxMacros,
     modified,
     selectedList,
     selectedMacro,
@@ -602,7 +719,8 @@ function MacroEditor(props: MacroEditorProps) {
               deleteItem={deleteMacro}
               updateItem={saveName}
               cloneItem={duplicateMacro}
-              maxMacros={maxMacros}
+              importMacro={importMacro}
+              exportMacro={exportMacro}
               mem={usedMemory}
               tMem={totalMemory}
             />
