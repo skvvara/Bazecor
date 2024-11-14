@@ -133,7 +133,7 @@ function EnergyManagement(props: EnergyManagementProps) {
             <div className={`flex flex-col pt-3 ${!wireless.true_sleep ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
               <div className="block w-full relative">
                 <Slider
-                  min={0}
+                  min={1}
                   max={60}
                   step={1}
                   value={[Math.round(wireless.true_sleep_time / 60)]}

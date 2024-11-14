@@ -21,24 +21,50 @@ import { i18n } from "@Renderer/i18n";
 import NameModal from "@Renderer/components/molecules/CustomModal/ModalName";
 import MacrosMemoryUsage from "@Renderer/modules/Macros/MacrosMemoryUsage";
 
-import { IconDelete, IconPen, IconClone, IconAddNew } from "@Renderer/components/atoms/icons";
-
+import {
+  IconDelete,
+  IconPen,
+  IconClone,
+  IconAddNew,
+  IconSettings,
+  IconArrowUpWithLine,
+  IconArrowDownWithLine,
+} from "@Renderer/components/atoms/icons";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@Renderer/components/atoms/DropdownMenu";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@Renderer/components/atoms/Select";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@Renderer/components/atoms/Tooltip";
 import { Button } from "@Renderer/components/atoms/Button";
+import { MacrosType } from "@Renderer/types/macros";
 
-interface ItemList {
-  id: number;
-  name: string;
+interface MacroSelectorProps {
+  onSelect: (value: number) => void;
+  deleteItem: () => void;
+  addItem: (name: string) => void;
+  cloneItem: () => void;
+  importMacro: () => void;
+  exportMacro: () => void;
+  updateItem: (name: string) => void;
+  itemList: MacrosType[];
+  selectedItem: number;
+  subtitle: string;
+  mem: number;
+  tMem: number;
 }
 
-const MacroSelector: React.FC<any> = ({
+const MacroSelector: React.FC<MacroSelectorProps> = ({
   onSelect,
   itemList,
   selectedItem,
   deleteItem,
   addItem,
   cloneItem,
+  importMacro,
+  exportMacro,
   subtitle,
   mem,
   tMem,
@@ -62,13 +88,13 @@ const MacroSelector: React.FC<any> = ({
   return (
     <div className="flex items-center gap-1">
       <div className="itemListelector dropdownMultipleActions max-w-[350px] min-w-[350px]">
-        <Select onValueChange={value => onSelect(parseInt(value, 10))} value={selectedItem}>
-          <SelectTrigger variant="combo" className="pr-[126px]">
+        <Select onValueChange={value => onSelect(parseInt(value, 10))} value={String(selectedItem)}>
+          <SelectTrigger variant="combo" className="pr-[80px]">
             {/* dropdownListInner */}
             <div className="flex flex-nowrap items-center">
               {/* dropdownListNumber */}
               <div className="relative self-center w-[34px] text-center pr-[8px] text-[13px] font-semibold tracking-tight text-gray-500 dark:text-gray-200 after:content-[' '] after:absolute after:flex after:w-[1px] after:h-[30px] after:right-0 after:top-1/2 after:transform-style-3d after:translate-y-[-50%] after:bg-gray-200/50 dark:after:bg-gray-500/50">
-                {itemList.length === 0 ? "#0" : `#${parseInt(selectedItem, 10) + 1}`}
+                {itemList.length === 0 ? "#0" : `#${selectedItem + 1}`}
               </div>
               {/* dropdownListItem style={{ width: "calc(100% - 42px)" }} */}
               <div className="flex flex-wrap pl-[12px] leading-[1.25em] text-left">
@@ -88,45 +114,38 @@ const MacroSelector: React.FC<any> = ({
             </div>
           </SelectTrigger>
           <SelectContent>
-            {itemList.map((item: ItemList, i: string) => (
-              <SelectItem key={`item-macro-id-${item.id}`} value={i}>
+            {itemList.map((item, i) => (
+              <SelectItem key={`item-macro-id-${item.id}`} value={String(i)}>
                 <em className="itemIndex inline-block w-7 mr-1 text-right not-italic">#{i + 1}.</em>
                 {item.name === "" ? i18n.general.noname : item.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
+        <div className="absolute top-1 right-[44px]">
+          <DropdownMenu>
+            <DropdownMenuTrigger>
+              <div className="flex w-[36px] h-[36px] rounded-md items-center justify-center shadow-none p-0 text-purple-300 dark:text-white hover:text-purple-300 hover:dark:text-gray-50 bg-gradient-to-r from-gray-100/40 to-gray-25/40 hover:from-gray-70 hover:to-gray-25 dark:bg-none dark:bg-gray-600 dark:hover:bg-gray-500">
+                <IconSettings />
+              </div>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="min-w-56">
+              <DropdownMenuItem className="flex gap-2" onSelect={toggleShow}>
+                <IconPen /> {i18n.app.menu.changeName}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex gap-2" onSelect={exportMacro}>
+                <IconArrowUpWithLine /> {i18n.editor.macros.exportTitle}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex gap-2" onSelect={importMacro}>
+                <IconArrowDownWithLine /> {i18n.editor.macros.importTitle}
+              </DropdownMenuItem>
+              <DropdownMenuItem className="flex gap-2" onSelect={cloneItem}>
+                <IconClone /> {i18n.editor.macros.clone}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
         <div className="absolute top-[2px] right-[2px] flex gap-0.5 p-0.5">
-          <TooltipProvider delayDuration={50}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <Button variant="config" size="icon" onClick={toggleShow} className="!w-[36px] !h-[36px]">
-                    <IconPen />
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs" side="bottom" size="sm">
-                {i18n.app.menu.changeName}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
-          <TooltipProvider delayDuration={50}>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <div>
-                  <Button variant="config" size="icon" onClick={cloneItem} className="!w-[36px] !h-[36px]">
-                    <IconClone />
-                  </Button>
-                </div>
-              </TooltipTrigger>
-              <TooltipContent className="max-w-xs" side="bottom" size="sm">
-                {i18n.general.clone}
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-
           <TooltipProvider delayDuration={50}>
             <Tooltip>
               <TooltipTrigger asChild>
