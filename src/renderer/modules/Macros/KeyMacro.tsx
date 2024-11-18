@@ -72,10 +72,31 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
   const [delay, setDelay] = useState<number | number[]>(item.keyCode);
   const [enableEdit, setEnableEdit] = useState(false);
 
+  const setDelayHandler = (value: string) => {
+    const randomDelay = Array.isArray(item.keyCode);
+    const allNumbers = randomDelay ? value.split("-").filter(v => v !== "").length === 2 : value !== "";
+
+    if (allNumbers) {
+      if (randomDelay) {
+        const newDelay = value
+          .trim()
+          .split("-")
+          .map(s => parseInt(s, 10));
+        setDelay(newDelay);
+      } else {
+        setDelay(parseInt(value, 10));
+      }
+    } else {
+      setDelay(randomDelay ? [0, 0] : 0);
+    }
+  };
+
   const finishDelayEdit = () => {
     editDelay(item.id, delay);
     setEnableEdit(false);
   };
+
+  const visualKeycode = Array.isArray(item.keyCode) ? item.keyCode.join("-") : item.keyCode;
 
   return (
     <div>
@@ -124,20 +145,11 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                               id="changeDelay"
                               type="text"
                               value={Array.isArray(delay) ? `${delay[0]}-${delay[1]}` : `${delay}`}
-                              onChange={event =>
-                                event.target.value.includes("-")
-                                  ? setDelay(
-                                      event.target.value
-                                        .trim()
-                                        .split("-")
-                                        .map(s => parseInt(s, 10)),
-                                    )
-                                  : setDelay(parseInt(event.target.value, 10))
-                              }
-                              className="form-input form-input-lg"
+                              onChange={event => setDelayHandler(event.target.value)}
+                              className="form-input form-input-lg p-3 align-top"
                             />
                           ) : (
-                            item.keyCode
+                            visualKeycode
                           )}
                           {(item.type === 1 || item.type === 2) && !enableEdit ? <small>ms</small> : ""}
                           {(item.type === 1 || item.type === 2) && !enableEdit ? (
@@ -148,8 +160,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             ""
                           )}
                           {(item.type === 1 || item.type === 2) && enableEdit ? (
-                            <Button variant="ghost" onClick={() => finishDelayEdit()}>
-                              <IconCheckmark />{" "}
+                            <Button variant="ghost" onClick={() => finishDelayEdit()} className="pl-3">
+                              <IconCheckmark size="md" />{" "}
                             </Button>
                           ) : (
                             ""
