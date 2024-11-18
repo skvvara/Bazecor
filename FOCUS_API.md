@@ -72,7 +72,11 @@ Commands to help you with the testing and settings of the raise's leds
 
 [led.brightness](#ledbrightness)
 
+[led.brightness.wireless](#ledbrightnesswireless)
+
 [led.brightnessUG](#ledbrightnessUG)
+
+[led.brightnessUG.wireless](#ledbrightnessUGwireless)
 
 [led.theme](#ledtheme)
 
@@ -89,6 +93,12 @@ Commands to read/write the color palette and colorMap from the raise to change i
 Time to wait until turning the led's off
 
 [idleleds.time_limit](#idleledstime_limit)
+
+[idleleds.wireless](#idleledswireless)
+
+[idleleds.true_sleep](#idleledstrue_sleep)
+
+[idleleds.true_sleep_time](#idleledstrue_sleep_time)
 
 **Hardware Section**
 
@@ -167,6 +177,26 @@ Layer commands to switch between them (for example when changing a from a progra
 [layer.moveTo](#layermoveto)
 
 [layer.state](#layerstate)
+
+**Wireless Section**
+
+Wireless commands are only supported on the wireless hardware devices, like the Defy wireless and the Raise 2 wireless, other products should not enumerate these commands when using ```help```
+
+[wireless.battery.left.level](#wirelessbatteryleftlevel)
+
+[wireless.battery.left.status](#wirelessbatteryleftstatus)
+
+[wireless.battery.right.level](#wirelessbatteryrightlevel)
+
+[wireless.battery.right.status](#wirelessbatteryrightstatus)
+
+[wireless.battery.savingMode](#wirelessbatterysavingMode)
+
+[wireless.battery.forceRead](#wirelessbatteryforceRead)
+
+[wireless.rf.syncPairing](#wirelessrfsyncPairing)
+
+[wireless.rf.power](#wirelessrfpower)
 
 ### version
 
@@ -626,9 +656,7 @@ The keyboard will either return the current effect being displayed following it'
 
 ### led.brightness
 
-This command reads/writes the brightness setting for the Backlight LEDs stored in the EEPROM
-
-When applied to the Defy keyboard, additional commands are available to modify the behavior when in wireless mode, this one remains and only affects wired mode.
+This command reads/writes the brightness setting for the Backlight LEDs stored in the EEPROM for wired operation
 
 #### Commands
 
@@ -659,11 +687,44 @@ To set:
 This function allows you to get/set the current brightness of the backlight LEDs of your keyboard.
 
 the return value will be the same as the sent one, a 8 bit integer (number between 0 and 255)
+
+### led.brightness.wireless
+
+This command reads/writes the wireless brightness setting for the Backlight LEDs stored in the EEPROM, this command modifies the behavior only when in wireless mode, when in wired the ``led.brightness`` value is applied.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("led.brightness.wireless")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'led.brightness.wireless' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("led.brightness.wireless 210")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'led.brightness.wireless 210' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+This function allows you to get/set the current wireless brightness of the backlight LEDs for your keyboard.
+
+the return value will be the same as the sent one, a 8 bit integer (number between 0 and 255)
+
 ### led.brightnessUG
 
-This command reads/writes the brightness setting for the Underglow stored in the EEPROM
-
-When applied to the Defy keyboard, additional commands are available to modify the behavior when in wireless mode, these one remain and only affect wired mode.
+This command reads/writes the brightness setting for the Underglow stored in the EEPROM for wired operation
 
 #### Commands
 
@@ -687,6 +748,40 @@ To set:
 - Serial Command (Unix):
   ```shell
   echo 'led.brightnessUG 210' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+This function allows you to get/set the current brightness of the Underglow LEDs of your keyboard.
+
+the return value will be the same as the sent one, a 8 bit integer (number between 0 and 255)
+
+### led.brightnessUG.wireless
+
+This command reads/writes the wireless brightness setting for the Underglow stored in the EEPROM, this command modifies the behavior only when in wireless mode, when in wired the ``led.brightnessUG`` value is applied.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("led.brightnessUG.wireless")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'led.brightnessUG.wireless' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("led.brightnessUG.wireless 210")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'led.brightnessUG.wireless 210' > /dev/ttyACM0
   ```
 
 #### Expected output
@@ -831,6 +926,102 @@ To set:
 #### Expected output
 
 returns the current time stored in the EEPROM and allows you to set it to another time, not exceding 65k seconds
+
+### idleleds.wireless
+
+This command reads/writes the idle led time for keyboards connected through wireless to be turned off in N seconds, replaces the time_limit for wireless operation mode, letting you have a different time to disable the LEDs on wired or wireless modes.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("idleleds.wireless")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'idleleds.wireless' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("idleleds.wireless 600")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'idleleds.wireless 600' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+returns the current time stored in the EEPROM and allows you to set it to another time, not exceding 65k seconds
+
+### idleleds.true_sleep
+
+This command reads/writes the enable/disable of the true sleep function, in which the deivce sleeps deeper. This deep sleep is triggered after ``idleleds.wireless`` seconds when it's already beyond the ``idleleds.time_limit`` time.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("idleleds.true_sleep")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'idleleds.true_sleep' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("idleleds.true_sleep 1")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'idleleds.true_sleep 1' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+returns true_sleep enable/disable as 1 / 0 values and allows you to set it back.
+
+### idleleds.true_sleep_time
+
+This command reads/writes the true sleep time for keyboards connected through wireless. the function puts into deep sleep the keyboard to save energy when not in use, this function, once enabled, it will start counting this time to trigger deep sleep after ``idleleds.time_limit`` seconds.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("idleleds.true_sleep_time")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'idleleds.true_sleep_time' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("idleleds.true_sleep_time 600")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'idleleds.true_sleep_time 600' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+returns the current true_sleep_time stored in the EEPROM and allows you to set it to another time, not exceding 65k seconds
 
 ### hardware.version
 
@@ -1248,4 +1439,214 @@ To use:
 This is the typical answer when the first layer is active:
 ```shell
 '1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 '
-``````
+```
+
+### wireless.battery.left.level
+
+This command allows the user to check the remaining battery level of the left side of a wireless keyboard like the Defy or the Raise 2.
+
+#### Commands
+
+To use:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.left.level")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.left.level' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+the output will be a charge percentage between 0 and 100%.
+
+### wireless.battery.left.status
+
+This command allows the user to check the battery status of the left side of a wireless keyboard like the Defy or the Raise 2.
+
+#### Commands
+
+To use:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.left.status")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.left.status' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+the status command will give back a status code, this code will be a number between 0 and 4:
+
+0. The battery is in normal/drain mode, being actively discharged
+1. The battery is charging
+2. The battery is fully charged
+3. The battery is faulty or has some reading error
+4. The battery is physically disconnected from the RF Board
+
+any other number is considered an error.
+
+### wireless.battery.right.level
+
+This command allows the user to check the remaining battery level of the right side of a wireless keyboard like the Defy or the Raise 2.
+
+#### Commands
+
+To use:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.right.level")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.right.level' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+the output will be a charge percentage between 0 and 100%.
+
+### wireless.battery.right.status
+
+This command allows the user to check the battery status of the right side of a wireless keyboard like the Defy or the Raise 2.
+
+#### Commands
+
+To use:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.right.status")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.right.status' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+the status command will give back a status code, this code will be a number between 0 and 4:
+
+0. The battery is in normal/drain mode, being actively discharged
+1. The battery is charging
+2. The battery is fully charged
+3. The battery is faulty or has some reading error
+4. The battery is physically disconnected from the RF Board
+
+any other number is considered an error.
+
+### wireless.battery.savingMode
+
+This command allows you to get/set the battery.savingMode of the side, this will be automatically enabled when remaining battery charge is low but it can be manually enabled earlier by the user.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.savingMode")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.savingMode' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.savingMode 1")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.savingMode 1' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+Modifies/Retrieves the value stored in the keyboard for the ``wireless.battery.savingMode`` mode.
+
+### wireless.battery.forceRead
+
+This command allows the user to force the neuron to retrieve the battery data of a wireless keyboard like the Defy or the Raise 2, after a second or two, the neuron values of the battery state of each side will be updated and can be retrieved through the typical commands.
+
+#### Commands
+
+To use:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.battery.forceRead")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.battery.forceRead' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+there is no direct output, after a couple seconds the values of each side for battery status and level should be updated from the current status of each side.
+
+### wireless.rf.syncPairing
+
+This command allows the user to re-sync the neuron with both sides via wireless (RF) comms, this command can only be succesfully used when in wired mode with all cables connected, as the RF Link will be broken if the sides and the neuron do not share the same ID (which is what this sync pairing operation re-creates).
+
+#### Commands
+
+To use:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.rf.syncPairing")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.rf.syncPairing' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+there is no direct output, the keyboards should work in RF mode correctly after performing this opeartion.
+
+### wireless.rf.power
+
+This command allows you to get/set the rf.power strength of the RF signal used to communicate between the sides and the neuron, lower signal strength will mean worse coverage and operational range but more battery life, and vice versa.
+
+#### Commands
+
+To retrieve:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.rf.power")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.rf.power' > /dev/ttyACM0
+  ```
+
+To set:
+
+- JavaScript:
+  ```js
+   state.currentDevice.command("wireless.rf.power 1")
+  ```
+- Serial Command (Unix):
+  ```shell
+  echo 'wireless.rf.power 1' > /dev/ttyACM0
+  ```
+
+#### Expected output
+
+Modifies/Retrieves the value stored in the keyboard for the ``wireless.rf.power`` signal strength, expected and valid values are:
+
+0. Low signal power
+1. Medium signal power
+2. High signal power
