@@ -1,16 +1,14 @@
-# Focus API documentation
+# Serial API documentation
 
 ## Concept
 
-The Focus API is a two-way communication mechanism between the Raise and any computer software that wants to get information or configure/activate the raise\'s plugins.
+The Serial API is a two-way communication mechanism between the Raise and any computer software that wants to get information or configure/activate the raise\'s plugins.
 
 It discovers all the EEPROM assigned positions of the memory with specific commands to update or trigger them depending on the kind of plugin that uses them.
 
 This means for example being capable of storing the macros or to be able to trigger them through the serial interface without touching the keyboard or Bazecor.
 
-The focus library is a part of the Keyboard's Firmware but also has a helper class created in JavaScript for the Bazecor, we will show here the commands for the JavaScript Focus API and how to trigger them through the serial interface also, just as an example if you want to retrieve all available commands you have to send the keyboard the string "help".
-
-**For JavaScript:** `focus.command("help")`
+The serial library is a part of the Keyboard's Firmware but also has a helper class created in JavaScript for the Bazecor, we will show here the commands for the JavaScript Serial API and how to trigger them through the serial interface also, just as an example if you want to retrieve all available commands you have to send the keyboard the string "help".
 
 **Serial Command (Unix):** `echo 'help' > /dev/ttyACM0`
 
@@ -20,11 +18,11 @@ You can expand on this knowledge in the docs about the [kaleidoscope Firmware](h
 
 ## ⚠ Memory usage disclaimer ⚠
 
-When sending focus commands to the keyboard, keep in mind that every time you put data after the command, that stores the information in the keyboard, this means that the flash memory is using up it's lifespan, so avoid loops that save data to the keyboard frequently, so that the chip will last you as long as possible.
+When sending serial commands to the keyboard, keep in mind that every time you put data after the command, that stores the information in the keyboard, this means that the flash memory is using up it's lifespan, so avoid loops that save data to the keyboard frequently, so that the chip will last you as long as possible.
 
 ## Available Methods
 
-Running `focus.command("help")` will get you the following list of available commands:
+Running ` state.currentDevice.command("help")` will get you the following list of available commands:
 
 **Version**
 
@@ -178,7 +176,7 @@ Returns the version of the Raise firmware stored in the keyboard's EEPROM
 
 - JavaScript:
   ```js
-  focus.command("version")
+   state.currentDevice.command("version")
   ```
 - Serial Command (Unix):
   ```shell
@@ -205,7 +203,7 @@ it should give back 3 strings,
 
 ### keymap.custom
 
-This command of the focus API has two functions, when sent alone, it retrieves the whole custom keymap stored in the keyboard, when sent with the map as trailing numbers (in the same format as received) it will update the custom keymap stored in the EEPROM.
+This command of the serial API has two functions, when sent alone, it retrieves the whole custom keymap stored in the keyboard, when sent with the map as trailing numbers (in the same format as received) it will update the custom keymap stored in the EEPROM.
 
 To know the actual correlation between the position of the map sent and the actual keys in the keyboard, [look here](https://github.com/Dygmalab/Raise-Firmware/blob/master/FOCUS_API.MD)
 
@@ -215,7 +213,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("keymap.custom")
+   state.currentDevice.command("keymap.custom")
   ```
 - Serial Command (Unix):
   ```shell
@@ -226,7 +224,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("keymap.custom N N N N N N N N N N N N N N N")
+   state.currentDevice.command("keymap.custom N N N N N N N N N N N N N N N")
   ```
 - Serial Command (Unix):
   ```shell
@@ -255,7 +253,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("keymap.default")
+   state.currentDevice.command("keymap.default")
   ```
 - Serial Command (Unix):
   ```shell
@@ -266,7 +264,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("keymap.default N N N N N N N N N N N N N N N")
+   state.currentDevice.command("keymap.default N N N N N N N N N N N N N N N")
   ```
 - Serial Command (Unix):
   ```shell
@@ -293,7 +291,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("keymap.onlyCustom")
+   state.currentDevice.command("keymap.onlyCustom")
   ```
 - Serial Command (Unix):
   ```shell
@@ -304,7 +302,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("keymap.onlyCustom true")
+   state.currentDevice.command("keymap.onlyCustom true")
   ```
 - Serial Command (Unix):
   ```shell
@@ -325,7 +323,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("keymap.defaultLayer")
+   state.currentDevice.command("keymap.defaultLayer")
   ```
 - Serial Command (Unix):
   ```shell
@@ -336,7 +334,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("keymap.defaultLayer 1")
+   state.currentDevice.command("keymap.defaultLayer 1")
   ```
 - Serial Command (Unix):
   ```shell
@@ -357,7 +355,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("settings.valid")
+   state.currentDevice.command("settings.valid")
   ```
 - Serial Command (Unix):
   ```shell
@@ -378,7 +376,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("settings.version")
+   state.currentDevice.command("settings.version")
   ```
 - Serial Command (Unix):
   ```shell
@@ -389,7 +387,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("settings.version 1")
+   state.currentDevice.command("settings.version 1")
   ```
 - Serial Command (Unix):
   ```shell
@@ -410,7 +408,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("settings.crc")
+   state.currentDevice.command("settings.crc")
   ```
 - Serial Command (Unix):
   ```shell
@@ -431,7 +429,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("eeprom.contents")
+   state.currentDevice.command("eeprom.contents")
   ```
 - Serial Command (Unix):
   ```shell
@@ -442,7 +440,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("eeprom.contents NNNNNNNNNNNNN")
+   state.currentDevice.command("eeprom.contents NNNNNNNNNNNNN")
   ```
 - Serial Command (Unix):
   ```shell
@@ -463,7 +461,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("eeprom.free")
+   state.currentDevice.command("eeprom.free")
   ```
 - Serial Command (Unix):
   ```shell
@@ -484,7 +482,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("led.at 21")
+   state.currentDevice.command("led.at 21")
   ```
 - Serial Command (Unix):
   ```shell
@@ -495,7 +493,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.at 21 255 255 0")
+   state.currentDevice.command("led.at 21 255 255 0")
   ```
 - Serial Command (Unix):
   ```shell
@@ -522,7 +520,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("led.getMultiple 1 2 3 4 5")
+   state.currentDevice.command("led.getMultiple 1 2 3 4 5")
   ```
 - Serial Command (Unix):
   ```shell
@@ -551,7 +549,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.setMultiple 255 0 0 1 2 3 4 5")
+   state.currentDevice.command("led.setMultiple 255 0 0 1 2 3 4 5")
   ```
 - Serial Command (Unix):
   ```shell
@@ -572,7 +570,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.setAll 255 255 255")
+   state.currentDevice.command("led.setAll 255 255 255")
   ```
 - Serial Command (Unix):
   ```shell
@@ -593,7 +591,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("led.mode")
+   state.currentDevice.command("led.mode")
   ```
 - Serial Command (Unix):
   ```shell
@@ -604,7 +602,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.mode 2")
+   state.currentDevice.command("led.mode 2")
   ```
 - Serial Command (Unix):
   ```shell
@@ -638,7 +636,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("led.brightness")
+   state.currentDevice.command("led.brightness")
   ```
 - Serial Command (Unix):
   ```shell
@@ -649,7 +647,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.brightness 210")
+   state.currentDevice.command("led.brightness 210")
   ```
 - Serial Command (Unix):
   ```shell
@@ -673,7 +671,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("led.brightnessUG")
+   state.currentDevice.command("led.brightnessUG")
   ```
 - Serial Command (Unix):
   ```shell
@@ -684,7 +682,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.brightnessUG 210")
+   state.currentDevice.command("led.brightnessUG 210")
   ```
 - Serial Command (Unix):
   ```shell
@@ -707,7 +705,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("led.theme")
+   state.currentDevice.command("led.theme")
   ```
 - Serial Command (Unix):
   ```shell
@@ -718,7 +716,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.theme NNN NNN NNN NNN NNN NNN")
+   state.currentDevice.command("led.theme NNN NNN NNN NNN NNN NNN")
   ```
 - Serial Command (Unix):
   ```shell
@@ -746,7 +744,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("palette")
+   state.currentDevice.command("palette")
   ```
 - Serial Command (Unix):
   ```shell
@@ -757,7 +755,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("led.palete NNN NNN NNN NNN NNN NNN")
+   state.currentDevice.command("led.palete NNN NNN NNN NNN NNN NNN")
   ```
 - Serial Command (Unix):
   ```shell
@@ -780,7 +778,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("colormap.map")
+   state.currentDevice.command("colormap.map")
   ```
 - Serial Command (Unix):
   ```shell
@@ -791,7 +789,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("colormap.map N N N N N N N N N N N N N N N N N N")
+   state.currentDevice.command("colormap.map N N N N N N N N N N N N N N N N N N")
   ```
 - Serial Command (Unix):
   ```shell
@@ -812,7 +810,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("idleleds.time_limit")
+   state.currentDevice.command("idleleds.time_limit")
   ```
 - Serial Command (Unix):
   ```shell
@@ -823,7 +821,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("idleleds.time_limit 600")
+   state.currentDevice.command("idleleds.time_limit 600")
   ```
 - Serial Command (Unix):
   ```shell
@@ -908,12 +906,12 @@ We repeat this for each action we want to perform until we finish the whole macr
 
 To retrieve:
 
-- JavaScript: `focus.command("macros.map")`
+- JavaScript: ` state.currentDevice.command("macros.map")`
 - Serial Command (Unix): `echo 'macros.map' > /dev/ttyACM0`
 
 To set:
 
-- JavaScript: `focus.command("macros.map 8 4 8 5 8 6 0 8 7 8 8 0 0")`
+- JavaScript: ` state.currentDevice.command("macros.map 8 4 8 5 8 6 0 8 7 8 8 0 0")`
 - Serial Command (Unix): `echo 'macros.map 8 4 8 5 8 6 0 8 7 8 8 0 0' > /dev/ttyACM0`
 
 #### Expected output
@@ -928,7 +926,7 @@ This command triggers a stored macro programatically.
 
 To use:
 
-- JavaScript: `focus.command("macros.trigger 0")`
+- JavaScript: ` state.currentDevice.command("macros.trigger 0")`
 - Serial Command (Unix): `echo 'macros.trigger 0' > /dev/ttyACM0`
 
 #### Expected output
@@ -961,12 +959,12 @@ To end a superkey, place the number of actions you want to use as keyCodes and t
 
 To retrieve:
 
-- JavaScript: `focus.command("superkeys.map")`
+- JavaScript: ` state.currentDevice.command("superkeys.map")`
 - Serial Command (Unix): `echo 'superkeys.map' > /dev/ttyACM0`
 
 To set:
 
-- JavaScript: `focus.command("superkeys.map 4 5 6 44 7 0 4 224 225 6 226 0 0")`
+- JavaScript: ` state.currentDevice.command("superkeys.map 4 5 6 44 7 0 4 224 225 6 226 0 0")`
 - Serial Command (Unix): `echo 'superkeys.map 4 5 6 44 7 0 4 224 225 6 226 0 0' > /dev/ttyACM0`
 
 #### Expected output
@@ -983,12 +981,12 @@ waitfor value specifies the time between the first and subsequent releases of th
 
 To retrieve:
 
-- JavaScript: `focus.command("superkeys.waitfor")`
+- JavaScript: ` state.currentDevice.command("superkeys.waitfor")`
 - Serial Command (Unix): `echo 'superkeys.waitfor' > /dev/ttyACM0`
 
 To set:
 
-- JavaScript: `focus.command("superkeys.waitfor 500")`
+- JavaScript: ` state.currentDevice.command("superkeys.waitfor 500")`
 - Serial Command (Unix): `echo 'superkeys.waitfor 500' > /dev/ttyACM0`
 
 #### Expected output
@@ -1011,12 +1009,12 @@ timeout value specifies the time the keyboard waits after a superkey is pressed 
 
 To retrieve:
 
-- JavaScript: `focus.command("superkeys.timeout")`
+- JavaScript: ` state.currentDevice.command("superkeys.timeout")`
 - Serial Command (Unix): `echo 'superkeys.timeout' > /dev/ttyACM0`
 
 To set:
 
-- JavaScript: `focus.command("superkeys.timeout 250")`
+- JavaScript: ` state.currentDevice.command("superkeys.timeout 250")`
 - Serial Command (Unix): `echo 'superkeys.timeout 250' > /dev/ttyACM0`
 
 #### Expected output
@@ -1033,12 +1031,12 @@ the repeat value specifies the time between the second and subsequent keyCode re
 
 To retrieve:
 
-- JavaScript: `focus.command("superkeys.repeat")`
+- JavaScript: ` state.currentDevice.command("superkeys.repeat")`
 - Serial Command (Unix): `echo 'superkeys.repeat' > /dev/ttyACM0`
 
 To set:
 
-- JavaScript: `focus.command("superkeys.repeat 250")`
+- JavaScript: ` state.currentDevice.command("superkeys.repeat 250")`
 - Serial Command (Unix): `echo 'superkeys.repeat 250' > /dev/ttyACM0`
 
 #### Expected output
@@ -1057,7 +1055,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("superkeys.holdstart")
+   state.currentDevice.command("superkeys.holdstart")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1068,7 +1066,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("superkeys.holdstart 200")
+   state.currentDevice.command("superkeys.holdstart 200")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1091,7 +1089,7 @@ To retrieve:
 
 - JavaScript:
   ```js
-  focus.command("superkeys.overlap")
+   state.currentDevice.command("superkeys.overlap")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1102,7 +1100,7 @@ To set:
 
 - JavaScript:
   ```js
-  focus.command("superkeys.overlap 80")
+   state.currentDevice.command("superkeys.overlap 80")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1129,7 +1127,7 @@ The help command returns all the available commands in the current version of th
 
 - JavaScript:
   ```js
-  focus.command("help")
+   state.currentDevice.command("help")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1150,7 +1148,7 @@ To use:
 
 - JavaScript:
   ```js
-  focus.command("layer.activate 1")
+   state.currentDevice.command("layer.activate 1")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1171,7 +1169,7 @@ To use:
 
 - JavaScript:
   ```js
-  focus.command("layer.deactivate")
+   state.currentDevice.command("layer.deactivate")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1192,7 +1190,7 @@ To use:
 
 - JavaScript:
   ```js
-  focus.command("layer.isActive")
+   state.currentDevice.command("layer.isActive")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1217,7 +1215,7 @@ To use:
 
 - JavaScript:
   ```js
-  focus.command("layer.moveTo 1")
+   state.currentDevice.command("layer.moveTo 1")
   ```
 - Serial Command (Unix):
   ```shell
@@ -1238,7 +1236,7 @@ To use:
 
 - JavaScript:
   ```js
-  focus.command("layer.state")
+   state.currentDevice.command("layer.state")
   ```
 - Serial Command (Unix):
   ```shell
