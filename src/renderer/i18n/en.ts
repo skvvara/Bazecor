@@ -497,7 +497,7 @@ const English = {
     pasteSuccess: "Pasted!",
     importSuccessCurrentLayerTitle: "Imported successfully!",
     importSuccessCurrentLayer: "Imported to current Layer successfully",
-    importSuccessCurrentMacro: "Imported to current Macro successfully",
+    importSuccessCurrentMacro: "The imported macro has been added as a new macro",
     importSuccessAllLayers: "Imported all Layers successfully",
     exportSuccessCurrentLayer: "Ready to share!",
     exportSuccessCurrentLayerContent: "Your layer has been successfully exported.",
