@@ -1,10 +1,10 @@
 import path from "path";
 import fs from "fs";
-import Store from "electron-store";
 import log from "electron-log/renderer";
 import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
+import Store from "../../renderer/utils/Store";
 import Device from "../comms/Device";
 import {
   convertColormapRtoR2,
@@ -17,7 +17,7 @@ import {
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
-const store = new Store();
+const store = Store.getStore();
 
 export default class Backup {
   neurons: Neuron[];

@@ -104,6 +104,11 @@ const English = {
       title: "Cancel pending changes?",
       content: "You have unsaved changes. If you proceed, they will be lost.",
     },
+    updateChanges: {
+      title: "Bazecor update changes",
+      close: "Close",
+      accept: "Do not show again",
+    },
   },
   editor: {
     keyType: "Key type",
