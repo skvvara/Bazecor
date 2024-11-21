@@ -104,6 +104,11 @@ const English = {
       title: "Cancel pending changes?",
       content: "You have unsaved changes. If you proceed, they will be lost.",
     },
+    updateChanges: {
+      title: "What's new?",
+      close: "Close",
+      accept: "Do not show again",
+    },
   },
   editor: {
     keyType: "Key type",
@@ -177,8 +182,8 @@ const English = {
       backup: "Backup All",
       backupMacro: "Backup Macros",
       backupMacroFile: "Backup Macros to file",
-      exportTitle: "Export selected macro",
-      importTitle: "Import selected macro",
+      exportTitle: "Export macro",
+      importTitle: "Import macro",
       clone: "Clone",
       copy: "Copy",
       editMacros: "Edit macros",
