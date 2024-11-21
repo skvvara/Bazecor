@@ -147,7 +147,7 @@ export function VersionUpdateDialog(props: VersionUpdateProps) {
                 >
                   <div>
                     <AccordionTrigger className="px-2 py-3 bg-transparent bg-dark:bg-black/5 mb-[-1px] hover:no-underline">
-                      <Heading>
+                      <Heading className="pl-[22px]">
                         <div className="flex items-center">
                           {elem.name}
                           <p className="ml-4 font-extralight text-sm text-gray-200">{new Date(elem.date).toDateString()}</p>
