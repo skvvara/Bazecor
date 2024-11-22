@@ -21,9 +21,8 @@ import { Octokit } from "@octokit/core";
 import SemVer from "semver";
 import parse, { domToReact } from "html-react-parser";
 
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@Renderer/components/atoms/Dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@Renderer/components/atoms/Dialog";
 import { i18n } from "@Renderer/i18n";
-import { Button } from "@Renderer/components/atoms/Button";
 import Heading from "@Renderer/components/atoms/Heading";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@Renderer/components/atoms/Accordion";
 
@@ -129,7 +128,13 @@ export function VersionUpdateDialog(props: VersionUpdateProps) {
   }, []);
 
   return (
-    <Dialog open={open} onOpenChange={onCancel}>
+    <Dialog
+      open={open}
+      onOpenChange={() => {
+        handleUpdate();
+        onCancel();
+      }}
+    >
       <DialogContent>
         <DialogHeader>
           <DialogTitle>{i18n.app.updateChanges.title}</DialogTitle>
@@ -163,27 +168,6 @@ export function VersionUpdateDialog(props: VersionUpdateProps) {
             </Accordion>
           </div>
         </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              onCancel();
-            }}
-          >
-            {i18n.app.updateChanges.close}
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={() => {
-              handleUpdate();
-              onCancel();
-            }}
-          >
-            {i18n.app.updateChanges.accept}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

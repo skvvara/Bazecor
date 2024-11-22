@@ -26,17 +26,20 @@ import { LayerType, Neuron } from "@Renderer/types/neurons";
 import { useDevice } from "@Renderer/DeviceContext";
 import { flags, languages, languageNames } from "@Renderer/modules/Settings/GeneralSettingsLanguages";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@Renderer/components/atoms/Card";
+import { VersionUpdateDialog } from "@Renderer/components/molecules/CustomModal/VersionUpdateDialog";
 import { Switch } from "@Renderer/components/atoms/Switch";
-import { IconChip, IconHanger, IconSun, IconMoon, IconScreen, IconKeyboard } from "@Renderer/components/atoms/icons";
+import { IconChip, IconHanger, IconSun, IconMoon, IconScreen, IconKeyboard, IconVersion } from "@Renderer/components/atoms/icons";
 import ToggleGroup from "@Renderer/components/molecules/CustomToggleGroup/ToggleGroup";
 import { KeyPickerPreview } from "@Renderer/modules/KeyPickerKeyboard";
 import getLanguage from "@Renderer/utils/language";
 import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@Renderer/components/atoms/Select";
+import { Button } from "@Renderer/component/Button";
 
 import { i18n } from "@Renderer/i18n";
 import Keymap from "../../../api/keymap";
 import Store from "../../utils/Store";
+import { version } from "../../../../package.json";
 import { LangOptions } from "../KeyPickerKeyboard/KeyPickerLanguage";
 
 const GeneralSettingsWrapper = Styled.div`
@@ -77,6 +80,7 @@ const GeneralSettings = ({
   onChangeAutoUpdate,
 }: GeneralSettingsProps) => {
   const [selectedLanguage, setSelectedLanguage] = useState<LangOptions>();
+  const [versionDialog, setVersionDialog] = useState(false);
   const { state } = useDevice();
 
   useEffect(() => {
@@ -267,6 +271,37 @@ const GeneralSettings = ({
           </form>
         </CardContent>
       </Card>
+      <Card className="mt-3 max-w-2xl mx-auto" variant="default">
+        <CardHeader>
+          <CardTitle variant="default">
+            <IconVersion /> Version <span className="text-lg font-thin">{version}</span>
+          </CardTitle>
+          <CardDescription className="mt-1">Current version release notes and release channel acces on Github</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="my-3 flex justify-between items-center">
+            <p>Current release </p>
+            <Button variant="outline" size="sm" onClick={() => setVersionDialog(true)}>
+              Release notes
+            </Button>
+          </div>
+          <div className="my-3 flex justify-between items-center">
+            <p>Older releases</p>
+            <a href="https://github.com/Dygmalab/Bazecor/releases">
+              <Button variant="outline" size="sm" onClick={() => {}}>
+                Github Releases
+              </Button>
+            </a>
+          </div>
+        </CardContent>
+      </Card>
+      <VersionUpdateDialog
+        open={versionDialog}
+        oldVersion={version}
+        newVersion={version}
+        handleUpdate={() => {}}
+        onCancel={() => setVersionDialog(false)}
+      />
     </GeneralSettingsWrapper>
   );
 };
