@@ -276,22 +276,22 @@ const GeneralSettings = ({
           <CardTitle variant="default">
             <IconVersion /> Version <span className="text-lg font-thin">{version}</span>
           </CardTitle>
-          <CardDescription className="mt-1">Current version release notes and release channel acces on Github</CardDescription>
+          <CardDescription className="mt-1">
+            Read the latest release notes or access our Github to check previous releases
+          </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="my-3 flex justify-between items-center">
-            <p>Current release </p>
-            <Button variant="outline" size="sm" onClick={() => setVersionDialog(true)}>
-              Release notes
-            </Button>
-          </div>
-          <div className="my-3 flex justify-between items-center">
-            <p>Older releases</p>
+          <div className="my-3 flex justify-end">
             <a href="https://github.com/Dygmalab/Bazecor/releases">
               <Button variant="outline" size="sm" onClick={() => {}}>
-                Github Releases
+                Github
               </Button>
             </a>
+            <div className="sticky ml-4">
+              <Button variant="secondary" size="sm" onClick={() => setVersionDialog(true)}>
+                Release notes
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>

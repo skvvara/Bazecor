@@ -139,7 +139,7 @@ export function VersionUpdateDialog(props: VersionUpdateProps) {
         <DialogHeader>
           <DialogTitle>{i18n.app.updateChanges.title}</DialogTitle>
         </DialogHeader>
-        <div className="px-6 pb-2 mt-2">
+        <div className="px-6 pb-6 mt-2">
           <div
             className={`toggleButtonsInner flex flex-col items-center justify-start gap-1 p-[4px] rounded-regular border-[1px] border-solid border-gray-100/60 bg-white/30 dark:border-transparent dark:bg-gray-900/25 w-full [&_.button-config]:w-full [&_.button-config]:basis-full [&_.button-config]:text-left [&_.button-config.disabled]:opacity-25 [&_.button-config.disabled]:pointer-events-none"}`}
           >
