@@ -252,7 +252,7 @@ export default class Backup {
           if (data[command].eraseable === true) {
             log.info(`Going to send ${command} to keyboard`);
             // eslint-disable-next-line no-await-in-loop
-            await device.noCacheCommand(`${command} ${data[command].data}`.trim());
+            await device.command(`${command} ${data[command].data}`.trim());
           }
         }
         await device.noCacheCommand("led.mode 0");
