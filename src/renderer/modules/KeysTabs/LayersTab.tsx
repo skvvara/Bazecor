@@ -385,7 +385,8 @@ const LayersTab = ({
                           hold it. Double-tap it to lock into the layer; go back to the previous layer by tapping the key again.
                           <br />
                           <br />
-                          OneShot layers only work for layers 1 to 8.
+                          OneShot layers only work for layers 1 to 8, and you need to set the same key as &quot;Transparent&quot;
+                          in the destination layer.
                         </p>
                       </>
                     }
