@@ -16,6 +16,7 @@
 
 import { Neuron } from "./neurons";
 import { WirelessInterface } from "./wireless";
+import { AppThemeType } from "@Common/store/types";
 
 export interface PreferencesProps {
   cancelContext: () => void;
@@ -61,7 +62,7 @@ export interface PrefState {
   devTools: boolean;
   advanced: boolean;
   verboseFocus: boolean;
-  darkMode: string;
+  darkMode: AppThemeType;
   neurons: Array<Neuron>;
   selectedNeuron: number;
   neuronID: string;

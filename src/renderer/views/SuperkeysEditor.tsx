@@ -52,7 +52,7 @@ import { useDevice } from "@Renderer/DeviceContext";
 import { i18n } from "@Renderer/i18n";
 import Store from "@Renderer/utils/Store";
 import getLanguage from "@Renderer/utils/language";
-import { ApplicationPreferencesProvider as Storage } from "../../common/store/AppSettings";
+import { AppContext } from "../../common/app-context/AppContext";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import Backup from "../../api/backup";
 
@@ -141,8 +141,8 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
     listToDelete: [],
     futureSK: [],
     futureSSK: 0,
-    currentLanguageLayout: getLanguage(Storage.language),
-    isStandardView: Storage.isStandardView,
+    currentLanguageLayout: getLanguage(AppContext.settings.language),
+    isStandardView: AppContext.settings.isStandardView,
     showStandardView: false,
     loading: true,
   };
@@ -297,7 +297,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
 
   useEffect(() => {
     try {
-      Storage.isStandardView = state.isStandardView;
+      AppContext.settings.isStandardView = state.isStandardView;
       setViewMode(state.isStandardView ? "standard" : "single");
     } catch (error) {
       log.info("error when setting standard view mode", error);
@@ -643,7 +643,7 @@ function SuperkeysEditor(props: SuperkeysEditorProps) {
   // Manage Standard/Single view
   const configStandarView = async () => {
     try {
-      const preferencesStandardView = Storage.isStandardView;
+      const preferencesStandardView = AppContext.settings.isStandardView;
       // log.info("Preferences StandardView", preferencesStandardViewJSON);
       if (preferencesStandardView !== null) {
         state.isStandardView = preferencesStandardView;

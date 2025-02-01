@@ -18,51 +18,51 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { MouseEvent, useCallback, useEffect, useMemo, useState } from "react";
+import React, {MouseEvent, useCallback, useEffect, useMemo, useState} from "react";
 import Styled from "styled-components";
-import { toast } from "react-toastify";
-import { ipcRenderer } from "electron";
+import {toast} from "react-toastify";
+import {ipcRenderer} from "electron";
 import fs from "fs";
 import log from "electron-log/renderer";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@Renderer/components/atoms/Dialog";
+import {Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle} from "@Renderer/components/atoms/Dialog";
 import customCursor from "@Assets/base/cursorBucket.png";
 import ToastMessage from "@Renderer/components/atoms/ToastMessage";
-import { CopyFromDialog } from "@Renderer/components/molecules/CustomModal/CopyFromDialog";
-import { useDevice } from "@Renderer/DeviceContext";
+import {CopyFromDialog} from "@Renderer/components/molecules/CustomModal/CopyFromDialog";
+import {useDevice} from "@Renderer/DeviceContext";
 
 // Types
-import { LayerType, Neuron } from "@Renderer/types/neurons";
-import { ColormapType, KeymapType, KeyType, LayoutEditorProps, PaletteType, SegmentedKeyType } from "@Renderer/types/layout";
-import { SuperkeysType } from "@Renderer/types/superkeys";
-import { MacroActionsType, MacrosType } from "@Renderer/types/macros";
-import { DeviceClass } from "@Renderer/types/devices";
+import {LayerType, Neuron} from "@Renderer/types/neurons";
+import {ColormapType, KeymapType, KeyType, LayoutEditorProps, PaletteType, SegmentedKeyType} from "@Renderer/types/layout";
+import {SuperkeysType} from "@Renderer/types/superkeys";
+import {MacroActionsType, MacrosType} from "@Renderer/types/macros";
+import {DeviceClass} from "@Renderer/types/devices";
 
 // Modules
-import { PageHeader } from "@Renderer/modules/PageHeader";
+import {PageHeader} from "@Renderer/modules/PageHeader";
 import ColorEditor from "@Renderer/modules/ColorEditor";
-import { KeyPickerKeyboard } from "@Renderer/modules/KeyPickerKeyboard";
+import {KeyPickerKeyboard} from "@Renderer/modules/KeyPickerKeyboard";
 import StandardView from "@Renderer/modules/StandardView";
 
 // Components
 import LayerSelector from "@Renderer/components/organisms/Select/LayerSelector";
-import { Button } from "@Renderer/components/atoms/Button";
+import {Button} from "@Renderer/components/atoms/Button";
 import ToggleGroupLayoutViewMode from "@Renderer/components/molecules/CustomToggleGroup/ToggleGroupLayoutViewMode";
-import { IconArrowDownWithLine, IconArrowUpWithLine } from "@Renderer/components/atoms/icons";
+import {IconArrowDownWithLine, IconArrowUpWithLine} from "@Renderer/components/atoms/icons";
 import LoaderLayout from "@Renderer/components/atoms/loader/loaderLayout";
-import { i18n } from "@Renderer/i18n";
+import {i18n} from "@Renderer/i18n";
 
 import Store from "@Renderer/utils/Store";
 
 import getLanguage from "@Renderer/utils/language";
-import { ClearLayerDialog } from "@Renderer/components/molecules/CustomModal/ClearLayerDialog";
-import { getAppContext } from "@Common/app-context/appContext";
-import Keymap, { KeymapDB } from "../../api/keymap";
-import { rgb2w, rgbw2b } from "../../api/color";
+import {ClearLayerDialog} from "@Renderer/components/molecules/CustomModal/ClearLayerDialog";
+import {AppContext} from "@Common/app-context/AppContext";
+import Keymap, {KeymapDB} from "../../api/keymap";
+import {rgb2w, rgbw2b} from "../../api/color";
 import Backup from "../../api/backup";
-import { TRANS_KEY_CODE } from "../../api/keymap/types";
+import {TRANS_KEY_CODE} from "../../api/keymap/types";
 
 const store = Store.getStore();
-const Storage = getAppContext().settings;
+const Storage = AppContext.settings;
 
 const Styles = Styled.div`
 &.layoutEditor {

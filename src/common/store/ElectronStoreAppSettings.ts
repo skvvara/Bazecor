@@ -1,5 +1,5 @@
 import Store from "electron-store";
-import { AppPreferencesType, DarkModeType, LanguageType } from "@Common/store/types";
+import { AppPreferencesType, AppThemeType, LanguageType } from "./types";
 
 interface JsonSettingsType {
   language: string;
@@ -27,11 +27,11 @@ export class ApplicationPreferences implements AppPreferencesType {
     this.store.set("settings.language", val);
   }
 
-  get darkMode(): DarkModeType {
+  get darkMode(): AppThemeType {
     return this.store.get("settings.darkMode", "system");
   }
 
-  set darkMode(val: DarkModeType) {
+  set darkMode(val: AppThemeType) {
     this.store.set("settings.darkMode", val);
   }
 
@@ -83,5 +83,3 @@ export class ApplicationPreferences implements AppPreferencesType {
     this.store.set("settings.showDeveloperConsole", val);
   }
 }
-
-export const ApplicationPreferencesProvider = new ApplicationPreferences();

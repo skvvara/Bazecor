@@ -1,4 +1,4 @@
-import { AppPreferencesType } from "@Common/store/types";
+import { AppPreferencesType } from "../store/types";
 
 interface Supplier<T> {
   get: () => T;
@@ -6,6 +6,6 @@ interface Supplier<T> {
 
 export type SettingsProvider = Supplier<AppPreferencesType>;
 
-export type AppContextType = {
-  settings: AppPreferencesType;
-};
+export interface AppContextType {
+  get settings(): AppPreferencesType;
+}

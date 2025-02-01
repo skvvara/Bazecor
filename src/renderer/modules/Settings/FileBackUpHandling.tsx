@@ -29,11 +29,11 @@ import { IconFolder } from "@Renderer/components/atoms/icons";
 // Utils
 import { Slider } from "@Renderer/components/atoms/slider";
 import log from "electron-log";
-import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
+import { AppContext } from "../../../common/app-context/AppContext";
 
 const FileBackUpHandling = () => {
-  const [backupFolder, setBackupFolder] = useState(storage.backupFolder);
-  const [storeBackups, setStoreBackups] = useState(storage.backupFrequency);
+  const [backupFolder, setBackupFolder] = useState(AppContext.settings.backupFolder);
+  const [storeBackups, setStoreBackups] = useState(AppContext.settings.backupFrequency);
   const ChooseBackupFolder = async () => {
     const options = {
       title: i18n.keyboardSettings.backupFolder.title,
@@ -46,7 +46,7 @@ const FileBackUpHandling = () => {
     if (!resp.canceled) {
       // console.log(resp.filePaths);
       setBackupFolder(resp.filePaths[0]);
-      storage.backupFolder = `${resp.filePaths[0]}`;
+      AppContext.settings.backupFolder = `${resp.filePaths[0]}`;
     } else {
       // console.log("user closed backup folder dialog");
     }
@@ -56,7 +56,7 @@ const FileBackUpHandling = () => {
     log.info("onSetStoreBackups", value);
     const val = value[0];
     setStoreBackups(val);
-    storage.backupFrequency = val;
+    AppContext.settings.backupFrequency = val;
   };
 
   return (

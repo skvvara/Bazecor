@@ -1,5 +1,5 @@
-import { nativeTheme, NativeTheme } from "electron";
-import { ApplicationPreferencesProvider } from "../../common/store/AppSettings";
+import { nativeTheme } from "electron";
+import { AppContext } from "../../common/app-context/AppContext";
 import sendToRenderer from "../utils/sendToRenderer";
 
 const onThemeChange = () => () => {
@@ -11,7 +11,7 @@ const configureNativeTheme = () => {
 };
 
 const setTheme = () => {
-  nativeTheme.themeSource = ApplicationPreferencesProvider.darkMode as NativeTheme["themeSource"];
+  nativeTheme.themeSource = AppContext.settings.darkMode;
 };
 
 export { configureNativeTheme, setTheme, onThemeChange };

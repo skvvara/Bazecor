@@ -38,7 +38,7 @@ import { BackupSettingsProps } from "@Renderer/types/preferences";
 import WaitForRestoreDialog from "@Renderer/components/molecules/CustomModal/WaitForRestoreDialog";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
-import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
+import { AppContext } from "../../../common/app-context/AppContext";
 import Backup from "../../../api/backup";
 
 const BackupSettings = (props: BackupSettingsProps) => {
@@ -48,7 +48,7 @@ const BackupSettings = (props: BackupSettingsProps) => {
 
   const { connected, neurons, neuronID, toggleBackup, destroyContext } = props;
   useEffect(() => {
-    setBackupFolder(storage.backupFolder);
+    setBackupFolder(AppContext.settings.backupFolder);
   }, []);
 
   const openPerformingBackup = () => {

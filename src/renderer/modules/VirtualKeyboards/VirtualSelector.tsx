@@ -15,8 +15,7 @@ import { i18n } from "@Renderer/i18n";
 
 import { VirtualType } from "@Renderer/types/virtual";
 import { BackupType } from "@Renderer/types/backups";
-
-import { ApplicationPreferencesProvider as storage } from "../../../common/store/AppSettings";
+import { AppContext } from "@Common/app-context/AppContext";
 import Hardware from "../../../api/hardware";
 import { RaiseISO, RaiseANSI, DefyWired, DefyWireless, Raise2ANSI, Raise2ISO, enumerator } from "../../../api/hardware-virtual";
 import { isVirtualType } from "../../../api/comms/virtual";
@@ -96,7 +95,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
     const options = {
       title: i18n.keyboardSelect.virtualKeyboard.newTitle,
       buttonLabel: i18n.keyboardSelect.virtualKeyboard.buttonLabelSave,
-      defaultPath: path.join(storage.backupFolder, `${fileName}.json`),
+      defaultPath: path.join(AppContext.settings.backupFolder, `${fileName}.json`),
       filters: [{ name: "Json", extensions: ["json"] }],
     };
     const newPath = await ipcRenderer.invoke("save-dialog", options);
@@ -199,7 +198,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
     const options = {
       title: i18n.keyboardSelect.virtualKeyboard.newTitle,
       buttonLabel: i18n.keyboardSelect.virtualKeyboard.buttonLabelSave,
-      defaultPath: path.join(storage.backupFolder, `${fileName}.json`),
+      defaultPath: path.join(AppContext.settings.backupFolder, `${fileName}.json`),
       filters: [{ name: "Json", extensions: ["json"] }],
     };
     const newPath = await ipcRenderer.invoke("save-dialog", options);

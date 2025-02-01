@@ -18,7 +18,7 @@
  */
 
 import { KeyType } from "@Renderer/types/layout";
-import { ApplicationPreferencesProvider as Storage } from "../../common/store/AppSettings";
+import { AppContext } from "../../common/app-context/AppContext";
 import BlankTable from "./db/blanks";
 import { LetterTable, ModifiedLetterTables } from "./db/letters";
 import DigitTable, { ModifiedDigitTables } from "./db/digits";
@@ -120,7 +120,7 @@ class KeymapDB {
   constructor() {
     this.keymapCodeTable = new Array<KeymapCodeTableType>();
     // create variable that get language from the local storage
-    this.language = getLanguage(Storage.language);
+    this.language = getLanguage(AppContext.settings.language);
     if (languagesDB[this.language] === undefined) {
       this.language = "en-US";
     }
@@ -307,7 +307,7 @@ class KeymapDB {
   }
 
   updateBaseKeyCode() {
-    this.language = getLanguage(Storage.language);
+    this.language = getLanguage(AppContext.settings.language);
     if (languagesDB[this.language] === undefined) {
       this.language = "en-US";
     }

@@ -56,7 +56,7 @@ import TimelineEditorManager from "@Renderer/modules/Macros/TimelineEditorManage
 // Tools
 import { useDevice } from "@Renderer/DeviceContext";
 import { i18n } from "@Renderer/i18n";
-import { ApplicationPreferencesProvider as Storage } from "../../common/store/AppSettings";
+import { AppContext } from "../../common/app-context/AppContext";
 import Backup from "../../api/backup";
 import Keymap, { KeymapDB } from "../../api/keymap";
 
@@ -132,7 +132,7 @@ function MacroEditor(props: MacroEditorProps) {
     totalMemory: 0,
     macrosEraser: "",
     loading: true,
-    currentLanguageLayout: getLanguage(Storage.language),
+    currentLanguageLayout: getLanguage(AppContext.settings.language),
     kbtype: "ansi",
     scrollPos: 0,
   };

@@ -35,7 +35,7 @@ import ToastMessage from "@Renderer/components/atoms/ToastMessage";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@Renderer/components/atoms/Select";
 
 import { i18n } from "@Renderer/i18n";
-import { ApplicationPreferencesProvider as Storage } from "../../../common/store/AppSettings";
+import { AppContext } from "../../../common/app-context/AppContext";
 import Keymap from "../../../api/keymap";
 
 const GeneralSettingsWrapper = Styled.div`
@@ -73,13 +73,13 @@ const GeneralSettings = ({
   const { state } = useDevice();
 
   useEffect(() => {
-    setSelectedLanguage(getLanguage(Storage.language));
+    setSelectedLanguage(getLanguage(AppContext.settings.language));
   }, []);
 
   const changeLanguage = (language: string) => {
     try {
       setSelectedLanguage(language);
-      Storage.language = language;
+      AppContext.settings.language = language;
       if (state.currentDevice && !state.currentDevice.isClosed) {
         const deviceLang = { ...state.currentDevice.device, language: true };
         state.currentDevice.commands.keymap = new Keymap(deviceLang);

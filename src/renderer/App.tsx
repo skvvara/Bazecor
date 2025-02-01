@@ -15,8 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
-import { Routes, Navigate, Route, useNavigate } from "react-router-dom";
+import React, { useCallback, useEffect, useState } from "react";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ThemeProvider } from "styled-components";
 import { ipcRenderer } from "electron";
@@ -29,7 +29,6 @@ import Light from "@Renderer/theme/LightTheme";
 import Dark from "@Renderer/theme/DarkTheme";
 
 import Header from "@Renderer/modules/NavigationMenu";
-// import SelectKeyboard from "@Renderer/views/SelectKeyboard";
 import FirmwareUpdate from "@Renderer/views/FirmwareUpdate";
 import LayoutEditor from "@Renderer/views/LayoutEditor";
 import MacroEditor from "@Renderer/views/MacroEditor";
@@ -45,8 +44,7 @@ import { showDevtools } from "@Renderer/devMode";
 import Store from "@Renderer/utils/Store";
 import getTranslator from "@Renderer/utils/translator";
 import { Neuron } from "@Types/neurons";
-import { getAppContext } from "../common/app-context/appContext";
-import Focus from "../api/focus";
+import { AppContext } from "../common/app-context/AppContext";
 import "../api/keymap";
 import "../api/colormap";
 import { DeviceTools, useDevice } from "./DeviceContext";
@@ -54,9 +52,10 @@ import DeviceManager from "./views/DeviceManager";
 import Device from "../api/comms/Device";
 import { HIDNotifdevice } from "./types/hid";
 import HID from "../api/hid/hid";
+import { AppThemeType } from "@Common/store/types";
 
 const store = Store.getStore();
-const storage = getAppContext().settings;
+const storage = AppContext.settings;
 
 function App() {
   const [pages, setPages] = useState({});
@@ -76,15 +75,13 @@ function App() {
   const device: any = React.useRef();
 
   const updateStorageSchema = async () => {
-    // Update stored settings schema
-    log.verbose("Retrieving settings: ", store.get("settings"));
     const locale = await ipcRenderer.invoke("get-Locale");
     log.verbose("Settings for locale: ", locale);
     i18n.setLanguage(storage.language);
 
     // when moving from other version, config may for superkeys may contain wrong data (wrong legnth, nulls)
     // so we have to fix it. This fix should not be here. It should be in separate file.
-    // Store class could handle this kind of things.
+    // Store class could handle these kind of things.
     const neurons = store.get("neurons");
     if (neurons !== undefined) {
       (neurons as Neuron[])
@@ -133,16 +130,6 @@ function App() {
       } else {
         document.documentElement.classList.add(mode);
       }
-
-      // Settings entry creation for the beta toggle, it will have a control in preferences to change the policy
-      let getAllowBeta: boolean;
-      if (store.has("settings.allowBeta")) {
-        getAllowBeta = store.get("settings.allowBeta") as boolean;
-      } else {
-        getAllowBeta = true;
-        store.set("settings.allowBeta", true);
-      }
-
       setDarkMode(isDark);
       setConnected(false);
       device.current = null;
@@ -193,11 +180,10 @@ function App() {
     device.current = currentDevice;
     setPages({ keymap: true });
     setLoading(true);
-    // navigate(pages.keymap ? "/editor" : "/welcome");
     navigate("/editor");
   };
 
-  const toggleDarkMode = async (mode: string) => {
+  const toggleDarkMode = async (mode: AppThemeType) => {
     document.documentElement.classList.remove("light");
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.remove("system");

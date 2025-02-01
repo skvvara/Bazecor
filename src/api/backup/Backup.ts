@@ -5,13 +5,13 @@ import log from "electron-log/renderer";
 import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
+import { AppContext } from "@Common/app-context/AppContext";
 import Device from "../comms/Device";
-import { getAppContext } from "@Common/app-context/appContext";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
 const store = new Store();
-const storage = getAppContext().settings;
+const storage = AppContext.settings;
 
 export default class Backup {
   neurons: Neuron[];

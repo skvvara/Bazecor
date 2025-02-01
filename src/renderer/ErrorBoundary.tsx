@@ -5,7 +5,7 @@ import Styled, { ThemeProvider } from "styled-components";
 import GlobalStyles from "@Renderer/theme/GlobalStyles";
 import Light from "@Renderer/theme/LightTheme";
 import Dark from "@Renderer/theme/DarkTheme";
-import { ApplicationPreferencesProvider as storage } from "../common/store/AppSettings";
+import { AppContext } from "../common/app-context/AppContext";
 
 const Styles = Styled.div`
 .alert {
@@ -54,7 +54,7 @@ class ErrorBoundary extends React.Component<Myprops, Mystate> {
     super(props);
 
     let isDark;
-    const mode = storage.darkMode;
+    const mode = AppContext.settings.darkMode;
     isDark = mode === "dark";
     if (mode === "system") {
       isDark = ipcRenderer.invoke("get-NativeTheme");

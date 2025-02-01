@@ -61,7 +61,8 @@ import { KBDataPref, PrefState, PreferencesProps } from "@Renderer/types/prefere
 import { WirelessInterface } from "@Renderer/types/wireless";
 import LogoLoader from "@Renderer/components/atoms/loader/LogoLoader";
 import { Neuron } from "@Renderer/types/neurons";
-import { ApplicationPreferencesProvider, ApplicationPreferencesProvider as storage } from "../../common/store/AppSettings";
+import { AppContext } from "../../common/app-context/AppContext";
+import {AppThemeType, isAppThemeType} from "../../common/store/types";
 import Backup from "../../api/backup";
 
 const store = Store.getStore();
@@ -132,7 +133,7 @@ const initialPreferences = {
   devTools: false,
   advanced: false,
   verboseFocus: false,
-  darkMode: storage.darkMode,
+  darkMode: AppContext.settings.darkMode,
   neurons: store.get("neurons") as Array<Neuron>,
   selectedNeuron: 0,
   neuronID: "",
@@ -186,7 +187,7 @@ const Preferences = (props: PreferencesProps) => {
         newKbData.ledIdleTimeLimit = limit ? parseInt(limit, 10) : -1;
       });
 
-      newKbData.showDefaults = storage.showDefaultLayers;
+      newKbData.showDefaults = AppContext.settings.showDefaultLayers;
 
       // QUKEYS variables commands
       await state.currentDevice.command("qukeys.holdTimeout").then((holdTimeout: string) => {
@@ -253,7 +254,7 @@ const Preferences = (props: PreferencesProps) => {
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         neuronID: localNeuronID,
-        darkMode: ApplicationPreferencesProvider.darkMode,
+        darkMode: AppContext.settings.darkMode,
         neurons: store.get("neurons") as Array<Neuron>,
       }));
     }
@@ -345,7 +346,7 @@ const Preferences = (props: PreferencesProps) => {
       await state.currentDevice.command("led.brightnessUG", kbData.ledBrightnessUG.toString());
       if (kbData.ledIdleTimeLimit >= 0)
         await state.currentDevice.command("idleleds.time_limit", kbData.ledIdleTimeLimit.toString());
-      storage.showDefaultLayers = kbData.showDefaults;
+      AppContext.settings.showDefaultLayers = kbData.showDefaults;
       // QUKEYS
       await state.currentDevice.command("qukeys.holdTimeout", kbData.qukeysHoldTimeout.toString());
       await state.currentDevice.command("qukeys.overlapThreshold", kbData.qukeysOverlapThreshold.toString());
@@ -487,10 +488,17 @@ const Preferences = (props: PreferencesProps) => {
   };
 
   const selectDarkMode = (key: string) => {
-    toggleDarkMode(key);
+    let value: AppThemeType;
+    if (!isAppThemeType(key)) {
+      log.warn(`Invalid theme type: ${key}`);
+      value = AppContext.settings.darkMode;
+    } else {
+      value = key;
+    }
+    toggleDarkMode(value);
     setPreferencesState(prevState => ({
       ...prevState,
-      darkMode: key,
+      darkMode: value,
     }));
   };
 
@@ -592,7 +600,7 @@ const Preferences = (props: PreferencesProps) => {
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         devTools,
-        darkMode: storage.darkMode,
+        darkMode: AppContext.settings.darkMode,
         selectedNeuron: prevPreferencesState.neurons.indexOf(prevPreferencesState.neurons.find((x: Neuron) => x.id === NID)),
         verboseFocus: true,
       }));

@@ -3,7 +3,7 @@ import fs from "fs";
 import path from "path";
 import moment from "moment";
 import log from "electron-log/main";
-import { ApplicationPreferencesProvider } from "../../common/store/AppSettings";
+import { AppContext } from "../../common/app-context/AppContext";
 
 function deleteOldFiles(backupPath: string, period: number) {
   // Get the current date
@@ -39,14 +39,14 @@ function deleteOldFiles(backupPath: string, period: number) {
 }
 
 const setBackup = () => {
-  const bfolder = ApplicationPreferencesProvider.backupFolder;
-  const bfrequency = ApplicationPreferencesProvider.backupFrequency;
+  const bfolder = AppContext.settings.backupFolder;
+  const bfrequency = AppContext.settings.backupFrequency;
   log.verbose("** Checking backup folder value **");
   log.verbose(bfolder);
   if (bfolder === "" || bfolder === undefined) {
     const defaultPath = path.join(app.getPath("home"), "Dygma", "Backups");
     log.verbose(defaultPath);
-    ApplicationPreferencesProvider.backupFolder = defaultPath;
+    AppContext.settings.backupFolder = defaultPath;
     fs.mkdir(defaultPath, { recursive: true }, err => {
       if (err) {
         log.error(err);
