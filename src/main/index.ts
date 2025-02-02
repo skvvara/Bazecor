@@ -1,5 +1,4 @@
 import { app, BrowserWindow, Menu } from "electron";
-import { updateElectronApp, UpdateSourceType } from "update-electron-app";
 import log from "electron-log/main";
 import createWindow from "./createWindow";
 import { setTheme } from "./setup/theme";
@@ -7,19 +6,16 @@ import setBackup from "./setup/setBackup";
 import GlobalRecording from "./managers/GlobalRecording";
 import { addUSBListeners, removeUSBListeners } from "./setup/configureUSB";
 import { removeIPCs } from "./setup/configureIPCs";
+import configureAutoUpdate from "./setup/configureAutoUpdate";
 
+if (process.env.NODE_ENV === "development") {
+  log.transports.console.level = "verbose";
+} else {
+  log.transports.console.level = "info";
+}
 log.initialize();
-
-updateElectronApp({
-  updateSource: {
-    type: UpdateSourceType.ElectronPublicUpdateService,
-    repo: "Dygmalab/Bazecor",
-    host: "https://github.com/Dygmalab/Bazecor",
-  },
-  updateInterval: "24 hour",
-  logger: log,
-});
-
+configureAutoUpdate();
+log.info(app.getPath("userData"));
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 // eslint-disable-next-line global-require
 if (require("electron-squirrel-startup")) {

@@ -90,7 +90,10 @@ import { isIS, isISModifiedTables } from "./is/IS";
 import { jaJP, jaJPModifiedTables } from "./ja/JP";
 import { koKR, koKRModifiedTables } from "./ko/KR";
 import { plPL, plPLModifiedTables } from "./pl/PL";
+import { ruRU, ruRUModifiedTables} from "./ru/RU";
 import { deCH, deCHModifiedTables } from "./de/CH";
+import { esMX, esMXModifiedTables } from "./es/MX";
+import { itIT, itITModifiedTables } from "./it/IT";
 
 // Dygma - Layouts (community/third-party)
 import { enXXeurkey, enXXeurkeyModifiedTables } from "./en/XX-eurkey";
@@ -103,6 +106,7 @@ const supportModifiedTables = {
   // Keycaps
   "en-GB": enGBModifiedTables,
   "es-ES": esESModifiedTables,
+  "es-MX": esMXModifiedTables,
   "de-DE": deDEModifiedTables,
   "fr-FR": frFRModifiedTables,
   "da-DK": daDKModifiedTables,
@@ -114,7 +118,9 @@ const supportModifiedTables = {
   "ja-JP": jaJPModifiedTables,
   "ko-KR": koKRModifiedTables,
   "pl-PL": plPLModifiedTables,
+  "ru-RU": ruRUModifiedTables,
   "de-CH": deCHModifiedTables,
+  "it-IT": itITModifiedTables,
   // Community
   "en-XX-eurkey": enXXeurkeyModifiedTables,
   "fr-XX-bepo": frXXbepoModifiedTables,
@@ -129,6 +135,7 @@ const languages: {
   "en-US": undefined,
   "en-GB": enGB,
   "es-ES": esES,
+  "es-MX": esMX,
   "de-DE": deDE,
   "fr-FR": frFR,
   "da-DK": daDK,
@@ -140,7 +147,9 @@ const languages: {
   "ja-JP": jaJP,
   "ko-KR": koKR,
   "pl-PL": plPL,
+  "ru-RU": ruRU,
   "de-CH": deCH,
+  "it-IT": itIT,
   // Community
   "en-XX-eurkey": enXXeurkey,
   "fr-XX-bepo": frXXbepo,

@@ -818,39 +818,6 @@ button:focus-visible,
     font-size: 13px;
     margin-bottom: 8px;
   }
-  .groupButtons {
-    display: inline-flex;
-    padding: 4px 2px;
-    flex-wrap: nowrap;
-    background-color: ${({ theme }) => theme.styles.cardButtons.groupButtonsBackground};
-    border-radius: 6px;
-    max-width: 500px;
-    .button-config {
-      width: 42px;
-      margin: 0 2px;
-      padding: 10px 2px;
-      text-align: center;
-      flex: 1;
-    }
-  }
-  .groupButtons.groupButtonsGrid {
-    background-color: transparent;
-    padding: 0;
-    .buttonsGrid {
-      display: grid;
-      grid-template-columns: repeat(4, 112px);
-      grid-template-rows: repeat(2, 1fr);
-      grid-gap: 4px;
-      padding: 4px;
-      background-color: ${({ theme }) => theme.styles.cardButtons.groupButtonsBackground};
-      border-radius: 6px;
-      .button-config {
-        width: 100%;
-        margin: 0;
-        padding: 8px 2px;
-      }
-    }
-  }
 }
 
 .tooltip {
@@ -1786,9 +1753,9 @@ div.card.card-preferences .card-body {
       grid-template-columns: 1fr;
       grid-gap: 24px;
     }
-    .keyEnhanceWrapper {
-      order: 2;
-    }
+    // .keyEnhanceWrapper {
+    //   order: 2;
+    // }
     .KeyVisualizer {
       display: none;
     }
@@ -1826,18 +1793,18 @@ div.card.card-preferences .card-body {
 
 
 /* Layout Editor view responsive - Raise */
-@media screen and (max-height: 900px) {
-  .keyboard.singleViewMode .LayerHolder {
-    max-height: 342px;
-  }
-}
+// @media screen and (max-height: 900px) {
+//   .keyboard.singleViewMode .LayerHolder {
+//     max-height: 342px;
+//   }
+// }
 @media (min-height: 962px) {
-  body .layoutEditor .singleViewMode.keyboard .keyboardsWrapper {
-    height: calc(100vh - 104px);
-  }
-  body .singleViewMode .dygma-keyboard-editor {
-    margin-top: auto;
-  }
+  // body .layoutEditor .singleViewMode.keyboard .keyboardsWrapper {
+  //   height: calc(100vh - 104px);
+  // }
+  // body .singleViewMode .dygma-keyboard-editor {
+  //   margin-top: auto;
+  // }
   body .ordinary-keyboard-editor {
     margin-top: auto!important;
   }
@@ -1847,16 +1814,16 @@ div.card.card-preferences .card-body {
     grid-template-columns: minmax(160px,340px) minmax(840px,auto);
   }
 }
-@media (min-width: 1800px) and (min-height: 980px) {
-  body .layoutEditor .KeysWrapper {
-    max-width: 1160px;
-  }
-}
-@media (min-width: 1980px) and (min-height: 980px) {
-  body .layoutEditor .LayerHolder {
-    max-width: 1580px;
-  }
-}
+// @media (min-width: 1800px) and (min-height: 980px) {
+//   body .layoutEditor .KeysWrapper {
+//     max-width: 1160px;
+//   }
+// }
+// @media (min-width: 1980px) and (min-height: 980px) {
+//   body .layoutEditor .LayerHolder {
+//     max-width: 1580px;
+//   }
+// }
 @media (min-width: 2220px) and (min-height: 980px) {
   body .layoutEditor .LayerHolder {
     max-width: 2220px;
@@ -1866,13 +1833,6 @@ div.card.card-preferences .card-body {
   }
   body .layoutEditor .KeysWrapper {
     max-width: 100%;
-  }
-  .svgStyle {
-      max-width: 100%!important;
-      width: 100%;
-  }
-  #standardViewCointainer-tabpane-tabKeys .svgStyle {
-    max-width: 1640px!important;
   }
 }
 

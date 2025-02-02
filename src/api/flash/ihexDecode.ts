@@ -9,14 +9,14 @@ import { HexType } from "./types";
 export default function ihexDecode(line: string): HexType {
   let offset = 0;
 
-  const byteCount = parseInt(line.substr(offset, 2), 16);
+  const byteCount = parseInt(line.substring(offset, offset + 2), 16);
   offset += 2;
-  const address = parseInt(line.substr(offset, 4), 16);
+  const address = parseInt(line.substring(offset, offset + 4), 16);
   offset += 4;
-  const recordtype = parseInt(line.substr(offset, 2), 16);
+  const recordtype = parseInt(line.substring(offset, offset + 2), 16);
   offset += 2;
 
-  const byteData = hex2byte(line.substr(offset, byteCount * 2));
+  const byteData = hex2byte(line.substring(offset, offset + byteCount * 2));
 
   const bytes = new ArrayBuffer(byteData.length);
   const bytesView = new Uint8Array(bytes, 0, byteData.length);

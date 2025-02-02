@@ -4,7 +4,7 @@ import { ExtHIDInterface } from "../comms/types";
 import Hardware from "../hardware";
 
 const DygmavendorID = 13807;
-const DygmaproductID = 18;
+const DygmaproductID = [18, 33];
 const HIDReportID = 5;
 const DygmaUsage = 1;
 const DygmaUsagePage = 65280;
@@ -40,25 +40,35 @@ class HID {
 
   static getDevices = async (): Promise<HIDDevice[]> => {
     const grantedDevices = await navigator.hid.getDevices();
-    const filteredDevices = grantedDevices.filter(dev => dev.vendorId === DygmavendorID && dev.productId === DygmaproductID);
+    const filteredDevices = grantedDevices.filter(
+      dev => dev.vendorId === DygmavendorID && DygmaproductID.includes(dev.productId),
+    );
     const foundDevices: ExtHIDInterface[] = [];
 
     filteredDevices.forEach(device => {
       let name;
-      let wireless;
-      let layout;
+      let wireless = true;
+      let layout = "ANSI";
       if (device.productName.includes("Raise2")) {
         const [nme, wless, ly] = device.productName.split(" ")[0].split("-");
         name = nme;
         wireless = wless.includes("Wless");
-        layout = ly.includes("A") ? "ANSI" : "ISO";
+        layout = ly.includes("I") ? "ISO" : "ANSI";
         log.info("Raise2 Data", name, wireless, layout);
       }
       for (const Hdevice of Hardware.serial) {
         if (device.productId === Hdevice.usb.productId && device.vendorId === Hdevice.usb.vendorId) {
-          const newHID: ExtHIDInterface = device;
-          newHID.device = Hdevice as DygmaDeviceType;
-          foundDevices.push(newHID);
+          if (device.productId === 33) {
+            if (Hdevice.info.keyboardType === layout) {
+              const newHID: ExtHIDInterface = device;
+              newHID.device = Hdevice as DygmaDeviceType;
+              foundDevices.push(newHID);
+            }
+          } else {
+            const newHID: ExtHIDInterface = device;
+            newHID.device = Hdevice as DygmaDeviceType;
+            foundDevices.push(newHID);
+          }
         }
       }
     });
@@ -84,7 +94,13 @@ class HID {
         filters: [
           {
             vendorId: DygmavendorID,
-            productId: DygmaproductID,
+            productId: DygmaproductID[0],
+            usage: DygmaUsage,
+            usagePage: DygmaUsagePage,
+          },
+          {
+            vendorId: DygmavendorID,
+            productId: DygmaproductID[1],
             usage: DygmaUsage,
             usagePage: DygmaUsagePage,
           },
@@ -102,6 +118,7 @@ class HID {
       }
       throw new HIDError("No HID Devices to connect");
     } catch (err) {
+      log.error(err);
       throw new HIDError("HID Device could not be connected");
     }
   };
@@ -210,12 +227,12 @@ class HID {
           this.connectedDevice.removeEventListener("inputreport", receiveDataHandler);
         }
         reject(new HIDError("HID send data took too much time"));
-      }, 5000);
+      }, 8000);
       receiveDataHandler = (event: HIDInputReportEvent) => {
         // we cannot differentiate if the user has several defys
         const { data, device, reportId } = event;
 
-        if (device.productId !== DygmaproductID && reportId !== HIDReportID) return;
+        if (!DygmaproductID.includes(device.productId) && reportId !== HIDReportID) return;
 
         const decodedData = HID.decoder.decode(data);
         if (decodedData.includes("\r\n.\r\n")) {

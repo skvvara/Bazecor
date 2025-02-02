@@ -4,6 +4,8 @@ import path from "path";
 import moment from "moment";
 import log from "electron-log/main";
 import { AppContext } from "../../common/app-context/AppContext";
+import Store from "../managers/Store";
+
 
 function deleteOldFiles(backupPath: string, period: number) {
   // Get the current date

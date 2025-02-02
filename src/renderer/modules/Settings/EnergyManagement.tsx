@@ -100,7 +100,9 @@ function EnergyManagement(props: EnergyManagementProps) {
             <div className="flex items-center gap-2">
               <IconFlashlight /> {i18n.wireless.energyManagement.settings.trueSleepEnabling}
             </div>
-            <Badge content={i18n.wireless.energyManagement.settings.highBatteryImpact} variant="danger" size="sm" />
+            <Badge variant="danger" size="xs">
+              {i18n.wireless.energyManagement.settings.highBatteryImpact}
+            </Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="pb-3 pt-0">
@@ -131,18 +133,18 @@ function EnergyManagement(props: EnergyManagementProps) {
             <div className={`flex flex-col pt-3 ${!wireless.true_sleep ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
               <div className="block w-full relative">
                 <Slider
-                  min={0}
-                  max={100}
+                  min={1}
+                  max={60}
                   step={1}
                   value={[Math.round(wireless.true_sleep_time / 60)]}
                   onValueChange={setTrueSleepTime}
                   className="slider-danger"
-                  disabled={wireless.true_sleep === true}
+                  disabled={wireless.true_sleep === false}
                 />
               </div>
               <div className="flex justify-between">
                 <span className="text-xs text-gray-300 dark:text-gray-200">1 min</span>
-                <span className="text-xs text-gray-300 dark:text-gray-200">240 min</span>
+                <span className="text-xs text-gray-300 dark:text-gray-200">60 min</span>
               </div>
             </div>
             <div className="mt-3 text-sm font-semibold tracking-tight text-gray-500 dark:text-gray-100">

@@ -23,6 +23,8 @@ export interface SuperkeysEditorProps {
   startContext: () => void;
   cancelContext: () => void;
   setLoading: (lding: boolean) => void;
+  saveButtonRef?: React.RefObject<HTMLButtonElement>;
+  discardChangesButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
 export interface SuperkeysEditorInitialStateType {
@@ -30,6 +32,7 @@ export interface SuperkeysEditorInitialStateType {
   macros: MacrosType[];
   superkeys: SuperkeysType[];
   storedMacros: MacrosType[];
+  storedSuper: SuperkeysType[];
   neurons: Neuron[];
   neuronID: string;
   kbtype: string;
@@ -43,7 +46,7 @@ export interface SuperkeysEditorInitialStateType {
   futureSK: SuperkeysType[];
   futureSSK: number;
   currentLanguageLayout: string;
-  isStandardView: boolean;
+
   showStandardView: boolean;
   loading: boolean;
 }

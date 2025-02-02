@@ -25,7 +25,6 @@ export interface SuperkeysType {
 }
 
 export interface SuperKeyActionsProps {
-  isStandardViewSuperkeys: boolean;
   superkeys: SuperkeysType[];
   selected: number;
   selectedAction: number;
@@ -38,7 +37,6 @@ export interface SuperKeyActionsProps {
 }
 
 export interface SuperkeyPickerProps {
-  isStandardViewSuperkeys: boolean;
   superkeys: SuperkeysType[];
   selected: number;
   macros: MacrosType[];
@@ -46,8 +44,9 @@ export interface SuperkeyPickerProps {
   keymapDB: KeymapDB;
   onClick: (id: number) => void;
   index: number;
-  icon: JSX.Element;
+  icon?: JSX.Element;
   title: string;
   description: string;
   elementActive: boolean;
+  variant?: "subtle" | "regular";
 }

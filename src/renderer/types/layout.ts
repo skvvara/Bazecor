@@ -23,13 +23,16 @@ export interface LayoutEditorProps {
   inContext: boolean;
   restoredOk: boolean;
   handleSetRestoredOk: (status: boolean) => void;
+  saveButtonRef: React.RefObject<HTMLButtonElement>;
+  discardChangesButtonRef: React.RefObject<HTMLButtonElement>;
 }
 
 export interface KeyType {
   keyCode: number;
   label: string | JSX.Element;
-  extraLabel?: string;
-  verbose?: string;
+  extraLabel?: string | JSX.Element;
+  verbose?: string | JSX.Element;
+  alt?: boolean;
 }
 
 export interface SegmentedKeyType {
@@ -53,4 +56,31 @@ export interface PaletteType {
 export interface ColormapType {
   palette: PaletteType[];
   colorMap: number[][];
+}
+export interface OperationSystemIcons {
+  shift: {
+    xs: string;
+    sm: string;
+    md: string;
+  };
+  control: {
+    xs: string;
+    sm: string;
+    md: string;
+  };
+  os: {
+    xs: React.ReactNode;
+    sm: React.ReactNode;
+    md: React.ReactNode;
+  };
+  alt: {
+    xs: string;
+    sm: string;
+    md: string;
+  };
+  altGr: {
+    xs: string;
+    sm: string;
+    md: string;
+  };
 }

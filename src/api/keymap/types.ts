@@ -1,15 +1,13 @@
 export type KeymapCodeType = number;
 
-export const NOKEY_KEY_CODE = 0;
-export const TRANS_KEY_CODE = 65535;
-
 export type KeymapCodeTableType = {
   code: KeymapCodeType;
   labels: {
     primary: string | JSX.Element;
-    top?: string | undefined;
-    verbose?: string | undefined;
+    top?: string | JSX.Element | undefined;
+    verbose?: string | JSX.Element | undefined;
   };
+  alt?: boolean;
   newGroupName?: string;
 };
 
@@ -22,6 +20,7 @@ export type LanguageType =
   | "en-US"
   | "en-GB"
   | "es-ES"
+  | "es-MX"
   | "de-DE"
   | "fr-FR"
   | "da-DK"
@@ -29,9 +28,11 @@ export type LanguageType =
   | "nb-NO"
   | "sv-SE"
   | "is-IS"
+  | "it-IT"
   | "ja-JP"
   | "ko-KR"
   | "pl-PL"
+  | "ru-RU"
   | "de-CH"
   | "en-XX-eurkey"
   | "fr-XX-bepo"

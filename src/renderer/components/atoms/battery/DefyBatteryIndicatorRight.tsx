@@ -22,7 +22,7 @@ interface DefyBatteryIndicatorRightProps {
 }
 
 const DefyBatteryIndicatorRight = ({ batteryStatus, batteryHeight }: DefyBatteryIndicatorRightProps) => {
-  const maskHash = `${Date.now()}-${(Math.random() + 1).toString(36).substring(7)}-right`;
+  const maskHash = `${Date.now()}-${(Math.random() + 1).toString(36).substring(0, 7)}-right`;
   return (
     <svg
       className="defy-battery-indicator"

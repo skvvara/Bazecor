@@ -1,8 +1,6 @@
-import React, { useMemo, useCallback } from "react";
+import React, { useMemo, useCallback, useState } from "react";
 import { withTheme, DefaultTheme } from "styled-components";
 import { Popover, PopoverContent, PopoverTrigger } from "@Renderer/components/atoms/Popover";
-import { FaLinux } from "react-icons/fa";
-import { AiFillWindows } from "react-icons/ai";
 import { i18n } from "@Renderer/i18n";
 import {
   IconClone,
@@ -13,9 +11,13 @@ import {
   IconStopWatch,
   IconDragAndDrop,
   IconDelete,
+  IconPen,
+  IconCheckmark,
 } from "@Renderer/components/atoms/icons";
 import Heading from "@Renderer/components/atoms/Heading";
 import { Button } from "@Renderer/components/atoms/Button";
+import OSKey from "@Renderer/components/molecules/KeyTags/OSKey";
+import { RowsRepresentation } from "@Renderer/types/macros";
 
 interface Modifier {
   id: number;
@@ -26,23 +28,17 @@ interface ActionType {
   name: string;
 }
 
-interface Item {
-  id: number;
-  keyCode: number;
-  action: number;
-  symbol: string;
-}
-
 interface KeyMacroProps {
   provided: any;
   snapshot: any;
-  item: Item;
+  item: RowsRepresentation;
   modifiers: Modifier[];
   addModifier: (id: number, index: number) => void;
   actionTypes: Record<number, ActionType>;
   updateAction: (id: number, actionType: number) => void;
   onDeleteRow: (id: number) => void;
   onCloneRow: (id: number) => void;
+  editDelay: (id: number, delay: number | number[]) => void;
   theme: DefaultTheme;
 }
 
@@ -56,6 +52,7 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
   updateAction,
   onDeleteRow,
   onCloneRow,
+  editDelay,
   theme,
 }) => {
   const getItemStyle = useCallback(
@@ -71,69 +68,35 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
     }),
     [theme.styles.macroKey],
   );
+  const isModifier = useMemo(() => (item.keyCode as number) > 223 && (item.keyCode as number) < 232 && item.type !== 2, [item]);
+  const [delay, setDelay] = useState<number | number[]>(item.keyCode);
+  const [enableEdit, setEnableEdit] = useState(false);
 
-  // const shadeColor = useCallback((color: string, percent: number) => {
-  //   if (color === "transparent") {
-  //     return color;
-  //   }
-  //   let R = parseInt(color.substring(1, 3), 16);
-  //   let G = parseInt(color.substring(3, 5), 16);
-  //   let B = parseInt(color.substring(5, 7), 16);
+  const setDelayHandler = (value: string) => {
+    const randomDelay = Array.isArray(item.keyCode);
+    const allNumbers = randomDelay ? value.split("-").filter(v => v !== "").length === 2 : value !== "";
 
-  //   R = parseInt((R * (100 - percent)) / 100, 10);
-  //   G = parseInt((G * (100 - percent)) / 100, 10);
-  //   B = parseInt((B * (100 - percent)) / 100, 10);
-
-  //   R = Math.round((R * 255) / (R + 5));
-  //   G = Math.round((G * 255) / (G + 5));
-  //   B = Math.round((B * 255) / (B + 5));
-
-  //   const RR = R.toString(16).length === 1 ? `0${R.toString(16)}` : R.toString(16);
-  //   const GG = G.toString(16).length === 1 ? `0${G.toString(16)}` : G.toString(16);
-  //   const BB = B.toString(16).length === 1 ? `0${B.toString(16)}` : B.toString(16);
-
-  //   return `#${RR}${GG}${BB}`;
-  // }, []);
-
-  const operationSystem = process.platform;
-  const operationSystemIcons = useMemo(() => {
-    if (operationSystem === "darwin") {
-      return {
-        shift: "Shift",
-        control: "Control ^",
-        os: {
-          icon: false,
-          text: "⌘",
-        },
-        alt: "⌥",
-        altGr: "Right ⌥",
-      };
+    if (allNumbers) {
+      if (randomDelay) {
+        const newDelay = value
+          .trim()
+          .split("-")
+          .map(s => parseInt(s, 10));
+        setDelay(newDelay);
+      } else {
+        setDelay(parseInt(value, 10));
+      }
+    } else {
+      setDelay(randomDelay ? [0, 0] : 0);
     }
-    if (operationSystem === "win32") {
-      return {
-        shift: "Shift",
-        control: "Control",
-        os: {
-          icon: <AiFillWindows />,
-          text: false,
-        },
-        alt: "Alt",
-        altGr: "Alt Gr.",
-      };
-    }
-    return {
-      shift: "Shift",
-      control: "Control",
-      os: {
-        icon: <FaLinux />,
-        text: false,
-      },
-      alt: "Alt",
-      altGr: "Alt Gr.",
-    };
-  }, [operationSystem]);
+  };
 
-  const isModifier = useMemo(() => item.keyCode > 223 && item.keyCode < 232 && item.action !== 2, [item]);
+  const finishDelayEdit = () => {
+    editDelay(item.id, delay);
+    setEnableEdit(false);
+  };
+
+  const visualKeycode = Array.isArray(item.keyCode) ? item.keyCode.join("-") : item.keyCode;
 
   return (
     <div>
@@ -145,8 +108,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
       >
         <div
           className={`keyMacroWrapper relative flex flex-wrap flex-col p-0 !m-0 after:absolute after:content-[' '] after:w-full after:h-[1px] after:top-[71px] after:left-0 after:bg-white/80 after:dark:bg-[#2B2C43] keyCode-${item.keyCode} ${isModifier ? "isModifier" : ""} ${
-            item.action === 1 || item.action === 2 ? "isDelay" : ""
-          }`}
+            item.type === 1 || item.type === 2 ? "isDelay" : ""
+          } item-id-${item.id}`}
         >
           <div className="keyMacro">
             <div className="headerDrag">
@@ -158,7 +121,7 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                   variant="link"
                   size="icon"
                   onClick={() => onDeleteRow(item.id)}
-                  className="w-[24px] h-[24px] bg-tranparent hover:bg-white/20 transition-all"
+                  className="trash-icon w-[24px] h-[24px] bg-tranparent hover:bg-white/20 transition-all"
                 >
                   <IconDelete size="sm" strokeWidth={1.2} />
                 </Button>
@@ -174,13 +137,38 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                           renderAs="h4"
                           className="m-0 uppercase !text-ssm text-gray-300 dark:text-gray-500"
                         >
-                          {item.action === 1 || item.action === 2 ? i18n.editor.macros.delay : i18n.general.key}
+                          {item.type === 1 || item.type === 2 ? i18n.editor.macros.delay : i18n.general.key}
                         </Heading>
-                        <p className="keyValue text-2xl">
-                          {item.symbol} {item.action === 1 || item.action === 2 ? <small>ms</small> : ""}
-                        </p>
+                        <div className="keyValue text-2xl">
+                          {(item.type === 1 || item.type === 2) && enableEdit ? (
+                            <input
+                              id="changeDelay"
+                              type="text"
+                              value={Array.isArray(delay) ? `${delay[0]}-${delay[1]}` : `${delay}`}
+                              onChange={event => setDelayHandler(event.target.value)}
+                              className="form-input form-input-lg p-3 align-top"
+                            />
+                          ) : (
+                            visualKeycode
+                          )}
+                          {(item.type === 1 || item.type === 2) && !enableEdit ? <small>ms</small> : ""}
+                          {(item.type === 1 || item.type === 2) && !enableEdit ? (
+                            <Button variant="ghost" onClick={() => setEnableEdit(true)}>
+                              <IconPen />{" "}
+                            </Button>
+                          ) : (
+                            ""
+                          )}
+                          {(item.type === 1 || item.type === 2) && enableEdit ? (
+                            <Button variant="ghost" onClick={() => finishDelayEdit()} className="pl-3">
+                              <IconCheckmark size="md" />{" "}
+                            </Button>
+                          ) : (
+                            ""
+                          )}
+                        </div>
                       </div>
-                      <div className="keyFunctions py-[12px] px-[8px] bg-gray-50/40 dark:bg-gray-800 divide-y divide-y-reverse divide-gray-50 dark:divide-gray-700">
+                      <div className="keyFunctions py-[12px] px-[12px] bg-gray-50/40 dark:bg-gray-800 border-t-[1px] border-gray-50 dark:border-gray-700">
                         <Heading
                           headingLevel={5}
                           renderAs="h5"
@@ -193,8 +181,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             iconDirection="left"
                             variant="config"
                             icon={<IconPress size="sm" />}
-                            selected={actionTypes[item.action].name === "Key Press"}
-                            disabled={!!(item.action === 1 || item.action === 2)}
+                            selected={actionTypes[item.type].name === "Key Press"}
+                            disabled={!!(item.type === 1 || item.type === 2)}
                             onClick={() => updateAction(item.id, 6)}
                             size="sm"
                           >
@@ -204,8 +192,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             iconDirection="left"
                             variant="config"
                             icon={<IconRelease size="sm" />}
-                            selected={actionTypes[item.action].name === "Key Release"}
-                            disabled={!!(item.action === 1 || item.action === 2)}
+                            selected={actionTypes[item.type].name === "Key Release"}
+                            disabled={!!(item.type === 1 || item.type === 2)}
                             onClick={() => updateAction(item.id, 7)}
                             size="sm"
                           >
@@ -215,8 +203,8 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                             iconDirection="left"
                             variant="config"
                             icon={<IconPressAndRelease size="sm" />}
-                            selected={actionTypes[item.action].name === "Key Press & Rel."}
-                            disabled={!!(item.action === 1 || item.action === 2)}
+                            selected={actionTypes[item.type].name === "Key Press & Rel."}
+                            disabled={!!(item.type === 1 || item.type === 2)}
                             onClick={() => updateAction(item.id, 8)}
                             size="sm"
                           >
@@ -224,7 +212,7 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                           </Button>
                         </div>
                       </div>
-                      <div className="keyModifiers py-[12px] px-[8px] bg-gray-25/40 dark:bg-gray-700">
+                      <div className="keyModifiers py-[12px] px-[12px] bg-gray-25/40 dark:bg-gray-700">
                         <Heading
                           headingLevel={4}
                           renderAs="h4"
@@ -238,43 +226,41 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                               variant="config"
                               size="sm"
                               className="w-full text-center"
-                              onClick={() => addModifier(modifier.id, id)}
+                              onClick={() => addModifier(item.id, id)}
                               // eslint-disable-next-line
                               key={`addModifierMacro-${id}`}
                             >
-                              {modifier.name === "LEFT SHIFT" ? `L. ${operationSystemIcons.shift}` : ""}
-                              {modifier.name === "RIGHT SHIFT" ? `R. ${operationSystemIcons.shift}` : ""}
-                              {modifier.name === "LEFT CTRL" ? `L. ${operationSystemIcons.control}` : ""}
-                              {modifier.name === "RIGHT CTRL" ? `R. ${operationSystemIcons.control}` : ""}
-                              {modifier.name === "LEFT ALT" ? operationSystemIcons.alt : ""}
-                              {modifier.name === "RIGHT ALT" ? operationSystemIcons.altGr : ""}
-                              {modifier.name === "LEFT OS"
-                                ? `L. ${operationSystemIcons.os.text ? operationSystemIcons.os.text : operationSystemIcons.os.icon}`
-                                : ""}
-                              {modifier.name === "RIGHT OS"
-                                ? `R. ${operationSystemIcons.os.text ? operationSystemIcons.os.text : operationSystemIcons.os.icon}`
-                                : ""}
+                              {modifier.name === "LEFT SHIFT" ? <OSKey renderKey="shift" direction="Left" /> : ""}
+                              {modifier.name === "RIGHT SHIFT" ? <OSKey renderKey="shift" direction="Right" /> : ""}
+                              {modifier.name === "LEFT CTRL" ? <OSKey renderKey="control" direction="Left" /> : ""}
+                              {modifier.name === "RIGHT CTRL" ? <OSKey renderKey="control" direction="Right" /> : ""}
+                              {modifier.name === "LEFT OS" ? <OSKey renderKey="os" direction="Left" /> : ""}
+                              {modifier.name === "RIGHT OS" ? <OSKey renderKey="os" direction="Right" /> : ""}
+                              {modifier.name === "LEFT ALT" ? <OSKey renderKey="alt" direction="Left" /> : ""}
+                              {modifier.name === "RIGHT ALT" ? <OSKey renderKey="altGr" /> : ""}
                             </Button>
                           ))}
                         </div>
                       </div>
                     </div>
-                    <div className="keyMacroItemOptions">
+                    <div className="keyMacroItemOptions flex flex-col gap-1 mt-1">
                       <Button
-                        variant="link"
+                        variant="dropdownLink"
                         icon={<IconClone />}
                         iconDirection="left"
                         size="sm"
                         onClick={() => onCloneRow(item.id)}
+                        className="!justify-start"
                       >
                         Clone
                       </Button>
                       <Button
-                        variant="link"
+                        variant="dropdownLink"
                         iconDirection="left"
                         icon={<IconDelete />}
                         size="sm"
                         onClick={() => onDeleteRow(item.id)}
+                        className="!justify-start"
                       >
                         Delete
                       </Button>
@@ -288,10 +274,10 @@ const KeyMacro: React.FC<KeyMacroProps> = ({
                 {item.symbol}
               </p>
               <div className="actionicon">
-                {actionTypes[item.action].name === "Key Press" ? <IconPress size="sm" /> : ""}
-                {actionTypes[item.action].name === "Key Release" ? <IconRelease size="sm" /> : ""}
-                {actionTypes[item.action].name === "Key Press & Rel." ? <IconPressAndRelease size="sm" /> : ""}
-                {actionTypes[item.action].name === "Delay" ? <IconStopWatch size="sm" /> : ""}
+                {actionTypes[item.type].name === "Key Press" ? <IconPress size="sm" /> : ""}
+                {actionTypes[item.type].name === "Key Release" ? <IconRelease size="sm" /> : ""}
+                {actionTypes[item.type].name === "Key Press & Rel." ? <IconPressAndRelease size="sm" /> : ""}
+                {actionTypes[item.type].name === "Delay" ? <IconStopWatch size="sm" /> : ""}
               </div>
             </div>
           </div>

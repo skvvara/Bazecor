@@ -26,3 +26,28 @@ export interface MacroActionsType {
   type: number;
   id?: number;
 }
+
+export type MacroEAType = {
+  enum: string;
+  name: string;
+  id?: number;
+  icon?: string | JSX.Element;
+  smallIcon?: string | JSX.Element;
+};
+
+export type MacroModType = {
+  id: number;
+  name: string;
+  keyCode: number;
+  color: string;
+};
+
+export interface RowsRepresentation {
+  symbol: string | JSX.Element;
+  keyCode: number | number[];
+  type: number;
+  id: number;
+  uid: number;
+  color: string;
+  ucolor: string;
+}

@@ -1,7 +1,7 @@
 function hex2byte(hex: string) {
   const bytes = [];
 
-  for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
+  for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substring(i, i + 2), 16));
 
   return bytes;
 }
@@ -14,19 +14,21 @@ function hex2byte(hex: string) {
 export function decodeHexLine(line: string) {
   let offset = 0;
 
-  const byteCount = parseInt(line.substr(offset, 2), 16);
+  const byteCount = parseInt(line.substring(offset, offset + 2), 16);
   offset += 2;
-  const address = parseInt(line.substr(offset, 4), 16);
+  const address = parseInt(line.substring(offset, offset + 4), 16);
   offset += 4;
-  const recordtype = parseInt(line.substr(offset, 2), 16);
+  const recordtype = parseInt(line.substring(offset, offset + 2), 16);
   offset += 2;
 
-  const byteData = hex2byte(line.substr(offset, byteCount * 2));
+  const byteData = hex2byte(line.substring(offset, offset + byteCount * 2));
 
   const bytes = new ArrayBuffer(byteData.length);
   const bytesView = new Uint8Array(bytes, 0, byteData.length);
 
-  byteData.forEach((v, i) => bytesView[i] = v)
+  for (let i = 0; i < byteData.length; i += 1) {
+    bytesView[i] = byteData[i];
+  }
 
   return {
     str: line,

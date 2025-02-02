@@ -60,6 +60,8 @@ const DeviceManager = (props: DeviceManagerProps) => {
   const [open, setOpen] = useState(false);
   const [openDialogVirtualKB, setOpenDialogVirtualKB] = useState(false);
   const [selectedDevice, setSelectedDevice] = useState(0);
+  const [showMainButtons, setShowMainButtons] = useState(false);
+  const [animationLoadingDevice, setAnimationLoadingDevice] = useState(false);
 
   const ref = useRef(null);
   const isInView = useInView(ref);
@@ -87,7 +89,7 @@ const DeviceManager = (props: DeviceManagerProps) => {
 
   const handleOnDisconnect = async () => {
     setScanned(false);
-    const cID = state.currentDevice.serialNumber.toLowerCase();
+    const cID = state.currentDevice.serialNumber?.toLowerCase();
     await DeviceTools.disconnect(state.currentDevice);
     dispatch({ type: "disconnect", payload: [cID] });
     setDevicesList([]);
@@ -103,17 +105,24 @@ const DeviceManager = (props: DeviceManagerProps) => {
 
   const findKeyboards = useCallback(async (): Promise<DeviceListType[]> => {
     setLoading(true);
-    if (connected || state.deviceList.length > 0) {
+    if (connected || state.deviceList?.length > 0) {
       const toShowDevs: DeviceListType[] = [];
-      let newDeviceList = state.deviceList;
-      const existingIDs = state.deviceList.map(d => d.serialNumber.toLowerCase());
-      const newDevs = await DeviceTools.listNonConnected(false, existingIDs);
-      newDeviceList = newDeviceList.concat(newDevs);
+      const existingIDs = state.deviceList.map(d => d.serialNumber?.toLowerCase());
+      const result = await DeviceTools.listNonConnected(false, existingIDs);
+      let newDeviceList = state.deviceList.filter(
+        x => !result.devicesToRemove.includes(x.serialNumber?.toLowerCase()) || x.type === "virtual",
+      );
+      newDeviceList = newDeviceList.concat(result.finalDevices);
+      newDeviceList = newDeviceList.map((dev, i) => {
+        const localDev = dev;
+        localDev.serialNumber = dev.serialNumber !== undefined ? dev.serialNumber : `RaiseBootloader${i}`;
+        return localDev;
+      });
       dispatch({ type: "addDevicesList", payload: newDeviceList });
       log.info("Available Devices: ", newDeviceList);
       newDeviceList.forEach((item, index) => {
         const neurons = store.get("neurons") as Neuron[];
-        const neuron = neurons.find(n => n.id.toLowerCase() === item.device?.chipId?.toLowerCase());
+        const neuron = neurons.find(n => n.id?.toLowerCase() === item.device?.chipId?.toLowerCase());
         toShowDevs.push({
           name: neuron?.name ? neuron.name : "",
           available: true,
@@ -169,7 +178,7 @@ const DeviceManager = (props: DeviceManagerProps) => {
       case "connect":
         if (connected && deviceNumber !== state.selected) {
           setSelectedDevice(deviceNumber);
-          handleOnDisconnectConnect(deviceNumber);
+          await handleOnDisconnectConnect(deviceNumber);
         } else {
           setSelectedDevice(deviceNumber);
           await onKeyboardConnect(deviceNumber);
@@ -192,6 +201,8 @@ const DeviceManager = (props: DeviceManagerProps) => {
   const scanDevices = () => {
     log.info("Scan devices!");
     setScanned(false);
+    setAnimationLoadingDevice(true);
+    setTimeout(() => setAnimationLoadingDevice(false), 800);
   };
 
   const addVirtualDevicesButton = (
@@ -245,7 +256,7 @@ const DeviceManager = (props: DeviceManagerProps) => {
   }, []);
 
   useEffect(() => {
-    if (devicesList && state.deviceList.length !== devicesList.length) setScanned(false);
+    if (state.deviceList?.length !== devicesList?.length) setScanned(false);
   }, [devicesList, state.deviceList]);
 
   useEffect(() => {
@@ -258,11 +269,11 @@ const DeviceManager = (props: DeviceManagerProps) => {
   }, [findKeyboards, scanned]);
 
   useEffect(() => {
-    console.log("ref: ", ref.current);
+    // log.info("ref: ", ref.current);
     if (isInView) {
-      log.warn("Is visible");
+      setShowMainButtons(false);
     } else {
-      log.warn("Not visible");
+      setShowMainButtons(true);
     }
   }, [isInView, ref]);
 
@@ -282,17 +293,18 @@ const DeviceManager = (props: DeviceManagerProps) => {
   log.info("Current State: ", devicesList, selectedDevice);
 
   return (
-    <div className="h-full">
+    <div className="h-full relative flex flex-col justify-center">
       <div className="px-3 h-full">
         <div className="view-wrapper--devices flex h-[inherit] flex-col">
           <PageHeader
             text="Keyboard Manager"
-            primaryButton={scanDevicesButton}
-            secondaryButton={addVirtualDevicesButton}
+            primaryButton={showMainButtons ? scanDevicesButton : null}
+            secondaryButton={showMainButtons ? addVirtualDevicesButton : null}
             styles="pageHeaderFlatBottom"
           />
           {/* <div className="filterHeaderWrapper flex items-center justify-between pt-8 pb-3 mb-3 border-b-[1px] border-gray-100 dark:border-gray-600"> */}
           <div className="filterHeaderWrapper flex items-center justify-between pt-8 pb-3 mb-3">
+            {/* // To be restored when we activate the persistence of the devices */}
             {/* <div className="filter-header flex items-center gap-4">
               <Heading headingLevel={3} renderAs="h3" className="ml-[2px]">
                 {devicesList?.length > 1 ? i18n.deviceManager.myDevices : i18n.deviceManager.myDevice}
@@ -345,12 +357,12 @@ const DeviceManager = (props: DeviceManagerProps) => {
               ) : null}
             </div> */}
           </div>
-          <div className="flex gap-4 relative">
+          <div className="flex gap-4 relative h-full">
             {devicesList?.length > 0 ? (
               <div className="devices-container">
                 <SortableList
                   onSortEnd={onSortEnd}
-                  className="list devices-scroll relative w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4"
+                  className="list devices-scroll relative w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 pb-4"
                   draggedItemClassName="dragged"
                 >
                   {devicesList.map(item => (
@@ -373,7 +385,12 @@ const DeviceManager = (props: DeviceManagerProps) => {
                   ))}
                   <AnimatePresence mode="popLayout">
                     <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }}>
-                      <CardAddDevice addVirtualDevice={addVirtualDevice} scanDevices={scanDevices} ref={ref} />
+                      <CardAddDevice
+                        addVirtualDevice={addVirtualDevice}
+                        scanDevices={scanDevices}
+                        devicesNumber={devicesList?.length}
+                        animationLoadingDevice={animationLoadingDevice}
+                      />
                     </motion.div>
                   </AnimatePresence>
                 </SortableList>
@@ -382,16 +399,21 @@ const DeviceManager = (props: DeviceManagerProps) => {
               <div className="devices-container">
                 <AnimatePresence mode="popLayout">
                   <motion.div initial={{ opacity: 0, y: -50 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -50 }}>
-                    <div className="list devices-scroll relative w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pb-4">
+                    <div className="list devices-scroll relative w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-3 gap-4 pb-4">
                       <NoDeviceFound />
-                      <CardAddDevice addVirtualDevice={addVirtualDevice} scanDevices={scanDevices} ref={ref} />
+                      <CardAddDevice
+                        addVirtualDevice={addVirtualDevice}
+                        scanDevices={scanDevices}
+                        devicesNumber={devicesList?.length}
+                        animationLoadingDevice={animationLoadingDevice}
+                      />
                     </div>
                   </motion.div>
                 </AnimatePresence>
               </div>
             )}
           </div>
-          <HelpSupportLink />
+          <HelpSupportLink ref={ref} />
         </div>
       </div>
 

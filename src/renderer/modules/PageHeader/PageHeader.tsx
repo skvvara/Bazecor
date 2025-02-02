@@ -24,6 +24,7 @@ import Saving from "../Saving";
 const Style = Styled.div`
 width: 100%;
 flex: 0 0 100%;
+flex: 1;
 align-self: flex-start;
 // position: sticky;
 // top: 32px;
@@ -106,6 +107,8 @@ function PageHeader(props: PageHeaderType) {
     isSaving,
     primaryButton,
     secondaryButton,
+    saveButtonRef,
+    discardChangesButtonRef,
   } = props;
   return (
     <Style className={`${styles === "pageHeaderFlatBottom" ? "pageHeaderSticky" : ""}`}>
@@ -118,7 +121,14 @@ function PageHeader(props: PageHeaderType) {
         <div className="pageTools">
           {contentSelector || ""}
           {showSaving ? (
-            <Saving saveContext={saveContext} destroyContext={destroyContext} inContext={inContext} isSaving={isSaving} />
+            <Saving
+              saveContext={saveContext}
+              destroyContext={destroyContext}
+              inContext={inContext}
+              isSaving={isSaving}
+              saveButtonRef={saveButtonRef}
+              discardChangesButtonRef={discardChangesButtonRef}
+            />
           ) : (
             ""
           )}

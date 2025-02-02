@@ -5,6 +5,32 @@ import ElectronStore, { Schema } from "electron-store";
 // But you also need to create a mirror of that spec in TS
 // And use the type here
 const schema: Schema<StorageType> = {
+  settings: {
+    type: "object",
+    properties: {
+      backupFolder: { type: "string" },
+      backupFrequency: { type: "number" },
+      language: { type: "string" },
+      darkMode: { type: "string" },
+      hideBluetoothExperimental: { type: "boolean" },
+      showDefaults: { type: "boolean" },
+      autoUpdate: { type: "boolean" },
+      verbose: { type: "boolean" },
+      version: { type: "string" },
+    },
+    default: {
+      backupFolder: "",
+      backupFrequency: 0,
+      language: "english",
+      darkMode: "system",
+      hideBluetoothExperimental: false,
+      showDefaults: false,
+      autoUpdate: undefined,
+      verbose: false,
+      version: undefined,
+    },
+    required: [],
+  },
   neurons: {
     type: "array",
     items: {
@@ -136,6 +162,7 @@ const schema: Schema<StorageType> = {
 };
 
 export const STORE_KEYS: { [key: string]: keyof StorageType } = {
+  settings: "settings",
   neurons: "neurons",
 };
 

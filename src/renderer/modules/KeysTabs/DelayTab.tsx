@@ -1,4 +1,4 @@
-import React from "react";
+import React, { FormEvent } from "react";
 import Styled from "styled-components";
 import log from "electron-log/renderer";
 import { i18n } from "@Renderer/i18n";
@@ -9,21 +9,6 @@ import { Button } from "@Renderer/components/atoms/Button";
 import Heading from "@Renderer/components/atoms/Heading";
 
 const Styles = Styled.div`
-display: flex;
-flex-wrap: wrap;
-height: inherit;
-h4 {
-    font-size: 16px;
-    flex: 0 0 100%;
-    width: 100%;
-}
-.description {
-  margin-top: 8px;
-  font-size: 14px;
-  color: ${({ theme }) => theme.styles.macro.descriptionColor};
-  flex: 0 0 100%;
-  width: 100%;
-}
 .form-control {
     color: ${({ theme }) => theme.styles.form.inputColor};
     background: ${({ theme }) => theme.styles.form.inputBackgroundColor};
@@ -39,7 +24,6 @@ h4 {
     margin-bottom: 0;
 }
 .input-group {
-    max-width: 280px;
     border-top-right-radius: 0;
     border-bottom-right-radius: 0;
     .input-group-text {
@@ -52,7 +36,6 @@ h4 {
         border-bottom-left-radius: 0;
         border-color: ${({ theme }) => theme.styles.form.inputBorderSolid};
     }
-
 }
 
 .formWrapper {
@@ -62,33 +45,18 @@ h4 {
     margin-left: 16px;
   }
 }
-.inputMax {
-  text-align: right;
-}
 .inputGroupRandom {
-  position: relative;
-  .inputIcon {
-    position: absolute;
-    top: 33%;
-    left: 95px;
-    transform: translate3d(0, -50%, 0);
-    width: 32px;
-    height: 32px;
-    padding: 4px;
-    border-radius: 50%;
-    z-index: 3;
-    background-color: ${({ theme }) => theme.styles.form.inputGroup.background};
-  }
+
   .inputMin {
     border-right-color: transparent;
     &:focus {
-      border-right: 1px solid ${({ theme }) => theme.styles.form.inputBorderActive};
+      border-right: none;
     }
   }
   .inputMax {
     border-left-color: transparent;
     &:focus {
-      border-left: 1px solid ${({ theme }) => theme.styles.form.inputBorderActive};
+      border-left: none;
     }
   }
   .form-control {
@@ -174,12 +142,12 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
   render() {
     const { fixedSelected, fixedValue, randomValue } = this.state;
     return (
-      <Styles>
+      <Styles className="flex flex-wrap h-[inherit]">
         <div className="tabContentWrapper">
-          <Heading renderAs="h4" headingLevel={4}>
+          <Heading renderAs="h4" headingLevel={4} className="flex w-full">
             {i18n.editor.macros.delayTabs.title}
           </Heading>
-          <div className="formWrapper">
+          <div className="formWrapper mt-3">
             <CustomRadioCheckBox
               label="Fixed value"
               checked={fixedSelected}
@@ -206,13 +174,13 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
           <div className="inputsWrapper mt-3">
             {fixedSelected ? (
               <div className="inputGroupFixed">
-                <div className="input-group max-w-72 relative flex flex-wrap w-full items-stretch">
+                <div className="input-group max-w-full relative flex flex-wrap w-full items-stretch">
                   <input
                     placeholder={i18n.editor.macros.delayTabs.title}
                     min={0}
                     max={65535}
                     type="number"
-                    onChange={(e: any) => {
+                    onChange={(e: FormEvent<HTMLInputElement>) => {
                       this.updateFixed(e);
                     }}
                     value={fixedValue}
@@ -222,27 +190,30 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
                     ms
                   </div>
                 </div>
-                <p className="description">{i18n.editor.macros.delayTabs.minMaxDescription}</p>
+
+                <p className="description mt-2 text-sm w-full text-gray-400 dark:text-gray-200">
+                  {i18n.editor.macros.delayTabs.minMaxDescription}
+                </p>
               </div>
             ) : (
-              <div className="inputGroupRandom">
-                <div className="input-group max-w-72 relative flex flex-wrap w-full items-stretch">
+              <div className="inputGroupRandom relative">
+                <div className="input-group max-w-full relative flex flex-wrap w-full items-stretch">
                   <input
-                    className="inputMin form-control"
+                    className="inputMin form-control w-[120px]"
                     placeholder="Min."
                     min={0}
                     type="number"
-                    onChange={(e: any) => {
+                    onChange={(e: FormEvent<HTMLInputElement>) => {
                       this.updateRandomMin(e);
                     }}
                     value={randomValue.min}
                   />
                   <input
-                    className="inputMax form-control"
+                    className="inputMax form-control  w-[120px] !pl-9"
                     placeholder="Max"
                     min={1}
                     type="number"
-                    onChange={(e: any) => {
+                    onChange={(e: FormEvent<HTMLInputElement>) => {
                       this.updateRandomMax(e);
                     }}
                     value={randomValue.max}
@@ -251,10 +222,12 @@ class DelayTab extends React.Component<DelayTabProps, DelayTabState> {
                     ms
                   </div>
                 </div>
-                <div className="inputIcon">
+                <div className="absolute top-1/2 left-1/2 -mt-4 -ml-4 rounded w-8 h-8 p-1 z-10 bg-gray-25 dark:bg-gray-800/20 origin-center -translate-y-2/4 -translate-x-2/4">
                   <IconMediaShuffle />
                 </div>
-                <p className="description">{i18n.editor.macros.delayTabs.minMaxDescription}</p>
+                <p className="description mt-2 text-sm w-full text-gray-400 dark:text-gray-200">
+                  {i18n.editor.macros.delayTabs.minMaxDescription}
+                </p>
               </div>
             )}
           </div>

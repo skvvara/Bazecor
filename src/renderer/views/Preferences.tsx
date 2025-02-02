@@ -52,7 +52,6 @@ import {
   IconChip,
   IconWrench,
 } from "@Renderer/components/atoms/icons";
-import Version from "@Renderer/components/atoms/Version";
 
 import Store from "@Renderer/utils/Store";
 import { useDevice } from "@Renderer/DeviceContext";
@@ -61,9 +60,8 @@ import { KBDataPref, PrefState, PreferencesProps } from "@Renderer/types/prefere
 import { WirelessInterface } from "@Renderer/types/wireless";
 import LogoLoader from "@Renderer/components/atoms/loader/LogoLoader";
 import { Neuron } from "@Renderer/types/neurons";
-import { AppContext } from "../../common/app-context/AppContext";
-import {AppThemeType, isAppThemeType} from "../../common/store/types";
 import Backup from "../../api/backup";
+import { delay } from "../../api/flash/delay";
 
 const store = Store.getStore();
 
@@ -132,8 +130,8 @@ const initialKBData = {
 const initialPreferences = {
   devTools: false,
   advanced: false,
-  verboseFocus: false,
-  darkMode: AppContext.settings.darkMode,
+  verbose: store.get("settings.verbose") as boolean,
+  darkMode: store.get("settings.darkMode") as string,
   neurons: store.get("neurons") as Array<Neuron>,
   selectedNeuron: 0,
   neuronID: "",
@@ -152,7 +150,20 @@ const Preferences = (props: PreferencesProps) => {
   const [preferencesState, setPreferencesState] = useState<PrefState>(initialPreferences);
 
   // Destructuring PROPS
-  const { connected, allowBeta, updateAllowBetas, startContext, cancelContext, toggleDarkMode, toggleBackup, setLoading } = props;
+  const {
+    connected,
+    allowBeta,
+    updateAllowBetas,
+    autoUpdate,
+    updateAutoUpdate,
+    startContext,
+    cancelContext,
+    toggleDarkMode,
+    toggleBackup,
+    setLoading,
+    saveButtonRef,
+    discardChangesButtonRef,
+  } = props;
   const [activeTab, setActiveTab] = useState(connected ? "Keyboard" : "Application");
 
   const getNeuronData = useCallback(async () => {
@@ -187,7 +198,8 @@ const Preferences = (props: PreferencesProps) => {
         newKbData.ledIdleTimeLimit = limit ? parseInt(limit, 10) : -1;
       });
 
-      newKbData.showDefaults = AppContext.settings.showDefaultLayers;
+      newKbData.showDefaults =
+        store.get("settings.showDefaults") === undefined ? false : (store.get("settings.showDefaults") as boolean);
 
       // QUKEYS variables commands
       await state.currentDevice.command("qukeys.holdTimeout").then((holdTimeout: string) => {
@@ -254,7 +266,7 @@ const Preferences = (props: PreferencesProps) => {
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         neuronID: localNeuronID,
-        darkMode: AppContext.settings.darkMode,
+        darkMode: store.get("settings.darkMode") as string,
         neurons: store.get("neurons") as Array<Neuron>,
       }));
     }
@@ -346,7 +358,7 @@ const Preferences = (props: PreferencesProps) => {
       await state.currentDevice.command("led.brightnessUG", kbData.ledBrightnessUG.toString());
       if (kbData.ledIdleTimeLimit >= 0)
         await state.currentDevice.command("idleleds.time_limit", kbData.ledIdleTimeLimit.toString());
-      AppContext.settings.showDefaultLayers = kbData.showDefaults;
+      store.set("settings.showDefaults", kbData.showDefaults);
       // QUKEYS
       await state.currentDevice.command("qukeys.holdTimeout", kbData.qukeysHoldTimeout.toString());
       await state.currentDevice.command("qukeys.overlapThreshold", kbData.qukeysOverlapThreshold.toString());
@@ -409,6 +421,7 @@ const Preferences = (props: PreferencesProps) => {
 
   const saveContext = async () => {
     setLoading(true);
+    await delay(250);
 
     try {
       await saveKeymapChanges();
@@ -488,25 +501,22 @@ const Preferences = (props: PreferencesProps) => {
   };
 
   const selectDarkMode = (key: string) => {
-    let value: AppThemeType;
-    if (!isAppThemeType(key)) {
-      log.warn(`Invalid theme type: ${key}`);
-      value = AppContext.settings.darkMode;
-    } else {
-      value = key;
-    }
-    toggleDarkMode(value);
+    toggleDarkMode(key);
     setPreferencesState(prevState => ({
       ...prevState,
-      darkMode: value,
+      darkMode: key,
     }));
   };
 
   const onChangeVerbose = () => {
-    setPreferencesState(prevState => ({
-      ...prevState,
-      verboseFocus: !prevState.verboseFocus,
-    }));
+    setPreferencesState(prevState => {
+      log.transports.console.level = !prevState.verbose ? "verbose" : "info";
+      store.set("settings.verbose", !prevState.verbose);
+      return {
+        ...prevState,
+        verbose: !prevState.verbose,
+      };
+    });
   };
 
   const openDevTool = useCallback(() => {
@@ -593,16 +603,22 @@ const Preferences = (props: PreferencesProps) => {
   useEffect(() => {
     const init = async () => {
       setLoading(true);
+      updateAutoUpdate(undefined);
       const NID = await getNeuronData();
       if (connected && (state.currentDevice.device.info.keyboardType === "wireless" || state.currentDevice.device.wireless))
         await getWirelessPreferences();
       const devTools = await ipcRenderer.invoke("is-devtools-opened");
+      let darkMode = store.get("settings.darkMode") as string;
+      if (!darkMode) {
+        darkMode = "system";
+      }
+      const verbose = store.get("settings.verbose") as boolean;
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         devTools,
-        darkMode: AppContext.settings.darkMode,
+        darkMode,
+        verbose,
         selectedNeuron: prevPreferencesState.neurons.indexOf(prevPreferencesState.neurons.find((x: Neuron) => x.id === NID)),
-        verboseFocus: true,
       }));
 
       ipcRenderer.on("opened-devtool", openDevTool);
@@ -625,7 +641,7 @@ const Preferences = (props: PreferencesProps) => {
     visible: { opacity: 1, transition: { duration: 0.5 } },
   };
 
-  const { neurons, selectedNeuron, darkMode, neuronID, devTools, verboseFocus } = preferencesState;
+  const { neurons, selectedNeuron, darkMode, neuronID, devTools, verbose } = preferencesState;
   const { defaultLayer } = kbData;
 
   if (localloading)
@@ -648,6 +664,8 @@ const Preferences = (props: PreferencesProps) => {
         inContext={modified}
         isSaving={localloading}
         styles="pageHeaderFlatBottom"
+        saveButtonRef={saveButtonRef}
+        discardChangesButtonRef={discardChangesButtonRef}
       />
       <div className="flex w-full mx-auto mt-4">
         <Tabs
@@ -784,10 +802,12 @@ const Preferences = (props: PreferencesProps) => {
                     selectedNeuron={selectedNeuron}
                     devTools={devTools}
                     onChangeDevTools={onChangeDevTools}
-                    verbose={verboseFocus}
+                    verbose={verbose}
                     onChangeVerbose={onChangeVerbose}
                     allowBeta={allowBeta}
                     onChangeAllowBetas={updateAllowBetas}
+                    autoUpdate={autoUpdate}
+                    onChangeAutoUpdate={updateAutoUpdate}
                   />
                 </motion.div>
               </TabsContent>
@@ -801,6 +821,7 @@ const Preferences = (props: PreferencesProps) => {
                       neuronID={neuronID}
                       toggleBackup={toggleBackup}
                       destroyContext={destroyContext}
+                      enabled={!!(connected && state.currentDevice && state.currentDevice.type !== "hid")}
                     />
                   ) : (
                     ""
@@ -825,7 +846,6 @@ const Preferences = (props: PreferencesProps) => {
               )}
             </div>
           </div>
-          <Version />
         </Tabs>
       </div>
     </div>

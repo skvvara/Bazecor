@@ -38,8 +38,10 @@ import IconClose from "./IconClose";
 import IconCloudDownload from "./IconCloudDownload";
 import IconColorPalette from "./IconColorPalette";
 import IconColorPicker from "./IconColorPicker";
+import IconCommandMacOs from "./IconCommandMacOs";
 import IconConnected from "./IconConnected";
 import IconDelete from "./IconDelete";
+import IconDocumentWithLines from "./IconDocumentWithLines";
 import IconDragAndDrop from "./IconDragAndDrop";
 import IconDragDots from "./IconDragDots";
 import IconEditModeSingleView from "./IconEditModeSingleView";
@@ -67,6 +69,8 @@ import IconKeysTapHold from "./IconKeysTapHold";
 import IconKeysUnderglow from "./IconKeysUnderglow";
 import IconLeaf from "./IconLeaf";
 import IconLayers from "./IconLayers";
+import IconLayerShift from "./IconLayerShift";
+import IconLayerLock from "./IconLayerLock";
 import IconLEDNextEffect from "./IconLEDNextEffect";
 import IconLEDPreviousEffect from "./IconLEDPreviousEffect";
 import IconLEDSwitchLeft from "./IconLEDSwitchLeft";
@@ -84,6 +88,7 @@ import IconMediaSoundMore from "./IconMediaSoundMore";
 import IconMediaSoundMute from "./IconMediaSoundMute";
 import IconMediaStop from "./IconMediaStop";
 import IconMemory from "./IconMemory";
+import IconMemoryUpload from "./IconMemoryUpload";
 import IconMoon from "./IconMoon";
 import IconMoreVertical from "./IconMoreVertical";
 import IconMouse from "./IconMouse";
@@ -95,6 +100,7 @@ import IconNoWifi from "./IconNoWifi";
 import IconNoSignal from "./IconNoSignal";
 import IconNull from "./IconNull";
 import IconOneShot from "./IconOneShot";
+import IconOneShotMode from "./IconOneShotMode";
 import IconPause from "./IconPause";
 import IconPen from "./IconPen";
 import IconPlug from "./IconPlug";
@@ -113,6 +119,7 @@ import IconSettings from "./IconSettings";
 import IconShutdown from "./IconShutdown";
 import IconSignal from "./IconSignal";
 import IconSleep from "./IconSleep";
+import IconSplitView from "./IconSplitView";
 import IconStopWatch from "./IconStopwatch";
 import IconStopwatchCrossed from "./IconStopwatchCrossed";
 import IconSun from "./IconSun";
@@ -126,6 +133,8 @@ import IconToolsEject from "./IconToolsEject";
 import IconTypo from "./IconTypo";
 import IconUndoRestart from "./IconUndoRestart";
 import IconUpload from "./IconUpload";
+import IconUSB from "./IconUSB";
+import IconVersion from "./IconVersion";
 import IconWarning from "./IconWarning";
 import IconWireless from "./IconWireless";
 import IconWrench from "./IconWrench";
@@ -155,8 +164,10 @@ export {
   IconCloudDownload,
   IconColorPalette,
   IconColorPicker,
+  IconCommandMacOs,
   IconConnected,
   IconDelete,
+  IconDocumentWithLines,
   IconDragAndDrop,
   IconDragDots,
   IconEditModeSingleView,
@@ -184,6 +195,8 @@ export {
   IconKeysUnderglow,
   IconLeaf,
   IconLayers,
+  IconLayerShift,
+  IconLayerLock,
   IconLEDNextEffect,
   IconLEDPreviousEffect,
   IconLEDSwitchLeft,
@@ -201,6 +214,7 @@ export {
   IconMediaSoundMute,
   IconMediaStop,
   IconMemory,
+  IconMemoryUpload,
   IconMoon,
   IconMoreVertical,
   IconMouse,
@@ -212,6 +226,7 @@ export {
   IconNoSignal,
   IconNull,
   IconOneShot,
+  IconOneShotMode,
   IconPause,
   IconPen,
   IconPlug,
@@ -230,6 +245,7 @@ export {
   IconShutdown,
   IconSignal,
   IconSleep,
+  IconSplitView,
   IconStopWatch,
   IconStopwatchCrossed,
   IconSun,
@@ -243,6 +259,8 @@ export {
   IconTypo,
   IconUndoRestart,
   IconUpload,
+  IconUSB,
+  IconVersion,
   IconWarning,
   IconWireless,
   IconWrench,

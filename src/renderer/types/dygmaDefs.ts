@@ -1,14 +1,16 @@
+export type DygmaDeviceInfoType = {
+  vendor: "Dygma";
+  product: "Raise" | "Defy" | "Raise2";
+  keyboardType: string;
+  displayName: string;
+  urls: {
+    name: string;
+    url: string;
+  }[];
+};
+
 export type DygmaDeviceType = {
-  info: {
-    vendor: string;
-    product: string;
-    keyboardType: string;
-    displayName: string;
-    urls: {
-      name: string;
-      url: string;
-    }[];
-  };
+  info: DygmaDeviceInfoType;
   usb: {
     vendorId: number;
     productId: number;
@@ -16,10 +18,16 @@ export type DygmaDeviceType = {
   keyboard?: {
     rows: number;
     columns: number;
+    left: number[][];
+    right: number[][];
+    ledsLeft: number[];
+    ledsRight: number[];
   };
   keyboardUnderglow?: {
     rows: number;
     columns: number;
+    ledsLeft: number[];
+    ledsRight: number[];
   };
   RGBWMode?: boolean;
   components?: {

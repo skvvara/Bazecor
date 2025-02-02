@@ -17,7 +17,7 @@
 /**
  * Is an Array of objects of values that have to be modified.
  */
-import { withModifiers, ModifierCodes } from "../../db/utils";
+import { withModifiers } from "../../db/utils";
 import { BaseKeycodeTableType, KeymapCodeTableType } from "../../types";
 
 const symbols: KeymapCodeTableType[] = [
@@ -117,78 +117,91 @@ const symbolsS: KeymapCodeTableType[] = [
     labels: {
       primary: "~",
     },
+    alt: true,
   },
   {
-    code: 34,
+    code: 30,
     labels: {
-      primary: "!",
+      primary: "€",
     },
+    alt: true,
   },
   {
     code: 31,
     labels: {
-      primary: "@",
+      primary: "«",
     },
+    alt: true,
   },
   {
     code: 32,
     labels: {
-      primary: "#",
+      primary: "»",
     },
+    alt: true,
   },
   {
     code: 33,
     labels: {
       primary: "$",
     },
+    alt: true,
   },
   {
     code: 34,
     labels: {
       primary: "%",
     },
+    alt: true,
   },
   {
     code: 35,
     labels: {
       primary: "^",
     },
+    alt: true,
   },
   {
     code: 36,
     labels: {
       primary: "&",
     },
+    alt: true,
   },
   {
     code: 37,
     labels: {
       primary: "*",
     },
+    alt: true,
   },
   {
     code: 38,
     labels: {
-      primary: "(",
+      primary: "#",
     },
+    alt: true,
   },
   {
     code: 39,
     labels: {
-      primary: ")",
+      primary: "@",
     },
+    alt: true,
   },
   {
     code: 45,
     labels: {
       primary: "_",
     },
+    alt: true,
   },
   {
     code: 46,
     labels: {
       primary: "+",
     },
+    alt: true,
   },
 ];
 
@@ -252,7 +265,7 @@ const letters: KeymapCodeTableType[] = [
   {
     code: 19,
     labels: {
-      primary: "f",
+      primary: "y",
     },
   },
   {
@@ -295,9 +308,8 @@ const letters: KeymapCodeTableType[] = [
   {
     code: 10,
     labels: {
-      primary: ",",
+      primary: "f",
     },
-    newGroupName: "Punctuation",
   },
   {
     code: 11,
@@ -406,9 +418,8 @@ const letters: KeymapCodeTableType[] = [
   {
     code: 55,
     labels: {
-      primary: "y",
+      primary: ",",
     },
-    newGroupName: "Letters",
   },
   {
     code: 56,
@@ -426,73 +437,85 @@ const lettersS: KeymapCodeTableType[] = [
     labels: {
       primary: "Q",
     },
+    alt: true,
   },
   {
     code: 26,
     labels: {
       primary: "C",
     },
+    alt: true,
   },
   {
     code: 8,
     labels: {
       primary: "O",
     },
+    alt: true,
   },
   {
     code: 21,
     labels: {
       primary: "P",
     },
+    alt: true,
   },
   {
     code: 23,
     labels: {
       primary: "W",
     },
+    alt: true,
   },
   {
     code: 28,
     labels: {
       primary: "J",
     },
+    alt: true,
   },
   {
     code: 24,
     labels: {
       primary: "M",
     },
+    alt: true,
   },
   {
     code: 12,
     labels: {
       primary: "D",
     },
+    alt: true,
   },
   {
     code: 18,
     labels: {
-      primary: "’",
+      primary: "!",
     },
+    alt: true,
     newGroupName: "Punctuation",
   },
   {
     code: 19,
     labels: {
-      primary: "F",
+      primary: "Y",
     },
+    alt: true,
   },
   {
     code: 47,
     labels: {
       primary: "{",
     },
+    alt: true,
   },
   {
     code: 48,
     labels: {
       primary: "}",
     },
+    alt: true,
   },
   // Second row
   {
@@ -500,61 +523,70 @@ const lettersS: KeymapCodeTableType[] = [
     labels: {
       primary: "A",
     },
+    alt: true,
   },
   {
     code: 22,
     labels: {
       primary: "S",
     },
+    alt: true,
   },
   {
     code: 7,
     labels: {
       primary: "E",
     },
+    alt: true,
   },
   {
     code: 9,
     labels: {
       primary: "N",
     },
+    alt: true,
   },
   {
     code: 10,
     labels: {
-      primary: ";",
+      primary: "F",
     },
-    newGroupName: "Punctuation",
+    alt: true,
   },
   {
     code: 11,
     labels: {
       primary: "L",
     },
+    alt: true,
   },
   {
     code: 13,
     labels: {
       primary: "R",
     },
+    alt: true,
   },
   {
     code: 14,
     labels: {
       primary: "T",
     },
+    alt: true,
   },
   {
     code: 15,
     labels: {
       primary: "I",
     },
+    alt: true,
   },
   {
     code: 51,
     labels: {
       primary: "U",
     },
+    alt: true,
     newGroupName: "Letters",
   },
   {
@@ -562,12 +594,14 @@ const lettersS: KeymapCodeTableType[] = [
     labels: {
       primary: '"',
     },
+    alt: true,
   },
   {
     code: 49,
     labels: {
       primary: "|",
     },
+    alt: true,
   },
   // Third row
   {
@@ -575,24 +609,28 @@ const lettersS: KeymapCodeTableType[] = [
     labels: {
       primary: ">",
     },
+    alt: true,
   },
   {
     code: 29,
     labels: {
       primary: "Z",
     },
+    alt: true,
   },
   {
     code: 27,
     labels: {
       primary: "X",
     },
+    alt: true,
   },
   {
     code: 6,
     labels: {
       primary: "?",
     },
+    alt: true,
     newGroupName: "Punctuation",
   },
   {
@@ -600,18 +638,21 @@ const lettersS: KeymapCodeTableType[] = [
     labels: {
       primary: "V",
     },
+    alt: true,
   },
   {
     code: 5,
     labels: {
       primary: "B",
     },
+    alt: true,
   },
   {
     code: 17,
     labels: {
       primary: ":",
     },
+    alt: true,
     newGroupName: "Punctuation",
   },
   {
@@ -619,26 +660,29 @@ const lettersS: KeymapCodeTableType[] = [
     labels: {
       primary: "H",
     },
+    alt: true,
   },
   {
     code: 54,
     labels: {
       primary: "G",
     },
+    alt: true,
     newGroupName: "Letters",
   },
   {
     code: 55,
     labels: {
-      primary: "Y",
+      primary: ";",
     },
-    newGroupName: "Letters",
+    alt: true,
   },
   {
     code: 56,
     labels: {
       primary: "K",
     },
+    alt: true,
     newGroupName: "Letters",
   },
 ];
@@ -652,151 +696,176 @@ const tableAGr: BaseKeycodeTableType = {
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 30,
       labels: {
         primary: "₁",
       },
+      alt: true,
     },
     {
       code: 31,
       labels: {
         primary: "₂",
       },
+      alt: true,
     },
     {
       code: 32,
       labels: {
         primary: "₃",
       },
+      alt: true,
     },
     {
       code: 33,
       labels: {
         primary: "₄",
       },
+      alt: true,
     },
     {
       code: 34,
       labels: {
         primary: "₅",
       },
+      alt: true,
     },
     {
       code: 35,
       labels: {
         primary: "₆",
       },
+      alt: true,
     },
     {
       code: 36,
       labels: {
         primary: "₇",
       },
+      alt: true,
     },
     {
       code: 37,
       labels: {
         primary: "₈",
       },
+      alt: true,
     },
     {
       code: 38,
       labels: {
         primary: "₉",
       },
+      alt: true,
     },
     {
       code: 39,
       labels: {
         primary: "₀",
       },
+      alt: true,
     },
     {
       code: 45,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 46,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     // First row
     {
       code: 20,
       labels: {
-        primary: "@",
+        primary: "^",
       },
+      alt: true,
     },
     {
       code: 26,
       labels: {
         primary: "<",
       },
+      alt: true,
     },
     {
       code: 8,
       labels: {
         primary: ">",
       },
+      alt: true,
     },
     {
       code: 21,
       labels: {
         primary: "$",
       },
+      alt: true,
     },
     {
       code: 23,
       labels: {
         primary: "%",
       },
+      alt: true,
     },
     {
       code: 28,
       labels: {
-        primary: "^",
+        primary: "@",
       },
+      alt: true,
     },
     {
       code: 24,
       labels: {
         primary: "&",
       },
+      alt: true,
     },
     {
       code: 12,
       labels: {
         primary: "*",
       },
+      alt: true,
     },
     {
       code: 18,
       labels: {
         primary: "'",
       },
+      alt: true,
     },
     {
       code: 19,
       labels: {
         primary: "`",
       },
+      alt: true,
     },
     {
       code: 47,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 48,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     // Second row
     {
@@ -804,72 +873,84 @@ const tableAGr: BaseKeycodeTableType = {
       labels: {
         primary: "{",
       },
+      alt: true,
     },
     {
       code: 22,
       labels: {
         primary: "(",
       },
+      alt: true,
     },
     {
       code: 7,
       labels: {
         primary: ")",
       },
+      alt: true,
     },
     {
       code: 9,
       labels: {
         primary: "}",
       },
+      alt: true,
     },
     {
       code: 10,
       labels: {
         primary: "=",
       },
+      alt: true,
     },
     {
       code: 11,
       labels: {
         primary: "\\",
       },
+      alt: true,
     },
     {
       code: 13,
       labels: {
         primary: "+",
       },
+      alt: true,
     },
     {
       code: 14,
       labels: {
         primary: "-",
       },
+      alt: true,
     },
     {
       code: 15,
       labels: {
         primary: "/",
       },
+      alt: true,
     },
     {
       code: 51,
       labels: {
         primary: '"',
       },
+      alt: true,
     },
     {
       code: 52,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 49,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     // Third row
     {
@@ -877,66 +958,77 @@ const tableAGr: BaseKeycodeTableType = {
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 29,
       labels: {
         primary: "~",
       },
+      alt: true,
     },
     {
       code: 27,
       labels: {
         primary: "[",
       },
+      alt: true,
     },
     {
       code: 6,
       labels: {
         primary: "]",
       },
+      alt: true,
     },
     {
       code: 25,
       labels: {
         primary: "_",
       },
+      alt: true,
     },
     {
       code: 5,
       labels: {
         primary: "#",
       },
+      alt: true,
     },
     {
       code: 17,
       labels: {
         primary: "|",
       },
+      alt: true,
     },
     {
       code: 16,
       labels: {
         primary: "!",
       },
+      alt: true,
     },
     {
       code: 54,
       labels: {
         primary: ";",
       },
+      alt: true,
     },
     {
       code: 55,
       labels: {
         primary: ":",
       },
+      alt: true,
     },
     {
       code: 56,
       labels: {
         primary: "?",
       },
+      alt: true,
     },
   ],
 };
@@ -949,224 +1041,261 @@ const tableAGrS: BaseKeycodeTableType = {
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 30,
       labels: {
         primary: "¹",
       },
+      alt: true,
     },
     {
       code: 31,
       labels: {
         primary: "²",
       },
+      alt: true,
     },
     {
       code: 32,
       labels: {
         primary: "³",
       },
+      alt: true,
     },
     {
       code: 33,
       labels: {
         primary: "⁴",
       },
+      alt: true,
     },
     {
       code: 34,
       labels: {
         primary: "⁵",
       },
+      alt: true,
     },
     {
       code: 35,
       labels: {
         primary: "⁶",
       },
+      alt: true,
     },
     {
       code: 36,
       labels: {
         primary: "⁷",
       },
+      alt: true,
     },
     {
       code: 37,
       labels: {
         primary: "⁸",
       },
+      alt: true,
     },
     {
       code: 38,
       labels: {
         primary: "⁹",
       },
+      alt: true,
     },
     {
       code: 39,
       labels: {
         primary: "⁰",
       },
+      alt: true,
     },
     {
       code: 45,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 46,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     // First row
     {
       code: 20,
       labels: {
-        primary: "",
+        primary: "^",
       },
+      alt: true,
     },
     {
       code: 26,
       labels: {
         primary: "≤",
       },
+      alt: true,
     },
     {
       code: 8,
       labels: {
         primary: "≥",
       },
+      alt: true,
     },
     {
       code: 21,
       labels: {
         primary: "¤",
       },
+      alt: true,
     },
     {
       code: 23,
       labels: {
         primary: "‰",
       },
+      alt: true,
     },
     {
       code: 28,
       labels: {
-        primary: "^",
+        primary: "˚",
       },
+      alt: true,
     },
     {
       code: 24,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 12,
       labels: {
         primary: "×",
       },
+      alt: true,
     },
     {
       code: 18,
       labels: {
         primary: "´",
       },
+      alt: true,
     },
     {
       code: 19,
       labels: {
         primary: "`",
       },
+      alt: true,
     },
     {
       code: 47,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 48,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     // Second row
     {
       code: 4,
       labels: {
-        primary: "",
+        primary: "ˇ",
       },
+      alt: true,
     },
     {
       code: 22,
       labels: {
-        primary: "⁽",
+        primary: "",
       },
+      alt: true,
     },
     {
       code: 7,
       labels: {
-        primary: "⁾",
+        primary: "",
       },
+      alt: true,
     },
     {
       code: 9,
       labels: {
-        primary: "",
+        primary: "˙",
       },
+      alt: true,
     },
     {
       code: 10,
       labels: {
         primary: "≠",
       },
+      alt: true,
     },
     {
       code: 11,
       labels: {
         primary: "/",
       },
+      alt: true,
     },
     {
       code: 13,
       labels: {
         primary: "±",
       },
+      alt: true,
     },
     {
       code: 14,
       labels: {
-        primary: "—",
+        primary: "ˉ",
       },
+      alt: true,
     },
     {
       code: 15,
       labels: {
         primary: "÷",
       },
+      alt: true,
     },
     {
       code: 51,
       labels: {
-        primary: "¨",
+        primary: "˝",
       },
+      alt: true,
     },
     {
       code: 52,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 49,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     // Third row
     {
@@ -1174,66 +1303,77 @@ const tableAGrS: BaseKeycodeTableType = {
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 29,
       labels: {
         primary: "~",
       },
+      alt: true,
     },
     {
       code: 27,
       labels: {
-        primary: "",
+        primary: ",",
       },
+      alt: true,
     },
     {
       code: 6,
       labels: {
-        primary: "",
+        primary: "˛",
       },
+      alt: true,
     },
     {
       code: 25,
       labels: {
         primary: "–",
       },
+      alt: true,
     },
     {
       code: 5,
       labels: {
         primary: "",
       },
+      alt: true,
     },
     {
       code: 17,
       labels: {
         primary: "¦",
       },
+      alt: true,
     },
     {
       code: 16,
       labels: {
         primary: "¬",
       },
+      alt: true,
     },
     {
       code: 54,
       labels: {
         primary: "¸",
       },
+      alt: true,
     },
     {
       code: 55,
       labels: {
-        primary: "",
+        primary: ":",
       },
+      alt: true,
     },
     {
       code: 56,
       labels: {
-        primary: "˛",
+        primary: "˘",
       },
+      alt: true,
     },
   ],
 };

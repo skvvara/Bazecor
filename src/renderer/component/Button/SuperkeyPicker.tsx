@@ -69,7 +69,6 @@ const Style = Styled.div`
     }
     .superkeyButtonWrapper {
         position: relative;
-        align-self: self-end;
         margin-top: auto;
         &:hover {
             .superkeyDeleteButton {
@@ -164,13 +163,12 @@ function SuperkeyPicker(props: SuperkeyPickerProps) {
     index,
     icon,
     title,
-    description,
-    isStandardViewSuperkeys,
     elementActive,
     superkeys,
     macros,
     keymapDB,
     updateAction,
+    variant = "regular",
   } = props;
   const [controlDeleteButton, setControlDeleteButton] = React.useState(false);
   const [keyContent, setKeyContent] = useState<string | JSX.Element>("Loading...");
@@ -198,14 +196,14 @@ function SuperkeyPicker(props: SuperkeyPickerProps) {
     if (aux.extraLabel === "MACRO") {
       const macroID = superkeys[selected].actions[index] - 53852;
       // console.log("checking macroID", macroID);
-      if (macros.length > macroID && macros[macroID].name.substr(0, 5) !== "") {
-        setKeyContent((aux.label = macros[macroID].name.substr(0, 5).toLowerCase()));
+      if (macros.length > macroID && macros[macroID]?.name?.substring(0, 5) !== "") {
+        setKeyContent((aux.label = macros[macroID]?.name?.substring(0, 5).toLowerCase()));
         return;
       }
       setKeyContent(`${aux.extraLabel} ${aux.label}`);
       return;
     }
-    if (React.isValidElement(aux.label)) {
+    if (React.isValidElement(aux.label) || React.isValidElement(aux.extraLabel)) {
       setKeyContent(
         aux.extraLabel !== undefined && aux.extraLabel !== "" ? (
           <>
@@ -220,30 +218,35 @@ function SuperkeyPicker(props: SuperkeyPickerProps) {
       return;
     }
     if (aux.label) {
-      setKeyContent(aux.extraLabel !== undefined && aux.extraLabel !== "" ? `${aux.extraLabel} ${aux.label}` : aux.label);
+      setKeyContent(
+        aux.extraLabel !== undefined && !(aux.extraLabel as string).includes("+") ? `${aux.extraLabel} ${aux.label}` : aux.label,
+      );
     }
   }, [index, keymapDB, macros, selected, superkeys, action]);
 
   if (superkeys === null) return null;
   return (
     <Style>
-      <div className={`superkeyAction ${elementActive ? "active" : ""}`}>
-        <div className={`superkeyTitle ${isStandardViewSuperkeys ? "standard" : "single"}`}>
-          {icon}
-          <Heading headingLevel={5} renderAs="h5">
+      <div className={`superkeyAction ${elementActive ? "active" : ""} ${variant === "subtle" ? "!py-2" : ""}`}>
+        <div className="superkeyTitle single">
+          {variant === "regular" && icon}
+          <Heading headingLevel={5} renderAs="h5" className={`${variant === "subtle" ? "my-0 !text-2xxs" : ""}`}>
             {title}
           </Heading>
         </div>
-        {isStandardViewSuperkeys && <div className="description">{description}</div>}
         <div className="superkeyButtonWrapper">
-          {controlDeleteButton && (
+          {controlDeleteButton && variant === "regular" && (
             // TODO: Div with click should not exist, use Button instead!!
             <div className="superkeyDeleteButton" aria-hidden="true" onClick={() => updateAction(index, 0)}>
               <IconClose />
             </div>
           )}
           {/* TODO: Div with click should not exist, use Button instead!! */}
-          <div className="superkeyButton" aria-hidden="true" onClick={() => onClick(index)}>
+          <div
+            className={`superkeyButton ${variant === "subtle" ? "!mt-0 pointer-events-none" : ""}`}
+            aria-hidden="true"
+            onClick={() => onClick(index)}
+          >
             <div className="superkeyButtonInner">{keyContent}</div>
             {superkeys[selected] !== undefined ? <ListModifier keyCode={superkeys[selected].actions[index]} /> : ""}
           </div>

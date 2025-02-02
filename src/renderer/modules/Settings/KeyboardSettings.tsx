@@ -208,16 +208,16 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
     setKbData({ ...localKBData, SuperHoldstart: value[0] });
   };
 
-  const setSuperOverlapThreshold = (value: number[]) => {
-    setLocalKBData(data => ({
-      ...data,
-      SuperOverlapThreshold: value[0],
-    }));
-    setKbData({
-      ...localKBData,
-      SuperOverlapThreshold: value[0],
-    });
-  };
+  // const setSuperOverlapThreshold = (value: number[]) => {
+  //   setLocalKBData(data => ({
+  //     ...data,
+  //     SuperOverlapThreshold: value[0],
+  //   }));
+  //   setKbData({
+  //     ...localKBData,
+  //     SuperOverlapThreshold: value[0],
+  //   });
+  // };
 
   const setSpeed = (value: number[]) => {
     setLocalKBData(data => ({
@@ -261,7 +261,7 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
     qukeysMinPrior,
     SuperTimeout,
     SuperHoldstart,
-    SuperOverlapThreshold,
+    // SuperOverlapThreshold,
     mouseSpeed,
     mouseAccelSpeed,
     mouseWheelSpeed,
@@ -335,44 +335,6 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
           </CardHeader>
           <CardContent>
             <div className="flex flex-col gap-4">
-              {qukeysOverlapThreshold >= 0 && (
-                <div className="w-full">
-                  <div className="w-full flex gap-2">
-                    <div className="w-full">
-                      <Heading headingLevel={3} renderAs="paragraph-sm" className="flex items-center gap-2">
-                        {i18n.keyboardSettings.qukeys.overlapThreshold}
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
-                              <IconInformation />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
-                                {i18n.keyboardSettings.qukeys.overlapThresholdTip1}
-                              </Heading>
-                              <ul>
-                                <li className="text-left">{i18n.keyboardSettings.qukeys.overlapThresholdTip2}</li>
-                                <li className="text-left">{i18n.keyboardSettings.qukeys.overlapThresholdTip3}</li>
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </Heading>
-                    </div>
-                  </div>
-                  <div className="w-full flex gap-2">
-                    <div className="flex max-w-12 p-0 text-center items-center">
-                      <span className="tagsfix">Less</span>
-                    </div>
-                    <div className="w-full flex items-center p-0">
-                      <Slider min={0} max={100} value={[qukeysOverlapThreshold]} onValueChange={setOverlapThreshold} />
-                    </div>
-                    <div className="flex max-w-12 p-0 text-center items-center">
-                      <span className="tagsfix">More</span>
-                    </div>
-                  </div>
-                </div>
-              )}
               {qukeysHoldTimeout >= 0 && (
                 <div className="w-full">
                   <div className="w-full flex gap-2">
@@ -388,9 +350,11 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                               <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
                                 {i18n.keyboardSettings.qukeys.holdTimeoutTip1}
                               </Heading>
-                              <ul>
+                              <ul className="list-disc pl-4">
                                 <li className="text-left">{i18n.keyboardSettings.qukeys.holdTimeoutTip2}</li>
                                 <li className="text-left">{i18n.keyboardSettings.qukeys.holdTimeoutTip3}</li>
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.holdTimeoutTip4}</li>
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.holdTimeoutTipDefault}</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
@@ -404,6 +368,45 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                     </div>
                     <div className="w-full flex items-center p-0">
                       <Slider min={1} max={255} value={[qukeysHoldTimeout]} onValueChange={setHoldTimeout} />
+                    </div>
+                    <div className="flex max-w-12 p-0 text-center items-center">
+                      <span className="tagsfix">More</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {qukeysOverlapThreshold >= 0 && (
+                <div className="w-full">
+                  <div className="w-full flex gap-2">
+                    <div className="w-full">
+                      <Heading headingLevel={3} renderAs="paragraph-sm" className="flex items-center gap-2">
+                        {i18n.keyboardSettings.qukeys.overlapThreshold}
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
+                              <IconInformation />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
+                                {i18n.keyboardSettings.qukeys.overlapThresholdTip1}
+                              </Heading>
+                              <ul className="list-disc pl-4">
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.overlapThresholdTip2}</li>
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.overlapThresholdTip3}</li>
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.overlapThresholdTipDefault}</li>
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </Heading>
+                    </div>
+                  </div>
+                  <div className="w-full flex gap-2">
+                    <div className="flex max-w-12 p-0 text-center items-center">
+                      <span className="tagsfix">Less</span>
+                    </div>
+                    <div className="w-full flex items-center p-0">
+                      <Slider min={0} max={100} value={[qukeysOverlapThreshold]} onValueChange={setOverlapThreshold} />
                     </div>
                     <div className="flex max-w-12 p-0 text-center items-center">
                       <span className="tagsfix">More</span>
@@ -426,8 +429,9 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                               <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
                                 {i18n.keyboardSettings.qukeys.minHoldTip1}
                               </Heading>
-                              <ul>
+                              <ul className="list-disc pl-4">
                                 <li className="text-left">{i18n.keyboardSettings.qukeys.minHoldTip2}</li>
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.minHoldTipDefault}</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
@@ -463,8 +467,9 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                               <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
                                 {i18n.keyboardSettings.qukeys.minPriorTip1}
                               </Heading>
-                              <ul>
+                              <ul className="list-disc pl-4">
                                 <li className="text-left">{i18n.keyboardSettings.qukeys.minPriorTip2}</li>
+                                <li className="text-left">{i18n.keyboardSettings.qukeys.minPriorTipDefault}</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
@@ -478,82 +483,6 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                     </div>
                     <div className="w-full flex items-center p-0">
                       <Slider min={1} max={254} value={[qukeysMinPrior]} onValueChange={setMinPrior} />
-                    </div>
-                    <div className="flex max-w-12 p-0 text-center items-center">
-                      <span className="tagsfix">More</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {SuperOverlapThreshold >= 0 && (
-                <div className="w-full">
-                  <div className="w-full flex gap-2">
-                    <div className="w-full">
-                      <Heading headingLevel={3} renderAs="paragraph-sm" className="flex items-center gap-2">
-                        {i18n.keyboardSettings.superkeys.overlap}
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
-                              <IconInformation />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
-                                {i18n.keyboardSettings.superkeys.overlapTip1}
-                              </Heading>
-                              <ul>
-                                <li className="text-left">{i18n.keyboardSettings.superkeys.overlapTip2}</li>
-                                <li className="text-left">{i18n.keyboardSettings.superkeys.overlapTip3}</li>
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </Heading>
-                    </div>
-                  </div>
-                  <div className="w-full flex gap-2">
-                    <div className="flex max-w-12 p-0 text-center items-center">
-                      <span className="tagsfix">Less</span>
-                    </div>
-                    <div className="w-full flex items-center p-0">
-                      <Slider min={0} max={80} value={[SuperOverlapThreshold]} onValueChange={setSuperOverlapThreshold} />
-                    </div>
-                    <div className="flex max-w-12 p-0 text-center items-center">
-                      <span className="tagsfix">More</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              {SuperTimeout >= 0 && (
-                <div className="w-full">
-                  <div className="w-full flex gap-2">
-                    <div className="w-full">
-                      <Heading headingLevel={3} renderAs="paragraph-sm" className="flex items-center gap-2">
-                        {i18n.keyboardSettings.superkeys.timeout}
-                        <TooltipProvider delayDuration={200}>
-                          <Tooltip>
-                            <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
-                              <IconInformation />
-                            </TooltipTrigger>
-                            <TooltipContent className="max-w-xs">
-                              <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
-                                {i18n.keyboardSettings.superkeys.timeoutTip1}
-                              </Heading>
-                              <ul>
-                                <li className="text-left">{i18n.keyboardSettings.superkeys.timeoutTip2}</li>
-                                <li className="text-left">{i18n.keyboardSettings.superkeys.timeoutTip3}</li>
-                              </ul>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </Heading>
-                    </div>
-                  </div>
-                  <div className="w-full flex gap-2">
-                    <div className="flex max-w-12 p-0 text-center items-center">
-                      <span className="tagsfix">Less</span>
-                    </div>
-                    <div className="w-full flex items-center p-0">
-                      <Slider min={1} max={500} value={[SuperTimeout]} onValueChange={setSuperTimeout} />
                     </div>
                     <div className="flex max-w-12 p-0 text-center items-center">
                       <span className="tagsfix">More</span>
@@ -576,9 +505,10 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                               <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
                                 {i18n.keyboardSettings.superkeys.chordingTip1}
                               </Heading>
-                              <ul>
+                              <ul className="list-disc pl-4">
                                 <li className="text-left">{i18n.keyboardSettings.superkeys.chordingTip2}</li>
                                 <li className="text-left">{i18n.keyboardSettings.superkeys.chordingTip3}</li>
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.chordingTipDefault}</li>
                               </ul>
                             </TooltipContent>
                           </Tooltip>
@@ -592,6 +522,84 @@ function KeyboardSettings(props: KeyboardSettingsProps) {
                     </div>
                     <div className="w-full flex items-center p-0">
                       <Slider min={120} max={500} value={[SuperHoldstart]} onValueChange={setSuperHoldstart} />
+                    </div>
+                    <div className="flex max-w-12 p-0 text-center items-center">
+                      <span className="tagsfix">More</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* {SuperOverlapThreshold >= 0 && (
+                <div className="w-full">
+                  <div className="w-full flex gap-2">
+                    <div className="w-full">
+                      <Heading headingLevel={3} renderAs="paragraph-sm" className="flex items-center gap-2">
+                        {i18n.keyboardSettings.superkeys.overlap}
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
+                              <IconInformation />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
+                                {i18n.keyboardSettings.superkeys.overlapTip1}
+                              </Heading>
+                              <ul className="list-disc pl-4">
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.overlapTip2}</li>
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.overlapTip3}</li>
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.overlapTipDefault}</li>
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </Heading>
+                    </div>
+                  </div>
+                  <div className="w-full flex gap-2">
+                    <div className="flex max-w-12 p-0 text-center items-center">
+                      <span className="tagsfix">Less</span>
+                    </div>
+                    <div className="w-full flex items-center p-0">
+                      <Slider min={0} max={80} value={[SuperOverlapThreshold]} onValueChange={setSuperOverlapThreshold} />
+                    </div>
+                    <div className="flex max-w-12 p-0 text-center items-center">
+                      <span className="tagsfix">More</span>
+                    </div>
+                  </div>
+                </div>
+              )} */}
+              {SuperTimeout >= 0 && (
+                <div className="w-full">
+                  <div className="w-full flex gap-2">
+                    <div className="w-full">
+                      <Heading headingLevel={3} renderAs="paragraph-sm" className="flex items-center gap-2">
+                        {i18n.keyboardSettings.superkeys.timeout}
+                        <TooltipProvider delayDuration={200}>
+                          <Tooltip>
+                            <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
+                              <IconInformation />
+                            </TooltipTrigger>
+                            <TooltipContent className="max-w-xs">
+                              <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-3 leading-6">
+                                {i18n.keyboardSettings.superkeys.timeoutTip1}
+                              </Heading>
+                              <ul className="list-disc pl-4">
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.timeoutTip2}</li>
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.timeoutTip3}</li>
+                                <li className="text-left">{i18n.keyboardSettings.superkeys.timeoutTipDefault}</li>
+                              </ul>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </Heading>
+                    </div>
+                  </div>
+                  <div className="w-full flex gap-2">
+                    <div className="flex max-w-12 p-0 text-center items-center">
+                      <span className="tagsfix">Less</span>
+                    </div>
+                    <div className="w-full flex items-center p-0">
+                      <Slider min={1} max={500} value={[SuperTimeout]} onValueChange={setSuperTimeout} />
                     </div>
                     <div className="flex max-w-12 p-0 text-center items-center">
                       <span className="tagsfix">More</span>

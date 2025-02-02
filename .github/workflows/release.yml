@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-12
+          - os: macos-13
           - os: windows-2019
           - os: ubuntu-20.04
     steps:
@@ -60,7 +60,7 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-12
+          - os: macos-13
           - os: windows-2019
           - os: ubuntu-20.04
 
@@ -180,6 +180,8 @@ jobs:
           path: |
             out/make/**/*.dmg
             out/make/**/*.AppImage
+            out/make/**/*.zip
+            out/make/**/*.nupkg
             windows_signing/**/*.exe
 
       - name: Show build items
@@ -220,7 +222,7 @@ jobs:
       - name: Install node_modules # we do this so we can use semantic-release
         if: steps.cache-node-modules.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile --network-timeout 300000 # sometimes yarn takes time, therefore, we increase the timeout
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4.1.7
         with:
           name: artifacts
           path: ${{ github.workspace }}/artifacts
@@ -231,8 +233,10 @@ jobs:
         run: |
           mkdir dist
           find ${{ github.workspace }}/artifacts -name '*.exe' -exec cp -v {} ${{ github.workspace }}/dist \;
+          find ${{ github.workspace }}/artifacts -name '*.nupkg' -exec cp -v {} ${{ github.workspace }}/dist \;
           find ${{ github.workspace }}/artifacts -name '*.AppImage' -exec cp -v {} ${{ github.workspace }}/dist \;
           find ${{ github.workspace }}/artifacts -name '*.dmg' -exec cp -v {} ${{ github.workspace }}/dist \;
+          find ${{ github.workspace }}/artifacts -name '*.zip' -exec cp -v {} ${{ github.workspace }}/dist \;
 
       - name: Log dist folder
         run: |

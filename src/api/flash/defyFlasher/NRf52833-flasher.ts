@@ -22,6 +22,7 @@ import { serialConnection, rawCommand, noWaitCommand } from "../serialConnection
 import { PACKET_SIZE, TYPE_DAT, TYPE_ELA, TYPE_ESA } from "../flasherConstants";
 import { HexType } from "../types";
 import ihexDecode from "../ihexDecode";
+import { delay } from "../delay";
 
 let serialPort;
 
@@ -48,12 +49,12 @@ const NRf52833 = {
       const hex = ihexDecode(lines[i]);
 
       if (hex.type === TYPE_ESA) {
-        segment = parseInt(hex.str.substr(8, hex.len * 2), 16) * 16;
+        segment = parseInt(hex.str.substring(8, 8 + hex.len * 2), 16) * 16;
         linear = 0;
       }
 
       if (hex.type === TYPE_ELA) {
-        linear = parseInt(hex.str.substr(8, hex.len * 2), 16) * 65536;
+        linear = parseInt(hex.str.substring(8, 8 + hex.len * 2), 16) * 65536;
         segment = 0;
       }
 
@@ -160,7 +161,9 @@ const NRf52833 = {
 
     try {
       // START APPLICATION
+      await delay(300);
       noWaitCommand("S#", serialPort);
+      await delay(300);
       if (ans[0] !== 65) log.warn("warning when disconnecting");
     } catch (error) {
       log.warn(error);

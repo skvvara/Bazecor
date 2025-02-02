@@ -16,17 +16,20 @@
 
 import { Neuron } from "./neurons";
 import { WirelessInterface } from "./wireless";
-import { AppThemeType } from "@Common/store/types";
 
 export interface PreferencesProps {
   cancelContext: () => void;
-  updateAllowBetas: (checked: boolean) => void;
   allowBeta: boolean;
+  updateAllowBetas: (checked: boolean) => void;
+  autoUpdate: boolean;
+  updateAutoUpdate: (checked: boolean) => void;
   connected: boolean;
   startContext: () => void;
   toggleDarkMode: (mode: string) => void;
   toggleBackup: (value: boolean) => void;
   setLoading: (lding: boolean) => void;
+  saveButtonRef?: React.RefObject<HTMLButtonElement>;
+  discardChangesButtonRef?: React.RefObject<HTMLButtonElement>;
 }
 
 export interface KBDataPref {
@@ -61,8 +64,8 @@ export interface KBDataPref {
 export interface PrefState {
   devTools: boolean;
   advanced: boolean;
-  verboseFocus: boolean;
-  darkMode: AppThemeType;
+  verbose: boolean;
+  darkMode: string;
   neurons: Array<Neuron>;
   selectedNeuron: number;
   neuronID: string;
@@ -115,4 +118,5 @@ export interface BackupSettingsProps {
   neuronID: string;
   toggleBackup: (value: boolean) => void;
   destroyContext: () => Promise<void>;
+  enabled?: boolean;
 }

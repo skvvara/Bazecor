@@ -61,9 +61,11 @@ import svSE from "@Renderer/modules/KeyPickerKeyboard/languages/sv/SE.json";
 
 // Dygma - Layouts (official/native)
 import isIS from "@Renderer/modules/KeyPickerKeyboard/languages/is/IS.json";
+import itIT from "@Renderer/modules/KeyPickerKeyboard/languages/it/IT.json";
 import jaJP from "@Renderer/modules/KeyPickerKeyboard/languages/ja/JP.json";
 import koKR from "@Renderer/modules/KeyPickerKeyboard/languages/ko/KR.json";
 import plPL from "@Renderer/modules/KeyPickerKeyboard/languages/pl/PL.json";
+import ruRU from "@Renderer/modules/KeyPickerKeyboard/languages/ru/RU.json";
 import deCH from "@Renderer/modules/KeyPickerKeyboard/languages/de/CH.json";
 
 // Dygma - Layouts (community/third-party)
@@ -71,8 +73,10 @@ import enXXeurkey from "@Renderer/modules/KeyPickerKeyboard/languages/en/XX-eurk
 import frXXbepo from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-bepo.json";
 import frXXoptimot from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-optimot.json";
 import frXXergol from "@Renderer/modules/KeyPickerKeyboard/languages/fr/XX-ergol.json";
+import esMX from "@Renderer/modules/KeyPickerKeyboard/languages/es/MX.json";
+import { KeyProps } from "./Key";
 
-const languages = {
+const languages: { [key in LangOptions]: Array<KeyProps> } = {
   // Keycaps
   "en-US": enUS,
   "en-GB": enGB,
@@ -85,10 +89,13 @@ const languages = {
   "sv-SE": svSE,
   // Official
   "is-IS": isIS,
+  "it-IT": itIT,
   "ja-JP": jaJP,
   "ko-KR": koKR,
   "pl-PL": plPL,
+  "ru-RU": ruRU,
   "de-CH": deCH,
+  "es-MX": esMX,
   // Community
   "en-XX-eurkey": enXXeurkey,
   "fr-XX-bepo": frXXbepo,
@@ -96,10 +103,11 @@ const languages = {
   "fr-XX-ergol": frXXergol,
 };
 
-type LangOptions =
+export type LangOptions =
   | "en-US"
   | "en-GB"
   | "es-ES"
+  | "es-MX"
   | "de-DE"
   | "fr-FR"
   | "da-DK"
@@ -107,9 +115,11 @@ type LangOptions =
   | "nb-NO"
   | "sv-SE"
   | "is-IS"
+  | "it-IT"
   | "ja-JP"
   | "ko-KR"
   | "pl-PL"
+  | "ru-RU"
   | "de-CH"
   | "en-XX-eurkey"
   | "fr-XX-bepo"

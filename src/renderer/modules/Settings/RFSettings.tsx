@@ -82,7 +82,7 @@ function RFSettings(props: RFSettingsProps) {
             <div className="flex items-center gap-2">
               <IconRadar /> {i18n.wireless.RFPreferences.RFRadioSignal}
             </div>{" "}
-            <Badge variant="subtle" size="sm">
+            <Badge variant="subtle" size="xs">
               {i18n.wireless.energyManagement.settings.lowBatteryImpact}
             </Badge>
           </CardTitle>
@@ -122,7 +122,7 @@ function RFSettings(props: RFSettingsProps) {
           </div>
           <div className="rounded-sm bg-gray-100/20 dark:bg-gray-900/20 py-3 px-3 mt-3">
             <p className="flex flex-row gap-2 items-center text-xs text-gray-300 dark:text-gray-100">
-              <IconThunder /> Consider minimize radio signal strength for power savings.
+              <IconThunder /> Consider reducing radio signal strength for power savings.
             </p>
           </div>
         </CardContent>

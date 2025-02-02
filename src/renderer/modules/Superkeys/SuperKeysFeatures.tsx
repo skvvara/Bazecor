@@ -71,7 +71,7 @@ function SuperKeysFeatures() {
     <Style>
       <Accordion type="single" collapsible className="w-full rounded bg-gray-25/80 dark:bg-gray-600 mt-3">
         <AccordionItem value="item-1" className="border-0">
-          <AccordionTrigger className="flex justify-between items-center py-3 px-3 mt-0 mb-[-1px] rounded-none text-purple-200 dark:text-gray-25 border-b border-solid border-gray-50 dark:border-gray-600">
+          <AccordionTrigger className="flex justify-between items-center py-3 px-3 mt-0 mb-[-1px] rounded-none text-purple-200 dark:text-gray-25 border-none">
             <strong className="text-xs tracking-tight font-semibold">{i18n.editor.superkeys.collapse.title}</strong>
           </AccordionTrigger>
           <AccordionContent className="px-3 py-3 bg-transparent border-0">
@@ -81,10 +81,10 @@ function SuperKeysFeatures() {
                   <h6>Tap</h6>
                   <ul>
                     <li className="active">Keys</li>
-                    <li>Modifiers</li>
+                    <li className="active">Modifiers</li>
                     <li className="active">Macros</li>
                     <li className="active">Media & LED</li>
-                    <li className="active">Mouse</li>
+                    <li className="active">Mouse Clicks</li>
                     <li className="active">Layer Lock</li>
                     <li>Layer Shift</li>
                     <li>Dual-function</li>
@@ -99,7 +99,7 @@ function SuperKeysFeatures() {
                     <li className="active">Modifiers</li>
                     <li className="active">Macros</li>
                     <li className="active">Media & LED</li>
-                    <li className="active">Mouse</li>
+                    <li className="active">Mouse Clicks</li>
                     <li className="active">Layer Lock</li>
                     <li className="active">Layer Shift</li>
                     <li>Dual-function</li>
@@ -114,7 +114,7 @@ function SuperKeysFeatures() {
                     <li className="active">Modifiers</li>
                     <li className="active">Macros</li>
                     <li className="active">Media & LED</li>
-                    <li className="active">Mouse</li>
+                    <li className="active">Mouse Clicks</li>
                     <li className="active">Layer Lock</li>
                     <li className="active">Layer Shift</li>
                     <li>Dual-function</li>
@@ -126,10 +126,10 @@ function SuperKeysFeatures() {
                   <h6>2Tap</h6>
                   <ul>
                     <li className="active">Keys</li>
-                    <li>Modifiers</li>
+                    <li className="active">Modifiers</li>
                     <li className="active">Macros</li>
                     <li className="active">Media & LED</li>
-                    <li className="active">Mouse</li>
+                    <li className="active">Mouse Clicks</li>
                     <li className="active">Layer Lock</li>
                     <li>Layer Shift</li>
                     <li>Dual-function</li>
@@ -144,7 +144,7 @@ function SuperKeysFeatures() {
                     <li className="active">Modifiers</li>
                     <li className="active">Macros</li>
                     <li className="active">Media & LED</li>
-                    <li className="active">Mouse</li>
+                    <li className="active">Mouse Clicks</li>
                     <li className="active">Layer Lock</li>
                     <li className="active">Layer Shift</li>
                     <li>Dual-function</li>

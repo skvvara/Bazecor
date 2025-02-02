@@ -72,12 +72,12 @@ const Raise2Flash = {
       const hex = ihexDecode(lines[i]);
 
       if (hex.type === TYPE_ESA) {
-        segment = parseInt(hex.str.substr(8, hex.len * 2), 16) * 16;
+        segment = parseInt(hex.str.substring(8, 8 + hex.len * 2), 16) * 16;
         linear = 0;
       }
 
       if (hex.type === TYPE_ELA) {
-        linear = parseInt(hex.str.substr(8, hex.len * 2), 16) * 65536;
+        linear = parseInt(hex.str.substring(8, 8 + hex.len * 2), 16) * 65536;
         segment = 0;
       }
 
@@ -211,9 +211,9 @@ const Raise2Flash = {
       address += bufferSize;
     }
 
-    log.info("Validating...");
-    ans = await rawCommand("V#", serialPort, 1000);
-    if (ans[0] !== 65) throw Error("error when Validating");
+    // log.info("Validating...");
+    // ans = await rawCommand("V#", serialPort, 1000);
+    // if (ans[0] !== 65) throw Error("error when Validating");
 
     // START APPLICATION
     ans = await rawCommand("F#", serialPort, 1000);

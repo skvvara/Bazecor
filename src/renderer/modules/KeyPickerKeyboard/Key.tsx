@@ -1,6 +1,6 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable eqeqeq */
 /* eslint-disable react/jsx-filename-extension */
-// @ts-nocheck
 import React from "react";
 import Styled, { withTheme } from "styled-components";
 import { SegmentedKeyType } from "@Renderer/types/layout";
@@ -342,20 +342,22 @@ const ksl: KslType = {
   },
 };
 
-interface KeyProps {
+export interface KeyProps {
   id: number;
-  keyCode: SegmentedKeyType;
+  keyCode?: SegmentedKeyType;
   x: number;
   y: number;
-  selected: boolean;
-  clicked: () => void;
-  onKeyPress: (keyCode: number) => void;
+  selected?: boolean;
+  clicked?: () => void;
+  onKeyPress?: (keyCode: number) => void;
   centered: boolean;
-  iconpresent: boolean;
-  icon: JSX.Element;
-  iconsize: number;
-  iconx: number;
-  icony: number;
+  iconpresent?: boolean;
+  iconname?: string;
+  icon: JSX.Element | boolean;
+  iconsize?: number;
+  iconx?: number;
+  icony?: number;
+  tooltip?: string[];
   content: {
     type: string;
     first: string;
@@ -363,9 +365,39 @@ interface KeyProps {
     third: string;
     fourth: string;
   };
-  idArray: string;
-  disabled: boolean;
+  mod?: boolean;
+  move?: boolean;
+  tap?: boolean;
+  idArray: string | number[];
+  disabled?: boolean;
+  platform?: string;
+  theme?: any;
 }
+
+interface KeyLabelProps {
+  content: string;
+  os: string;
+}
+const KeyLabel: React.FC<KeyLabelProps> = ({ content, os }) => {
+  let label;
+  if (os === "darwin") {
+    switch (content) {
+      case "Ctrl":
+        label = "Ctrl ˆ";
+        break;
+      case "Alt":
+      case "Alt Gr":
+        label = "⌥";
+        break;
+      default:
+        label = content;
+    }
+  } else {
+    label = content;
+  }
+
+  return <>{label}</>;
+};
 
 function Key(props: KeyProps) {
   const {
@@ -386,6 +418,12 @@ function Key(props: KeyProps) {
     idArray,
     disabled,
     theme,
+    platform,
+    iconname,
+    tooltip,
+    mod,
+    move,
+    tap,
   } = props;
 
   return (
@@ -467,12 +505,9 @@ function Key(props: KeyProps) {
           >
             <div xmlns="http://www.w3.org/1999/xhtml">
               <SelectGenericKeys
-                x={x + ksl[content.type].outb.dx}
-                y={y + ksl[content.type].outb.dy}
                 onSelect={onKeyPress}
-                selected={selected}
                 value={id}
-                listElements={idArray}
+                listElements={idArray as number[]}
                 content={content}
                 keyCode={keyCode}
                 label="F13+"
@@ -492,12 +527,9 @@ function Key(props: KeyProps) {
           >
             <div xmlns="http://www.w3.org/1999/xhtml">
               <SelectGenericKeys
-                x={x + ksl[content.type].outb.dx}
-                y={y + ksl[content.type].outb.dy}
                 onSelect={onKeyPress}
-                selected={selected}
                 value={id}
-                listElements={idArray}
+                listElements={idArray as number[]}
                 content={content}
                 keyCode={keyCode}
                 label={content.first}
@@ -549,7 +581,7 @@ function Key(props: KeyProps) {
               textAnchor="middle"
               className="contentFirst"
             >
-              {content.first}
+              <KeyLabel content={content.first} os={platform} />
             </text>
             <text
               x={x + ksl[content.type].text.letter.ddx}

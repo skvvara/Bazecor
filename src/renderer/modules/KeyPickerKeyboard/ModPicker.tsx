@@ -1,12 +1,14 @@
 /* eslint-disable no-bitwise */
 import React, { useEffect, useState } from "react";
-import { i18n } from "@Renderer/i18n";
 
 // Components
 import { SegmentedKeyType } from "@Renderer/types/layout";
 import usePrevious from "@Renderer/utils/usePrevious";
 import Heading from "@Renderer/components/atoms/Heading";
-import { Button } from "@Renderer/components/atoms/Button";
+import OSKey from "@Renderer/components/molecules/KeyTags/OSKey";
+import { IconInformation } from "@Renderer/components/atoms/icons";
+import CustomRadioCheckBox from "@Renderer/components/molecules/Form/CustomRadioCheckBox";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@Renderer/components/atoms/Tooltip";
 
 interface ModPickerProps {
   keyCode: SegmentedKeyType;
@@ -112,63 +114,80 @@ function ModPicker(props: ModPickerProps) {
 
   return (
     <div className="h-[inherit]">
-      <div className={`modPickerInner ${isStandardView ? "modPickerInnerStd p-0" : "p-[16px]"}`}>
+      <div className={`modPickerInner flex flex-wrap gap-6 ${isStandardView ? "modPickerInnerStd p-0" : "px-0"}`}>
         {!isStandardView ? (
-          <Heading headingLevel={4} renderAs="h4" className="text-ssm">
-            {i18n.editor.standardView.keys.addModifier}
+          <Heading
+            headingLevel={4}
+            renderAs="paragraph-sm"
+            className={`flex items-center gap-2 ${setModifierVisibility() ? "opacity-50" : "opacity-100"}`}
+          >
+            {/* {i18n.editor.standardView.keys.addModifier} */}
+            Create a shortcut
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger className="[&_svg]:text-purple-100 [&_svg]:dark:text-purple-200">
+                  <IconInformation />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs">
+                  <Heading headingLevel={4} renderAs="h4" className="text-gray-600 dark:text-gray-25 mb-1 leading-6 text-base">
+                    Create a shortcut
+                  </Heading>
+                  <p className="description text-ssm font-medium text-gray-400 dark:text-gray-200">
+                    Add modifiers to create a shortcut. Modifiers are special keys (like Ctrl, Shift, and Alt) that change the
+                    function of other keys or mouse actions when pressed together. For example, CTRL+C to copy text or CTRL+V to
+                    paste it.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </Heading>
         ) : null}
-        <div className={`modPickerButtonsList flex gap-1 ${isStandardView ? "" : "flex-wrap [&_button]:w-[64px]"}`}>
-          <Button
-            variant="config"
-            size="sm"
-            selected={modifs.includes(0)}
-            className="modbutton"
+        <div className="modPickerButtonsList flex gap-6 items-center">
+          <CustomRadioCheckBox
+            label={<OSKey renderKey="shift" size={`${isStandardView ? "md" : "sm"}`} />}
             onClick={() => SelectModif(0)}
+            checked={modifs.includes(0)}
+            type="radio"
+            name="addModShift"
+            id="addModShift"
             disabled={setModifierVisibility()}
-          >
-            Shift
-          </Button>
-          <Button
-            variant="config"
-            size="sm"
-            selected={modifs.includes(1)}
-            className="modbutton"
+          />
+          <CustomRadioCheckBox
+            label={<OSKey renderKey="control" size={`${isStandardView ? "sm" : "sm"}`} />}
             onClick={() => SelectModif(1)}
+            checked={modifs.includes(1)}
+            type="radio"
+            name="addModControl"
+            id="addModControl"
             disabled={setModifierVisibility()}
-          >
-            Ctrl
-          </Button>
-          <Button
-            variant="config"
-            size="sm"
-            selected={modifs.includes(2)}
-            className="modbutton"
-            onClick={() => SelectModif(2)}
-            disabled={setModifierVisibility()}
-          >
-            Alt
-          </Button>
-          <Button
-            variant="config"
-            size="sm"
-            selected={modifs.includes(3)}
-            className="modbutton"
-            onClick={() => SelectModif(3)}
-            disabled={setModifierVisibility()}
-          >
-            Alt Gr
-          </Button>
-          <Button
-            variant="config"
-            size="sm"
-            selected={modifs.includes(4)}
-            className="modbutton"
+          />
+          <CustomRadioCheckBox
+            label={<OSKey renderKey="os" size={`${isStandardView ? "md" : "sm"}`} />}
             onClick={() => SelectModif(4)}
+            checked={modifs.includes(4)}
+            type="radio"
+            name="addModOS"
+            id="addModOS"
             disabled={setModifierVisibility()}
-          >
-            OS
-          </Button>
+          />
+          <CustomRadioCheckBox
+            label={<OSKey renderKey="alt" size={`${isStandardView ? "md" : "sm"}`} />}
+            onClick={() => SelectModif(2)}
+            checked={modifs.includes(2)}
+            type="radio"
+            name="addModAlt"
+            id="addModAlt"
+            disabled={setModifierVisibility()}
+          />
+          <CustomRadioCheckBox
+            label={<OSKey renderKey="altGr" size={`${isStandardView ? "sm" : "sm"}`} />}
+            onClick={() => SelectModif(3)}
+            checked={modifs.includes(3)}
+            type="radio"
+            name="addModAltGr"
+            id="addModAltGr"
+            disabled={setModifierVisibility()}
+          />
         </div>
       </div>
     </div>

@@ -9,7 +9,7 @@ const PileIndicator = ({ batteryLevel, batteryStatus }: PileIndicatorProps) => {
   // console.log("isCharging", isCharging);
   // console.log("batteryStatus", batteryStatus);
 
-  const maskHash = `${Date.now()}-${(Math.random() + 1).toString(36).substring(7)}-level`;
+  const maskHash = `${Date.now()}-${(Math.random() + 1).toString(36).substring(0, 7)}-level`;
 
   useEffect(() => {
     switch (batteryStatus) {

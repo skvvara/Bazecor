@@ -15,13 +15,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { useCallback, useEffect, useState } from "react";
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Routes, Navigate, Route, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { ThemeProvider } from "styled-components";
 import { ipcRenderer } from "electron";
 import path from "path";
-import log from "electron-log/renderer";
 import { i18n } from "@Renderer/i18n";
 
 import GlobalStyles from "@Renderer/theme/GlobalStyles";
@@ -42,8 +41,10 @@ import BazecorDevtools from "@Renderer/views/BazecorDevtools";
 import { showDevtools } from "@Renderer/devMode";
 
 import Store from "@Renderer/utils/Store";
+import { VersionUpdateDialog } from "@Renderer/components/molecules/CustomModal/VersionUpdateDialog";
 import getTranslator from "@Renderer/utils/translator";
 import { Neuron } from "@Types/neurons";
+import { version } from "../../package.json";
 import { AppContext } from "../common/app-context/AppContext";
 import "../api/keymap";
 import "../api/colormap";
@@ -55,12 +56,14 @@ import HID from "../api/hid/hid";
 import { AppThemeType } from "@Common/store/types";
 
 const store = Store.getStore();
+
 const storage = AppContext.settings;
 
 function App() {
   const [pages, setPages] = useState({});
   const [contextBar, setContextBar] = useState(false);
   const [allowBeta, setAllowBeta] = useState(false);
+  const [autoUpdate, setAutoUpdate] = useState<boolean>(undefined);
   const [darkMode, setDarkMode] = useState(false);
 
   const [connected, setConnected] = useState(false);
@@ -68,6 +71,11 @@ function App() {
   const [restoredOk, setRestoredOk] = useState(true);
   const [fwUpdate, setFwUpdate] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [notifyNewVersion, setNotifyNewVersion] = useState(false);
+  const [oldSettings] = useState(store.get("settings"));
+
+  const saveButtonRef = useRef(null);
+  const discardChangesButtonRef = useRef(null);
 
   const { state, dispatch } = useDevice();
   const navigate = useNavigate();
@@ -75,13 +83,15 @@ function App() {
   const device: any = React.useRef();
 
   const updateStorageSchema = async () => {
+    // Update stored settings schema
+    log.verbose("Retrieving settings: ", oldSettings);
     const locale = await ipcRenderer.invoke("get-Locale");
     log.verbose("Settings for locale: ", locale);
     i18n.setLanguage(storage.language);
 
     // when moving from other version, config may for superkeys may contain wrong data (wrong legnth, nulls)
     // so we have to fix it. This fix should not be here. It should be in separate file.
-    // Store class could handle these kind of things.
+    // Store class could handle this kind of things.
     const neurons = store.get("neurons");
     if (neurons !== undefined) {
       (neurons as Neuron[])
@@ -112,12 +122,15 @@ function App() {
     i18n.setLanguage(data.language);
     store.set("settings", data);
     store.set("neurons", []);
-    log.verbose("Testing results: ", data, store.get("settings"), storage.darkMode);
+    log.verbose("Testing results: ", data, store.get("settings"), store.get("settings.darkMode"));
   };
 
   useEffect(() => {
     const init = async () => {
       await updateStorageSchema();
+      if (oldSettings.version === undefined || oldSettings.version !== version) {
+        setNotifyNewVersion(true);
+      }
       let isDark: boolean;
       const mode = storage.darkMode;
       isDark = mode === "dark";
@@ -130,17 +143,25 @@ function App() {
       } else {
         document.documentElement.classList.add(mode);
       }
+
+      let getAutoUpdate: boolean;
+      if (store.has("settings.autoUpdate")) {
+        getAutoUpdate = store.get("settings.autoUpdate") as boolean;
+      }
+
       setDarkMode(isDark);
       setConnected(false);
       device.current = null;
       setPages({});
       setContextBar(false);
       setAllowBeta(storage.allowBeta);
+      setAutoUpdate(getAutoUpdate);
       setLoading(true);
       setFwUpdate(false);
       localStorage.clear();
     };
     init();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const startContext = () => {
@@ -344,9 +365,23 @@ function App() {
     setAllowBeta(checked);
   };
 
+  const updateAutoUpdate = (checked: boolean) => {
+    log.info("auto update value changed to:", checked);
+    if (checked === undefined) {
+      setAutoUpdate(store.get("settings.autoUpdate"));
+    } else {
+      store.set("settings.autoUpdate", checked);
+      setAutoUpdate(checked);
+    }
+  };
+
   const handleSetRestoredOk = (status: boolean) => {
     log.verbose("CHECK RESTORE", status);
     setRestoredOk(status);
+  };
+
+  const handleUpdateVersion = () => {
+    store.set("settings.version", version);
   };
 
   return (
@@ -360,6 +395,8 @@ function App() {
         allowBeta={allowBeta}
         modified={contextBar}
         loading={loading}
+        saveButtonRef={saveButtonRef}
+        discardChangesButtonRef={discardChangesButtonRef}
       />
       <div className="main-container">
         <Routes>
@@ -405,6 +442,8 @@ function App() {
                 inContext={contextBar}
                 restoredOk={restoredOk}
                 handleSetRestoredOk={handleSetRestoredOk}
+                saveButtonRef={saveButtonRef}
+                discardChangesButtonRef={discardChangesButtonRef}
               />
             }
           />
@@ -416,6 +455,8 @@ function App() {
                 startContext={startContext}
                 cancelContext={cancelContext}
                 setLoading={setLoadingData}
+                saveButtonRef={saveButtonRef}
+                discardChangesButtonRef={discardChangesButtonRef}
               />
             }
           />
@@ -427,6 +468,8 @@ function App() {
                 startContext={startContext}
                 cancelContext={cancelContext}
                 setLoading={setLoadingData}
+                saveButtonRef={saveButtonRef}
+                discardChangesButtonRef={discardChangesButtonRef}
               />
             }
           />
@@ -455,11 +498,21 @@ function App() {
                 updateAllowBetas={updateAllowBetas}
                 allowBeta={allowBeta}
                 setLoading={setLoadingData}
+                autoUpdate={autoUpdate}
+                updateAutoUpdate={updateAutoUpdate}
+                saveButtonRef={saveButtonRef}
+                discardChangesButtonRef={discardChangesButtonRef}
               />
             }
           />
         </Routes>
       </div>
+      <VersionUpdateDialog
+        open={notifyNewVersion}
+        oldVersion={oldSettings.version}
+        handleUpdate={handleUpdateVersion}
+        onCancel={() => setNotifyNewVersion(false)}
+      />
     </ThemeProvider>
   );
 }

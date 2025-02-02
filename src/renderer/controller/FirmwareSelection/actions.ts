@@ -2,6 +2,9 @@ import { Octokit } from "@octokit/core";
 import axios from "axios";
 import SemVer from "semver";
 import log from "electron-log/renderer";
+import path from "path";
+import fs from "fs";
+
 import { ReleaseType } from "@Renderer/types/releases";
 
 import * as Context from "./context";
@@ -39,13 +42,16 @@ const loadAvailableFirmwareVersions = async (allowBeta: boolean) => {
       headers: {
         "X-GitHub-Api-Version": "2022-11-28",
       },
+      mediaType: {
+        format: "full",
+      },
     });
     // log.info("Data from github!", JSON.stringify(data));
     data.data.forEach(release => {
       const releaseData = release.name?.split(" ");
       const name = releaseData ? releaseData[0] : "";
       const version = releaseData ? releaseData[1] : "";
-      const body = release.body || "";
+      const body = release.body_html || "";
       const assets: Array<{
         name: string;
         url: string;
@@ -84,7 +90,7 @@ export const GitHubRead = async (context: Context.ContextType): Promise<Context.
     finalReleases = fwReleases.filter(
       release =>
         release.name === context.device.info.product &&
-        (context.device.info.product === "Defy"
+        (context.device.info.product !== "Raise"
           ? SemVer.satisfies(release.version ? release.version : "", FWMAJORVERSION, { includePrerelease: true })
           : true),
     );
@@ -103,8 +109,7 @@ export const GitHubRead = async (context: Context.ContextType): Promise<Context.
       isBeta = false;
     }
   } catch (error) {
-    log.warn("error when filtering data from GitHub");
-    log.error(error);
+    log.warn("error when filtering data from GitHub", error);
     throw new Error(error);
   }
   log.info("GitHub data acquired!", finalReleases);
@@ -172,39 +177,72 @@ const obtainFWFiles = async (type: string, url: string) => {
   return firmware;
 };
 
+const obtainLocalFWFiles = (customFWPath: string) => {
+  const fromHexString = (hexString: any) => Uint8Array.from(hexString.match(/.{1,2}/g).map((byte: string) => parseInt(byte, 16)));
+
+  let result;
+  if (customFWPath.includes(".hex")) {
+    let fileData = fs.readFileSync(customFWPath, { encoding: "utf8" });
+    fileData = fileData.replace(/(?:\r\n|\r|\n)/g, "");
+    const lines = fileData.split(":");
+    lines.splice(0, 1);
+    result = lines;
+  }
+  if (customFWPath.includes(".bin")) {
+    const filedata = fs.readFileSync(customFWPath, { encoding: "hex" });
+    result = fromHexString(filedata);
+  }
+  if (customFWPath.includes(".uf2")) {
+    result = customFWPath;
+  }
+  return result;
+};
+
 export const downloadFirmware = async (
   typeSelected: string,
   info: { product: string; keyboardType: string },
   firmwareList: ReleaseType[],
   selectedFirmware: number,
+  customFirmwareFolder: string,
 ) => {
   let filename: Array<string>;
   let filenameSides: Uint8Array;
   log.info("Data to download FW: ", typeSelected, info, firmwareList, selectedFirmware);
   try {
     if (typeSelected === "default") {
-      if (info.product === "Raise") {
-        filename = (await obtainFWFiles(
-          "firmware.hex",
-          firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "firmware.hex").url,
-        )) as Array<string>;
+    if (info.product === "Raise") {
+      filename =
+        typeSelected === "default"
+          ? ((await obtainFWFiles(
+              "firmware.hex",
+              firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "firmware.hex").url,
+            )) as Array<string>)
+          : (obtainLocalFWFiles(path.join(customFirmwareFolder, "firmware.hex")) as Array<string>);
+    } else {
+      if (info.keyboardType === "wireless" || info.product === "Raise2") {
+        filename =
+          typeSelected === "default"
+            ? ((await obtainFWFiles(
+                "Wireless_neuron.hex",
+                firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "Wireless_neuron.hex").url,
+              )) as Array<string>)
+            : (obtainLocalFWFiles(path.join(customFirmwareFolder, "Wireless_neuron.hex")) as Array<string>);
       } else {
-        if (info.keyboardType === "wireless") {
-          filename = (await obtainFWFiles(
-            "Wireless_neuron.hex",
-            firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "Wireless_neuron.hex").url,
-          )) as Array<string>;
-        } else {
-          filename = (await obtainFWFiles(
-            "Wired_neuron.uf2",
-            firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "Wired_neuron.uf2").url,
-          )) as Array<string>;
-        }
-        filenameSides = (await obtainFWFiles(
-          "keyscanner.bin",
-          firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "keyscanner.bin").url,
-        )) as Uint8Array;
+        filename =
+          typeSelected === "default"
+            ? ((await obtainFWFiles(
+                "Wired_neuron.uf2",
+                firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "Wired_neuron.uf2").url,
+              )) as Array<string>)
+            : [obtainLocalFWFiles(path.join(customFirmwareFolder, "Wired_neuron.uf2")) as string];
       }
+      filenameSides =
+        typeSelected === "default"
+          ? ((await obtainFWFiles(
+              "keyscanner.bin",
+              firmwareList[selectedFirmware].assets.find((asset: { name: string }) => asset.name === "keyscanner.bin").url,
+            )) as Uint8Array)
+          : new Uint8Array(obtainLocalFWFiles(path.join(customFirmwareFolder, "keyscanner.bin")) as any);
     }
   } catch (error) {
     log.warn("error when asking for FW files");

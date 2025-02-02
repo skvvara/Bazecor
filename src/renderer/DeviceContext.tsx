@@ -65,16 +65,15 @@ function deviceReducer(state: State, action: Action) {
       let newDevices = [...state.deviceList];
       let newSelected: number = state.selected;
       newDevices = newDevices.filter((device, index) => {
-        const isVirtual = device.type === "virtual";
-        const isNotPresent = action.payload.includes(device.serialNumber.toLowerCase());
+        const toRemove = action.payload.includes(device.serialNumber.toLowerCase());
 
         if (index < state.selected && newSelected > -1) newSelected -= 1;
-        if (isNotPresent && state.selected === index) {
-          log.info("entered with", state.selected, index, isNotPresent, device.serialNumber.toLowerCase());
+        if (toRemove && state.selected === index) {
+          log.info("entered with", state.selected, index, toRemove, device.serialNumber.toLowerCase());
           newSelected = -1;
         }
 
-        return !isVirtual && !isNotPresent;
+        return !toRemove;
       });
       // newSelected = state.selected >= newDevices.length ? -1 : state.selected;
       log.warn("EXECUTED disconnect: ", state.deviceList, state.selected, action.payload, newDevices);
@@ -148,7 +147,7 @@ const enumerateSerial = async (bootloader: boolean) => {
 };
 
 const enumerateDevice = async (bootloader: boolean, device: USBDevice, existingIDs: string[]) => {
-  const dev = await serial.enumerate(bootloader, device, existingIDs);
+  const dev = (await serial.enumerate(bootloader, device, existingIDs)).foundDevices;
   // log.info("Data from enum dev:", dev, bootloader, existingIDs);
   const newDevice = dev.map(d => new Device(d, "serial"));
 
@@ -168,18 +167,29 @@ const enumerateDevice = async (bootloader: boolean, device: USBDevice, existingI
   return newDevice;
 };
 
+/**
+ * Lists the non connected devices, thus excluding from the search any that already figure as connected.
+ * @param bootloader Boolean value that identifies the type of keyobard being searched for.
+ * @param existingIDs The list of ID's that are already present on the device manager devices list and thus have to be avoided.
+ */
 const listNonConnected = async (bootloader: boolean, existingIDs: string[]) => {
   const finalDevices: Array<Device> = [];
+  const devicesToRemove: Array<string> = [];
+  const hidDevicesPresent: Array<string> = [];
 
   // Gathering SerialPort Devices
-  const ports = await serial.enumerate(bootloader, undefined, existingIDs);
-  ports.map(dev => finalDevices.push(new Device(dev, "serial")));
+  const result = await serial.enumerate(bootloader, undefined, existingIDs);
+  result.foundDevices.map(dev => finalDevices.push(new Device(dev, "serial")));
   // log.info("Data from enum dev:", dev, bootloader, existingIDs);
 
   // Gathering HID Devices
   const hidDevs = await HID.getDevices();
   for (const [index, device] of hidDevs.entries()) {
     log.verbose("Checking: ", device);
+    if (existingIDs.includes((device as unknown as Device)?.device?.chipId)) {
+      hidDevicesPresent.push((device as unknown as Device).device.chipId);
+      break;
+    }
     const hid = new HID();
     const connected = await hid.isDeviceConnected(index);
     const supported = await hid.isDeviceSupported(index);
@@ -187,12 +197,16 @@ const listNonConnected = async (bootloader: boolean, existingIDs: string[]) => {
     if (connected && supported && !existingIDs.includes(hid.serialNumber)) finalDevices.push(new Device(hid, "hid"));
   }
 
-  return finalDevices;
+  existingIDs.forEach(d =>
+    result.validDevices.includes(d) || hidDevicesPresent.includes(d) ? undefined : devicesToRemove.push(d),
+  );
+
+  return { finalDevices, devicesToRemove };
 };
 
 const currentSerialN = async (existingIDs: string[]) => {
   const result: string[] = [];
-  const SN = (await serial.enumerate(false)).map(port => port.serialNumber.toLowerCase());
+  const SN = (await serial.enumerate(false)).foundDevices.map(port => port?.serialNumber?.toLowerCase());
   existingIDs.forEach(id => {
     if (!SN.includes(id.toLowerCase())) result.push(id.toLowerCase());
   });

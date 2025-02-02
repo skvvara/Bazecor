@@ -157,6 +157,7 @@ function LEDSettings(props: LEDSettingsPreferences) {
                         onValueChange={setBrightnessWireless}
                         className="slider-danger"
                         variant="alert"
+                        dataPlacement="bottom"
                       />
                     </div>
                   </div>
@@ -196,6 +197,7 @@ function LEDSettings(props: LEDSettingsPreferences) {
                         onValueChange={setBrightnessUGWireless}
                         className="slider-danger"
                         variant="alert"
+                        dataPlacement="bottom"
                       />
                     </div>
                   </div>
@@ -246,6 +248,7 @@ function LEDSettings(props: LEDSettingsPreferences) {
                           onValueChange={selectIdleLEDTimeWireless}
                           className="slider-danger"
                           variant="alert"
+                          dataPlacement="bottom"
                         />
                       </div>
                     </div>
@@ -287,7 +290,6 @@ function LEDSettings(props: LEDSettingsPreferences) {
                 </span>
                 {`It's essential to note that LEDs can significantly impact battery consumption. To optimize battery life when using
                 your device wirelessly, you can finely adjust LED intensity.`}
-                `
               </p>
             </div>
           </>

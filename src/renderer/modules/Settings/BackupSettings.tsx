@@ -31,13 +31,14 @@ import { i18n } from "@Renderer/i18n";
 import { Button } from "@Renderer/components/atoms/Button";
 
 // Icons Imports
-import { IconArrowDownWithLine, IconFloppyDisk } from "@Renderer/components/atoms/icons";
+import { IconArrowDownWithLine, IconFloppyDisk, IconUSB } from "@Renderer/components/atoms/icons";
 
 // Utils
 import { BackupSettingsProps } from "@Renderer/types/preferences";
 import WaitForRestoreDialog from "@Renderer/components/molecules/CustomModal/WaitForRestoreDialog";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
+import Banner from "@Renderer/components/atoms/Banner";
 import { AppContext } from "../../../common/app-context/AppContext";
 import Backup from "../../../api/backup";
 
@@ -46,7 +47,7 @@ const BackupSettings = (props: BackupSettingsProps) => {
   const [performingBackup, setPerformingBackup] = useState(false);
   const { state } = useDevice();
 
-  const { connected, neurons, neuronID, toggleBackup, destroyContext } = props;
+  const { connected, neurons, neuronID, toggleBackup, destroyContext, enabled } = props;
   useEffect(() => {
     setBackupFolder(AppContext.settings.backupFolder);
   }, []);
@@ -172,14 +173,23 @@ const BackupSettings = (props: BackupSettingsProps) => {
   };
 
   return (
-    <Card className="mt-3 max-w-2xl mx-auto" variant="default">
+    <Card className={`${enabled ? "" : "pointer-events-none"} mt-3 max-w-2xl mx-auto`} variant="default">
       <CardHeader>
         <CardTitle variant="default">
           <IconFloppyDisk /> {i18n.keyboardSettings.backupFolder.header}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <form>
+        {enabled ? (
+          ""
+        ) : (
+          <Banner variant="warning" icon={<IconUSB />}>
+            <p className="font-semibold tracking-tight text-gray-600 dark:text-gray-25">
+              To restore a Backup, please connect the keyboard to the computer via RF or USB.
+            </p>
+          </Banner>
+        )}
+        <form className={`${enabled ? "" : "opacity-30 mt-4"}`}>
           <h3 className="mb-1 text-gray-400 dark:text-gray-100 tracking-tight font-semibold">Backup actions</h3>
           <div className="flex gap-3">
             <Button variant="short" onClick={event => triggerGetBackup(event)} disabled={!connected}>

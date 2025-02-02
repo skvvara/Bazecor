@@ -15,11 +15,14 @@ import { i18n } from "@Renderer/i18n";
 
 import { VirtualType } from "@Renderer/types/virtual";
 import { BackupType } from "@Renderer/types/backups";
-import { AppContext } from "@Common/app-context/AppContext";
+
 import Hardware from "../../../api/hardware";
 import { RaiseISO, RaiseANSI, DefyWired, DefyWireless, Raise2ANSI, Raise2ISO, enumerator } from "../../../api/hardware-virtual";
+import Store from "../../utils/Store";
 import { isVirtualType } from "../../../api/comms/virtual";
 import Backup from "../../../api/backup";
+
+const store = Store.getStore();
 
 interface VirtualSelectorProps {
   handleVirtualConnect: (file: any) => void;
@@ -95,7 +98,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
     const options = {
       title: i18n.keyboardSelect.virtualKeyboard.newTitle,
       buttonLabel: i18n.keyboardSelect.virtualKeyboard.buttonLabelSave,
-      defaultPath: path.join(AppContext.settings.backupFolder, `${fileName}.json`),
+      defaultPath: path.join(store.get("settings.backupFolder") as string, `${fileName}.json`),
       filters: [{ name: "Json", extensions: ["json"] }],
     };
     const newPath = await ipcRenderer.invoke("save-dialog", options);
@@ -198,7 +201,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
     const options = {
       title: i18n.keyboardSelect.virtualKeyboard.newTitle,
       buttonLabel: i18n.keyboardSelect.virtualKeyboard.buttonLabelSave,
-      defaultPath: path.join(AppContext.settings.backupFolder, `${fileName}.json`),
+      defaultPath: path.join(store.get("settings.backupFolder") as string, `${fileName}.json`),
       filters: [{ name: "Json", extensions: ["json"] }],
     };
     const newPath = await ipcRenderer.invoke("save-dialog", options);
@@ -289,7 +292,7 @@ export default function VirtualSelector(props: VirtualSelectorProps) {
                   variant="primary"
                   className="mt-3"
                   onClick={() => {
-                    let fileName = enumerator[selectedVirtualKeyboard].device.info.product;
+                    let fileName = enumerator[selectedVirtualKeyboard].device.info.product as string;
                     fileName =
                       fileName === "Defy"
                         ? `Virtual${fileName}`

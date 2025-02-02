@@ -121,10 +121,11 @@ const FlashManager = setup({
       invoke: {
         src: "RestoreESCKey",
         input: ({ context, event }) => {
-          if (event.type === "next-event") {
+          if (event.type === "next-event" || event.type === "retry-event") {
             return context;
           }
 
+          log.info("Unexpected event type", event.type);
           throw new Error("Unexpected event type");
         },
         onDone: {

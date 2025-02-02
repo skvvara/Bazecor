@@ -206,7 +206,7 @@ function FirmwareUpdateProcess(props: FirmwareUpdateProcessProps) {
   }, [nextBlock, state]);
 
   const stepsDefy = [
-    { step: 1, title: i18n.firmwareUpdate.texts.flashCardTitle1, description: i18n.firmwareUpdate.texts.flashCardTitle2 },
+    { step: 1, title: i18n.firmwareUpdate.texts.flashCardTitle1, description: i18n.firmwareUpdate.texts.flashCardTitleDefy2 },
     {
       step: 2,
       title: i18n.firmwareUpdate.texts.progressCardStatusDefy1,
@@ -281,7 +281,7 @@ function FirmwareUpdateProcess(props: FirmwareUpdateProcessProps) {
               countdown={state.context.stateblock}
               deviceProduct={state.context.device?.info.product}
               keyboardType={state.context.device?.info.keyboardType}
-              steps={state.context.device?.info.product === "Defy" ? stepsDefy : stepsRaise}
+              steps={state.context.device?.info.product === "Raise" ? stepsRaise : stepsDefy}
             />
           </div>
           {state.context.stateblock === 1 ? (
