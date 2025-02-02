@@ -8,7 +8,6 @@ import { NOKEY_KEY_CODE, TRANS_KEY_CODE } from "../../../../api/keymap/types";
 import { SelectKeyboardSide } from "@Renderer/components/molecules/CustomSelect/SelectKeyboardSide";
 import { SelectResetKeyType } from "@Renderer/components/molecules/CustomSelect/SelectResetKeyType";
 import Heading from "@Renderer/components/atoms/Heading";
-import BlankTable from "../../../../api/keymap/db/blanks";
 
 export interface OnConfirmProps {
   keyCode: number;
@@ -31,6 +30,7 @@ interface ClearLayerDialogProps {
 export const ClearLayerDialog = (props: ClearLayerDialogProps): JSX.Element => {
   const { open, onCancel, onConfirm, colors, selectedColorIndex, fillWithNoKey, keyboardSide } = props;
   const [useNoKey, setUseNoKey] = useState(fillWithNoKey ?? false);
+  const [chooseYourKeyboardSide, setChooseYourKeyboardSide] = useState(keyboardSide ?? "BOTH");
   const [indexOfSelectedColor, setIndexOfSelectedColor] = useState(selectedColorIndex ?? -1);
   const createLabel = (text: string, forId: string) => (
     <label htmlFor={forId} className="grow m-0 font-semibold">

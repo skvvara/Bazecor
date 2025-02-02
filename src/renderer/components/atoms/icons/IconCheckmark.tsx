@@ -1,6 +1,7 @@
 import * as React from "react";
 
 interface IconProps {
+  size?: "sm" | "md";
 }
 
 function IconCheckmark({ size = "sm" }: IconProps) {

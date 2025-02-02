@@ -164,7 +164,6 @@ export const flashSide = async (side: string, context: Context.ContextType) => {
     await DeviceTools.disconnect(currentDevice);
     log.info("done closing serial");
     log.info("Going to flash side:", side);
-    const forceFlashSides = false;
     await context.flashSides.flashSide(
       context.comPath as string,
       side,
@@ -213,7 +212,6 @@ export const uploadDefyWired = async (context: Context.ContextType) => {
       fs.writeFileSync(finalPath, Buffer.from(new Uint8Array(context.firmwares?.fw)), { encoding: "utf8", flag: "w" });
     }
     stateUpdate("neuron", 80, context);
-    });
     stateUpdate("neuron", 100, context);
   } catch (error) {
     log.warn("error when flashing Neuron");

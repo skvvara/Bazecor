@@ -6,7 +6,6 @@ import path from "path";
 import fs from "fs";
 
 import { ReleaseType } from "@Renderer/types/releases";
-
 import * as Context from "./context";
 
 const FWMAJORVERSION = "1.x";
@@ -209,7 +208,6 @@ export const downloadFirmware = async (
   let filenameSides: Uint8Array;
   log.info("Data to download FW: ", typeSelected, info, firmwareList, selectedFirmware);
   try {
-    if (typeSelected === "default") {
     if (info.product === "Raise") {
       filename =
         typeSelected === "default"
