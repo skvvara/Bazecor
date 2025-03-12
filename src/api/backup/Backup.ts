@@ -4,6 +4,7 @@ import log from "electron-log/renderer";
 import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
+import { AppContext } from "@Common/app-context/AppContext";
 import Store from "../../renderer/utils/Store";
 import Device from "../comms/Device";
 import {
@@ -17,8 +18,6 @@ import {
   parseKeymapRaw,
   parsePaletteRaw,
 } from "../parsers";
-import { AppContext } from "@Common/app-context/AppContext";
-
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
@@ -75,7 +74,7 @@ export default class Backup {
   }
 
   static backupFolderValid = () => {
-    const folder = store.get("settings.backupFolder") as string;
+    const folder = AppContext.settings.backupFolder;
     try {
       const stats = fs.statSync(folder);
       return stats.isDirectory();

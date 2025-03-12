@@ -10,10 +10,11 @@ interface JsonSettingsType {
   isStandardView: boolean;
   showDefaults: boolean;
   showDeveloperConsole: boolean;
+  autoUpdate: boolean;
 }
 
 export class ApplicationPreferences implements AppPreferencesType {
-  private store: Store<JsonSettingsType>;
+  private readonly store: Store<JsonSettingsType>;
 
   constructor() {
     this.store = new Store<JsonSettingsType>();

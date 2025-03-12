@@ -144,18 +144,13 @@ function App() {
         document.documentElement.classList.add(mode);
       }
 
-      let getAutoUpdate: boolean;
-      if (store.has("settings.autoUpdate")) {
-        getAutoUpdate = store.get("settings.autoUpdate") as boolean;
-      }
-
       setDarkMode(isDark);
       setConnected(false);
       device.current = null;
       setPages({});
       setContextBar(false);
       setAllowBeta(storage.allowBeta);
-      setAutoUpdate(getAutoUpdate);
+      setAutoUpdate(storage.autoUpdateEnabled);
       setLoading(true);
       setFwUpdate(false);
       localStorage.clear();

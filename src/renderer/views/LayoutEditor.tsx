@@ -54,6 +54,7 @@ import Store from "@Renderer/utils/Store";
 import getLanguage from "@Renderer/utils/language";
 import { ClearLayerDialog } from "@Renderer/components/molecules/CustomModal/ClearLayerDialog";
 import { DygmaDeviceInfoType } from "@Renderer/types/dygmaDefs";
+import { AppContext } from "@Common/app-context/AppContext";
 import BlankTable from "../../api/keymap/db/blanks";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import { rgb2w } from "../../api/color";
@@ -695,7 +696,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
         if (!restoredOk) {
           log.info("Error when restoring data after flash detected, repairing...");
           try {
-            const backupFolder = store.get("settings.backupFolder") as string;
+            const { backupFolder } = AppContext.settings;
             const neurons = store.get("neurons") as Neuron[];
             const latestBackup = await Backup.getLatestBackup(backupFolder, chipID, currentDevice);
             await Backup.restoreBackup(neurons, chipID, latestBackup, currentDevice);
@@ -1499,7 +1500,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     // log.info("going to RUN INITIAL USE EFFECT just ONCE");
     const scanner = async () => {
       await scanKeyboard(currentLanguageLayout);
-      const newLanguage = getLanguage(store.get("settings.language") as string);
+      const newLanguage = getLanguage(AppContext.settings.language);
       log.info("Language automatically set to: ", newLanguage);
       setCurrentLanguageLayout(newLanguage || "english");
       setLoading(false);
@@ -1545,7 +1546,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
 
   useEffect(() => {
     // log.info("Running LayerData useEffect");
-    const localShowDefaults = store.get("settings.showDefaults") as boolean;
+    const localShowDefaults = AppContext.settings.showDefaultLayers;
     let cLayer = currentLayer;
 
     if (!localShowDefaults) {

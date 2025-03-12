@@ -4,10 +4,10 @@ import { Button } from "@Renderer/components/atoms/Button";
 import { ColorPalette } from "@Renderer/modules/ColorEditor/ColorPalette";
 import { PaletteType } from "@Types/layout";
 import { i18n } from "@Renderer/i18n";
-import { NOKEY_KEY_CODE, TRANS_KEY_CODE } from "../../../../api/keymap/types";
 import { SelectKeyboardSide } from "@Renderer/components/molecules/CustomSelect/SelectKeyboardSide";
 import { SelectResetKeyType } from "@Renderer/components/molecules/CustomSelect/SelectResetKeyType";
 import Heading from "@Renderer/components/atoms/Heading";
+import { NOKEY_KEY_CODE, TRANS_KEY_CODE } from "../../../../api/keymap/types";
 
 export interface OnConfirmProps {
   keyCode: number;
