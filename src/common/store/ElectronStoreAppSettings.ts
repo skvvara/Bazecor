@@ -82,4 +82,12 @@ export class ApplicationPreferences implements AppPreferencesType {
   set showDeveloperConsole(val: boolean) {
     this.store.set("settings.showDeveloperConsole", val);
   }
+
+  get autoUpdateEnabled(): boolean {
+    return this.store.get("settings.autoUpdate", false);
+  }
+
+  set autoUpdateEnabled(val: boolean) {
+    this.store.set("settings.autoUpdate", val);
+  }
 }

@@ -57,7 +57,6 @@ import HID from "../api/hid/hid";
 import { AppThemeType } from "@Common/store/types";
 
 const store = Store.getStore();
-
 const storage = AppContext.settings;
 
 function App() {

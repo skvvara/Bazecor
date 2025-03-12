@@ -13,4 +13,5 @@ export type AppPreferencesType = {
   isStandardView: boolean;
   showDefaultLayers: boolean;
   showDeveloperConsole: boolean;
+  autoUpdateEnabled: boolean;
 };
