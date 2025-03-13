@@ -86,7 +86,6 @@ function App() {
     // Update stored settings schema
     log.verbose("Retrieving settings: ", oldSettings);
     const locale = await ipcRenderer.invoke("get-Locale");
-    log.verbose("Settings for locale: ", locale);
     i18n.setLanguage(storage.language);
 
     // when moving from other version, config may for superkeys may contain wrong data (wrong legnth, nulls)
@@ -220,7 +219,6 @@ function App() {
     setDarkMode(isDark);
     storage.darkMode = mode;
   };
-
   const toggleFlashing = async () => {
     setFlashing(!flashing);
     varFlashing.current = !flashing;
@@ -363,9 +361,9 @@ function App() {
   const updateAutoUpdate = (checked: boolean) => {
     log.info("auto update value changed to:", checked);
     if (checked === undefined) {
-      setAutoUpdate(store.get("settings.autoUpdate"));
+      setAutoUpdate(AppContext.settings.autoUpdateEnabled);
     } else {
-      store.set("settings.autoUpdate", checked);
+      AppContext.settings.autoUpdateEnabled = checked;
       setAutoUpdate(checked);
     }
   };
