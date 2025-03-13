@@ -17,7 +17,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Octokit } from "@octokit/core";
-import log from "electron-log/renderer";
+// import log from "electron-log/renderer";
 import SemVer from "semver";
 import parse, { domToReact } from "html-react-parser";
 
@@ -31,7 +31,7 @@ import { version } from "../../../../../package.json";
 interface VersionUpdateProps {
   open: boolean;
   onCancel: () => void;
-  oldVersion: string;
+  oldVersion: string | undefined;
   handleUpdate: () => void;
 }
 
@@ -111,19 +111,18 @@ export function VersionUpdateDialog(props: VersionUpdateProps) {
           format: "full",
         },
       });
-      log.info("Testing", GHdata);
+      // log.info("Testing", GHdata);
       GHdata.data.forEach(release => {
         // eslint-disable-next-line @typescript-eslint/naming-convention
         const { prerelease, name, published_at, body_html, tag_name } = release;
         const newRelease = { name, version: tag_name, date: published_at, content: body_html };
         if (!prerelease) releases.push(newRelease);
       });
-      log.info("Data from Dialog: ", releases, version, oldVersion);
-      const parsedData = releases.filter(r =>
-        oldVersion
-          ? SemVer.compare(r.version, oldVersion) > 0 && SemVer.compare(r.version, version) <= 0
-          : SemVer.compare(r.version, version) === 0,
-      );
+      const parsedData =
+        oldVersion !== undefined
+          ? releases.filter(r => SemVer.compare(r.version, oldVersion) > 0 && SemVer.compare(r.version, version) <= 0)
+          : releases.filter(r => SemVer.compare(r.version, version) === 0);
+      // log.info("Data from Dialog: ", releases, version, oldVersion, parsedData);
       setData(parsedData);
     }
     fetchData();

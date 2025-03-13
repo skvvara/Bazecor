@@ -146,12 +146,19 @@ function MacroEditor(props: MacroEditorProps) {
   const { state: deviceState } = useDevice();
   const timelineRef = useRef(null);
 
+  const limitActions = (actions: MacroActionsType[]) => {
+    if (deviceState.currentDevice.device.info.product !== "Raise") {
+      return actions.slice(0, 100);
+    }
+    return actions;
+  };
+
   const addToActions = (actions: MacroActionsType[]) => {
     const { startContext } = props;
     const { macros, selectedMacro } = state;
 
     const macrosList: MacrosType[] = JSON.parse(JSON.stringify(macros));
-    macrosList[selectedMacro].actions = macrosList[selectedMacro].actions.concat(actions);
+    macrosList[selectedMacro].actions = limitActions(macrosList[selectedMacro].actions.concat(actions));
     state.macros = macrosList;
     state.modified = true;
     setState({ ...state });
@@ -164,7 +171,7 @@ function MacroEditor(props: MacroEditorProps) {
     const { macros, selectedMacro, modified } = state;
 
     const macrosList = JSON.parse(JSON.stringify(macros));
-    macrosList[selectedMacro].actions = JSON.parse(JSON.stringify(actions));
+    macrosList[selectedMacro].actions = limitActions(JSON.parse(JSON.stringify(actions)));
     if (!modified) {
       state.macros = macrosList;
       state.modified = true;
@@ -273,7 +280,7 @@ function MacroEditor(props: MacroEditorProps) {
     const { selectedList, listToDelete, listToDeleteS, listToDeleteM, keymap, superkeys } = state;
     const { startContext } = props;
     let macros = localstate ? localstate.futureMacros : state.futureMacros;
-    log.info("Checking list to delete macros", listToDeleteM, macros);
+    // log.info("Checking list to delete macros", listToDeleteM, macros);
     for (let i = 0; i < listToDelete.length; i += 1) {
       if (listToDelete[i].newKey === -1) {
         keymap.custom[listToDelete[i].layer][listToDelete[i].pos] = keymapDB.parse(
@@ -311,7 +318,7 @@ function MacroEditor(props: MacroEditorProps) {
       item.id = idx;
       return item;
     });
-    log.info("result!", macros);
+    // log.info("result!", macros);
     state.keymap = keymap;
     state.superkeys = superkeys;
     state.macros = macros;
@@ -360,7 +367,7 @@ function MacroEditor(props: MacroEditorProps) {
       customMacrosList = customMacrosList.concat(macrosList);
     }
 
-    log.info("result of macro exploration: ", macros, customKeymapList, customSuperList, customMacrosList);
+    // log.info("result of macro exploration: ", macros, customKeymapList, customSuperList, customMacrosList);
 
     state.futureMacros = localMacros;
     state.listToDelete = customKeymapList;

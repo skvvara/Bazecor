@@ -10,9 +10,9 @@
     "noEmit": true,
     "paths": {
       "@Assets/*": ["src/static/*"],
-      "@Common/*": ["src/common/*"],
       "@Renderer/*": ["src/renderer/*"],
-      "@Types/*": ["src/renderer/types/*"]
+      "@Types/*": ["src/renderer/types/*"],
+      "react": ["./node_modules/@types/react"]
     },
     "resolveJsonModule": true,
     "skipLibCheck": true,

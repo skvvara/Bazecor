@@ -29,6 +29,7 @@ import Light from "@Renderer/theme/LightTheme";
 import Dark from "@Renderer/theme/DarkTheme";
 
 import Header from "@Renderer/modules/NavigationMenu";
+// import SelectKeyboard from "@Renderer/views/SelectKeyboard";
 import FirmwareUpdate from "@Renderer/views/FirmwareUpdate";
 import LayoutEditor from "@Renderer/views/LayoutEditor";
 import MacroEditor from "@Renderer/views/MacroEditor";
@@ -46,7 +47,6 @@ import { VersionUpdateDialog } from "@Renderer/components/molecules/CustomModal/
 import getTranslator from "@Renderer/utils/translator";
 import { Neuron } from "@Types/neurons";
 import { version } from "../../package.json";
-import { AppContext } from "../common/app-context/AppContext";
 import "../api/keymap";
 import "../api/colormap";
 import { DeviceTools, useDevice } from "./DeviceContext";
@@ -54,10 +54,8 @@ import DeviceManager from "./views/DeviceManager";
 import Device from "../api/comms/Device";
 import { HIDNotifdevice } from "./types/hid";
 import HID from "../api/hid/hid";
-import { AppThemeType } from "@Common/store/types";
 
 const store = Store.getStore();
-const storage = AppContext.settings;
 
 function App() {
   const [pages, setPages] = useState({});
@@ -86,8 +84,9 @@ function App() {
     // Update stored settings schema
     log.verbose("Retrieving settings: ", oldSettings);
     const locale = await ipcRenderer.invoke("get-Locale");
-    log.verbose("Settings for locale: ", locale);
-    i18n.setLanguage(storage.language);
+    if (store.get("settings.language") !== undefined) {
+      i18n.setLanguage(store.get("settings.language").toString());
+    }
 
     // when moving from other version, config may for superkeys may contain wrong data (wrong legnth, nulls)
     // so we have to fix it. This fix should not be here. It should be in separate file.
@@ -132,7 +131,7 @@ function App() {
         setNotifyNewVersion(true);
       }
       let isDark: boolean;
-      const mode = storage.darkMode;
+      const mode = store.get("settings.darkMode") as string;
       isDark = mode === "dark";
       if (mode === "system") {
         isDark = await ipcRenderer.invoke("get-NativeTheme");
@@ -144,13 +143,27 @@ function App() {
         document.documentElement.classList.add(mode);
       }
 
+      // Settings entry creation for the beta toggle, it will have a control in preferences to change the policy
+      let getAllowBeta: boolean;
+      if (store.has("settings.allowBeta")) {
+        getAllowBeta = store.get("settings.allowBeta") as boolean;
+      } else {
+        getAllowBeta = true;
+        store.set("settings.allowBeta", true);
+      }
+
+      let getAutoUpdate: boolean;
+      if (store.has("settings.autoUpdate")) {
+        getAutoUpdate = store.get("settings.autoUpdate") as boolean;
+      }
+
       setDarkMode(isDark);
       setConnected(false);
       device.current = null;
       setPages({});
       setContextBar(false);
-      setAllowBeta(storage.allowBeta);
-      setAutoUpdate(storage.autoUpdateEnabled);
+      setAllowBeta(getAllowBeta);
+      setAutoUpdate(getAutoUpdate);
       setLoading(true);
       setFwUpdate(false);
       localStorage.clear();
@@ -196,10 +209,11 @@ function App() {
     device.current = currentDevice;
     setPages({ keymap: true });
     setLoading(true);
+    // navigate(pages.keymap ? "/editor" : "/welcome");
     navigate("/editor");
   };
 
-  const toggleDarkMode = async (mode: AppThemeType) => {
+  const toggleDarkMode = async (mode: string) => {
     document.documentElement.classList.remove("light");
     document.documentElement.classList.remove("dark");
     document.documentElement.classList.remove("system");
@@ -218,7 +232,7 @@ function App() {
       document.documentElement.classList.add(mode);
     }
     setDarkMode(isDark);
-    storage.darkMode = mode;
+    store.set("settings.darkMode", mode);
   };
 
   const toggleFlashing = async () => {
@@ -320,7 +334,7 @@ function App() {
 
     const darkThemeListener = (event: any, message: boolean) => {
       log.verbose("O.S. DarkTheme Settings changed to ", message, event);
-      const dm = storage.darkMode;
+      const dm = store.get("settings.darkMode");
       if (dm === "system") {
         toggleDarkMode(dm);
       }
@@ -356,8 +370,10 @@ function App() {
   };
 
   const updateAllowBetas = (checked: boolean) => {
-    storage.allowBeta = checked;
-    setAllowBeta(checked);
+    const newValue = checked;
+    // log.verbose("new allowBeta value: ", newValue);
+    store.set("settings.allowBeta", newValue);
+    setAllowBeta(newValue);
   };
 
   const updateAutoUpdate = (checked: boolean) => {

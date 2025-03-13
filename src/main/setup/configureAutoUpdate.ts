@@ -1,9 +1,11 @@
 import log from "electron-log/main";
 import { updateElectronApp, UpdateSourceType } from "update-electron-app";
-import { AppContext } from "../../common/app-context/AppContext";
+import Store from "../managers/Store";
+
+const store = Store.getStore();
 
 const configureAutoUpdate = () => {
-  const autoUpdate = AppContext.settings.autoUpdateEnabled;
+  const autoUpdate = store.get("settings.autoUpdate") as boolean;
 
   if (autoUpdate === true && process.platform !== "linux") {
     updateElectronApp({

@@ -34,13 +34,15 @@ import { Button } from "@Renderer/components/atoms/Button";
 import { IconArrowDownWithLine, IconFloppyDisk, IconUSB } from "@Renderer/components/atoms/icons";
 
 // Utils
+import Store from "@Renderer/utils/Store";
 import { BackupSettingsProps } from "@Renderer/types/preferences";
 import WaitForRestoreDialog from "@Renderer/components/molecules/CustomModal/WaitForRestoreDialog";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
 import Banner from "@Renderer/components/atoms/Banner";
-import { AppContext } from "../../../common/app-context/AppContext";
 import Backup from "../../../api/backup";
+
+const store = Store.getStore();
 
 const BackupSettings = (props: BackupSettingsProps) => {
   const [backupFolder, setBackupFolder] = useState("");
@@ -49,7 +51,7 @@ const BackupSettings = (props: BackupSettingsProps) => {
 
   const { connected, neurons, neuronID, toggleBackup, destroyContext, enabled } = props;
   useEffect(() => {
-    setBackupFolder(AppContext.settings.backupFolder);
+    setBackupFolder(store.get("settings.backupFolder") as string);
   }, []);
 
   const openPerformingBackup = () => {

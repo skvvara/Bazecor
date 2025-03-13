@@ -7,7 +7,7 @@ import { i18n } from "@Renderer/i18n";
 import { SelectKeyboardSide } from "@Renderer/components/molecules/CustomSelect/SelectKeyboardSide";
 import { SelectResetKeyType } from "@Renderer/components/molecules/CustomSelect/SelectResetKeyType";
 import Heading from "@Renderer/components/atoms/Heading";
-import { NOKEY_KEY_CODE, TRANS_KEY_CODE } from "../../../../api/keymap/types";
+import BlankTable from "../../../../api/keymap/db/blanks";
 
 export interface OnConfirmProps {
   keyCode: number;
@@ -80,7 +80,7 @@ export const ClearLayerDialog = (props: ClearLayerDialogProps): JSX.Element => {
             size="md"
             onClick={() =>
               onConfirm({
-                keyCode: useNoKey ? NOKEY_KEY_CODE : TRANS_KEY_CODE,
+                keyCode: useNoKey ? BlankTable.keys[0].code : BlankTable.keys[1].code,
                 colorIndex: indexOfSelectedColor < colors.length ? indexOfSelectedColor : -1,
                 chooseYourKeyboardSide,
               })

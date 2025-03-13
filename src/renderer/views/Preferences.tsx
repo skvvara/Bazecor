@@ -60,7 +60,6 @@ import { KBDataPref, PrefState, PreferencesProps } from "@Renderer/types/prefere
 import { WirelessInterface } from "@Renderer/types/wireless";
 import LogoLoader from "@Renderer/components/atoms/loader/LogoLoader";
 import { Neuron } from "@Renderer/types/neurons";
-import { AppContext } from "../../common/app-context/AppContext";
 import Backup from "../../api/backup";
 import { delay } from "../../api/flash/delay";
 
@@ -132,7 +131,7 @@ const initialPreferences = {
   devTools: false,
   advanced: false,
   verbose: store.get("settings.verbose") as boolean,
-  darkMode: AppContext.settings.darkMode,
+  darkMode: store.get("settings.darkMode") as string,
   neurons: store.get("neurons") as Array<Neuron>,
   selectedNeuron: 0,
   neuronID: "",
@@ -199,7 +198,8 @@ const Preferences = (props: PreferencesProps) => {
         newKbData.ledIdleTimeLimit = limit ? parseInt(limit, 10) : -1;
       });
 
-      newKbData.showDefaults = AppContext.settings.showDefaultLayers;
+      newKbData.showDefaults =
+        store.get("settings.showDefaults") === undefined ? false : (store.get("settings.showDefaults") as boolean);
 
       // QUKEYS variables commands
       await state.currentDevice.command("qukeys.holdTimeout").then((holdTimeout: string) => {
@@ -266,7 +266,7 @@ const Preferences = (props: PreferencesProps) => {
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         neuronID: localNeuronID,
-        darkMode: AppContext.settings.darkMode,
+        darkMode: store.get("settings.darkMode") as string,
         neurons: store.get("neurons") as Array<Neuron>,
       }));
     }
@@ -358,7 +358,7 @@ const Preferences = (props: PreferencesProps) => {
       await state.currentDevice.command("led.brightnessUG", kbData.ledBrightnessUG.toString());
       if (kbData.ledIdleTimeLimit >= 0)
         await state.currentDevice.command("idleleds.time_limit", kbData.ledIdleTimeLimit.toString());
-      AppContext.settings.showDefaultLayers = kbData.showDefaults;
+      store.set("settings.showDefaults", kbData.showDefaults);
       // QUKEYS
       await state.currentDevice.command("qukeys.holdTimeout", kbData.qukeysHoldTimeout.toString());
       await state.currentDevice.command("qukeys.overlapThreshold", kbData.qukeysOverlapThreshold.toString());
@@ -608,11 +608,15 @@ const Preferences = (props: PreferencesProps) => {
       if (connected && (state.currentDevice.device.info.keyboardType === "wireless" || state.currentDevice.device.wireless))
         await getWirelessPreferences();
       const devTools = await ipcRenderer.invoke("is-devtools-opened");
+      let darkMode = store.get("settings.darkMode") as string;
+      if (!darkMode) {
+        darkMode = "system";
+      }
       const verbose = store.get("settings.verbose") as boolean;
       setPreferencesState(prevPreferencesState => ({
         ...prevPreferencesState,
         devTools,
-        darkMode: AppContext.settings.darkMode,
+        darkMode,
         verbose,
         selectedNeuron: prevPreferencesState.neurons.indexOf(prevPreferencesState.neurons.find((x: Neuron) => x.id === NID)),
       }));

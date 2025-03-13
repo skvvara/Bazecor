@@ -54,7 +54,6 @@ import Store from "@Renderer/utils/Store";
 import getLanguage from "@Renderer/utils/language";
 import { ClearLayerDialog } from "@Renderer/components/molecules/CustomModal/ClearLayerDialog";
 import { DygmaDeviceInfoType } from "@Renderer/types/dygmaDefs";
-import { AppContext } from "@Common/app-context/AppContext";
 import BlankTable from "../../api/keymap/db/blanks";
 import Keymap, { KeymapDB } from "../../api/keymap";
 import { rgb2w } from "../../api/color";
@@ -696,7 +695,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
         if (!restoredOk) {
           log.info("Error when restoring data after flash detected, repairing...");
           try {
-            const { backupFolder } = AppContext.settings;
+            const backupFolder = store.get("settings.backupFolder") as string;
             const neurons = store.get("neurons") as Neuron[];
             const latestBackup = await Backup.getLatestBackup(backupFolder, chipID, currentDevice);
             await Backup.restoreBackup(neurons, chipID, latestBackup, currentDevice);
@@ -1500,7 +1499,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
     // log.info("going to RUN INITIAL USE EFFECT just ONCE");
     const scanner = async () => {
       await scanKeyboard(currentLanguageLayout);
-      const newLanguage = getLanguage(AppContext.settings.language);
+      const newLanguage = getLanguage(store.get("settings.language") as string);
       log.info("Language automatically set to: ", newLanguage);
       setCurrentLanguageLayout(newLanguage || "english");
       setLoading(false);
@@ -1546,7 +1545,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
 
   useEffect(() => {
     // log.info("Running LayerData useEffect");
-    const localShowDefaults = AppContext.settings.showDefaultLayers;
+    const localShowDefaults = store.get("settings.showDefaults") as boolean;
     let cLayer = currentLayer;
 
     if (!localShowDefaults) {
@@ -1658,7 +1657,7 @@ const LayoutEditor = (props: LayoutEditorProps) => {
   if (currentKeyIndex !== -1 && currentKeyIndex < ledIndexStart) {
     const tempkey = keymapDB.parse(layerData[currentKeyIndex].keyCode);
     // log.info("Key to be used in render", tempkey);
-    code = keymapDB.keySegmentator(tempkey.keyCode);
+    code = keymapDB.keySegmentor(tempkey.keyCode);
   }
 
   // log.info("execution that may not render");

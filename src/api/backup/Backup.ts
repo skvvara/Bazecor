@@ -4,7 +4,6 @@ import log from "electron-log/renderer";
 import { Neuron } from "@Renderer/types/neurons";
 import { BackupType } from "@Renderer/types/backups";
 import { VirtualType } from "@Renderer/types/virtual";
-import { AppContext } from "@Common/app-context/AppContext";
 import Store from "../../renderer/utils/Store";
 import Device from "../comms/Device";
 import {
@@ -22,7 +21,6 @@ import {
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const glob = require(`glob`);
 const store = Store.getStore();
-const storage = AppContext.settings;
 
 export default class Backup {
   neurons: Neuron[];
@@ -74,7 +72,7 @@ export default class Backup {
   }
 
   static backupFolderValid = () => {
-    const folder = AppContext.settings.backupFolder;
+    const folder = store.get("settings.backupFolder") as string;
     try {
       const stats = fs.statSync(folder);
       return stats.isDirectory();
@@ -157,7 +155,7 @@ export default class Backup {
     }
     const { product } = device.device.info;
     const d = new Date();
-    const folder = storage.backupFolder;
+    const folder = store.get("settings.backupFolder") as string;
     try {
       if (localBackup.neuron.name === undefined || localBackup.neuron.name === "") localBackup.neuron.name = "NoName";
       const folderPath = path.join(folder, product, localBackup.neuronID);
